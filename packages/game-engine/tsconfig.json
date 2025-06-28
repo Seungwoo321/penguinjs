@@ -1,0 +1,14 @@
+{
+  "extends": "@penguinjs/config-typescript/react-library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "lib": ["ES2020", "DOM", "WebWorker"],
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

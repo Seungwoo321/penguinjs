@@ -1,0 +1,23 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/playground"
+    },
+    {
+      "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/game-engine"
+    },
+    {
+      "path": "./packages/utils"
+    },
+    {
+      "path": "./packages/config-eslint"
+    },
+    {
+      "path": "./packages/config-typescript"
+    }
+  ]
+}

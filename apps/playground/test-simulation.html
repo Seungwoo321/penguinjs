@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CallStack Library Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .log {
+            font-family: monospace;
+            font-size: 12px;
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CallStack Library 시뮬레이션 테스트</h1>
+        
+        <div class="test-section">
+            <h2>테스트 시나리오</h2>
+            <p>1. 중급 난이도(Type A+) 선택</p>
+            <p>2. 함수 순서 배치</p>
+            <p>3. "코드 실행보기" 클릭</p>
+            <p>4. userOrder가 초기화되는지 확인</p>
+        </div>
+
+        <div class="test-section">
+            <h2>테스트 결과</h2>
+            <div id="status" class="status">테스트 준비 중...</div>
+            <div id="log" class="log">로그가 여기에 표시됩니다.</div>
+        </div>
+
+        <div class="test-section">
+            <h2>수동 테스트</h2>
+            <button onclick="openGame()">게임 열기</button>
+            <button onclick="clearLog()">로그 지우기</button>
+        </div>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `[${timestamp}] ${message}<br>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function setStatus(message, isSuccess) {
+            status.textContent = message;
+            status.className = 'status ' + (isSuccess ? 'success' : 'error');
+        }
+
+        function clearLog() {
+            log.innerHTML = '';
+            addLog('로그가 초기화되었습니다.');
+        }
+
+        function openGame() {
+            window.open('http://localhost:4000/ko/games/callstack-library?difficulty=intermediate&stage=9', '_blank');
+            addLog('게임 페이지를 새 탭에서 열었습니다.');
+            setStatus('게임이 열렸습니다. 수동으로 테스트를 진행하세요.', true);
+        }
+
+        // 페이지 로드 시 초기화
+        window.onload = function() {
+            setStatus('테스트 준비 완료', true);
+            addLog('테스트 페이지가 로드되었습니다.');
+            addLog('중요: 개발자 도구를 열고 Console 탭에서 다음을 확인하세요:');
+            addLog('1. initializeLevel 호출 여부');
+            addLog('2. handleRunSimulation 실행 시 userOrder 상태');
+            addLog('3. useEffect 트리거 여부');
+        };
+    </script>
+</body>
+</html>

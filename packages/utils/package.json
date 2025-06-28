@@ -1,0 +1,30 @@
+{
+  "name": "@penguinjs/utils",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./date": "./dist/date.js",
+    "./format": "./dist/format.js",
+    "./string": "./dist/string.js",
+    "./validation": "./dist/validation.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@penguinjs/config-eslint": "workspace:*",
+    "@penguinjs/config-typescript": "workspace:*",
+    "@types/node": "^22.15.30",
+    "eslint": "^9.28.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "zod": "^3.25.67"
+  }
+}

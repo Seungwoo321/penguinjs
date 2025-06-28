@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>콜스택 도서관 - 레이아웃 설계 총괄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .update-badge {
+            display: inline-block;
+            background: #fbbf24;
+            color: #1f2937;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        /* 개선 사항 섹션 */
+        .improvements {
+            background: #fff3cd;
+            border-left: 4px solid #fbbf24;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .improvements h2 {
+            color: #92400e;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .improvements ul {
+            color: #92400e;
+            padding-left: 20px;
+        }
+        
+        .improvements li {
+            margin-bottom: 8px;
+        }
+        
+        /* 레이아웃 그리드 */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .layout-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .layout-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .layout-card.type-a { border-left-color: #3b82f6; }
+        .layout-card.type-a-plus { border-left-color: #8b5cf6; }
+        .layout-card.type-b { border-left-color: #dc2626; }
+        .layout-card.type-c { border-left-color: #f59e0b; }
+        .layout-card.type-d { border-left-color: #10b981; }
+        .layout-card.type-e { border-left-color: #ec4899; }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-icon {
+            font-size: 28px;
+            margin-right: 12px;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .card-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+        
+        .new-badge {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .stage-info {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .stage-count {
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 8px;
+        }
+        
+        .difficulty-breakdown {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .difficulty-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .difficulty-tag.beginner {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .difficulty-tag.intermediate {
+            background: #fed7aa;
+            color: #92400e;
+        }
+        
+        .difficulty-tag.advanced {
+            background: #fecaca;
+            color: #991b1b;
+        }
+        
+        .features {
+            margin-top: 15px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: start;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        
+        .feature-icon {
+            margin-right: 8px;
+            color: #10b981;
+        }
+        
+        /* 난이도별 매핑 테이블 */
+        .mapping-table {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        
+        .mapping-table h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            background: #f9fafb;
+            font-weight: bold;
+            color: #374151;
+        }
+        
+        td {
+            color: #6b7280;
+        }
+        
+        .layout-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .layout-badge.a { background: #dbeafe; color: #1e40af; }
+        .layout-badge.a-plus { background: #e9d5ff; color: #6b21a8; }
+        .layout-badge.b { background: #fecaca; color: #991b1b; }
+        .layout-badge.c { background: #fed7aa; color: #92400e; }
+        .layout-badge.d { background: #bbf7d0; color: #166534; }
+        .layout-badge.e { background: #fce7f3; color: #9f1239; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>📚 콜스택 도서관 - 레이아웃 설계 총괄</h1>
+            <p>난이도별 차별화된 학습 경험을 위한 레이아웃 시스템</p>
+            <span class="update-badge">🆕 최신 버전</span>
+        </div>
+        
+        <!-- 개선 사항 -->
+        <div class="improvements">
+            <h2>📋 주요 개선 사항</h2>
+            <ul>
+                <li><strong>초급 (1-8)</strong>: 함수 호출 순서만 예측 (기존 방식 유지)</li>
+                <li><strong>중급 (9-16)</strong>: 함수 시작/종료 모두 예측하여 LIFO 원칙 학습</li>
+                <li><strong>고급 (17-24)</strong>: 각 실행 시점의 스택 상태를 직접 구성</li>
+                <li>난이도별 전용 레이아웃으로 점진적 학습 곡선 구현</li>
+            </ul>
+        </div>
+        
+        <!-- 레이아웃 카드들 -->
+        <div class="layout-grid">
+            <!-- 타입 A: 기본 -->
+            <div class="layout-card type-a">
+                <div class="card-header">
+                    <div class="card-icon">📚</div>
+                    <div>
+                        <div class="card-title">타입 A: 기본 콜스택</div>
+                        <div class="card-subtitle">초급 전용 - 함수 호출 순서 학습</div>
+                    </div>
+                </div>
+                
+                <div class="stage-info">
+                    <div class="stage-count">8개 스테이지</div>
+                    <div class="difficulty-breakdown">
+                        <span class="difficulty-tag beginner">초급 1-8</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>단순한 함수 호출 순서 예측</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>큰 책장 시각화로 직관적 이해</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>드래그 앤 드롭으로 순서 배치</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 타입 A+: 중급 -->
+            <div class="layout-card type-a-plus">
+                <div class="card-header">
+                    <div class="card-icon">📥📤</div>
+                    <div>
+                        <div class="card-title">타입 A+: 시작/종료 추적</div>
+                        <div class="card-subtitle">중급 전용 - LIFO 원칙 학습</div>
+                        <span class="new-badge">NEW</span>
+                    </div>
+                </div>
+                
+                <div class="stage-info">
+                    <div class="stage-count">8개 스테이지</div>
+                    <div class="difficulty-breakdown">
+                        <span class="difficulty-tag intermediate">중급 9-16</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>함수 시작(Push)과 종료(Pop) 구분</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>LIFO 원칙 실시간 검증</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>시각적 구분 (파란색/빨간색)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 타입 E: 고급 스냅샷 -->
+            <div class="layout-card type-e">
+                <div class="card-header">
+                    <div class="card-icon">📸</div>
+                    <div>
+                        <div class="card-title">타입 E: 스택 스냅샷</div>
+                        <div class="card-subtitle">고급 전용 - 상태 예측</div>
+                        <span class="new-badge">NEW</span>
+                    </div>
+                </div>
+                
+                <div class="stage-info">
+                    <div class="stage-count">4개 스테이지</div>
+                    <div class="difficulty-breakdown">
+                        <span class="difficulty-tag advanced">고급 17-20</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>코드 실행 단계별 추적</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>각 시점의 스택 상태 구성</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>타임라인 기반 네비게이션</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 타입 B: 이벤트 루프 -->
+            <div class="layout-card type-b">
+                <div class="card-header">
+                    <div class="card-icon">🔄</div>
+                    <div>
+                        <div class="card-title">타입 B: 이벤트 루프</div>
+                        <div class="card-subtitle">비동기 + 스택 상태</div>
+                    </div>
+                </div>
+                
+                <div class="stage-info">
+                    <div class="stage-count">2개 스테이지</div>
+                    <div class="difficulty-breakdown">
+                        <span class="difficulty-tag advanced">고급 21-22</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>3개 큐 시스템 (콜스택, 마이크로, 매크로)</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>비동기 코드의 스택 상태 예측</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 타입 C: 다중 큐 -->
+            <div class="layout-card type-c">
+                <div class="card-header">
+                    <div class="card-icon">🔮</div>
+                    <div>
+                        <div class="card-title">타입 C: 다중 큐</div>
+                        <div class="card-subtitle">복잡한 비동기 패턴</div>
+                    </div>
+                </div>
+                
+                <div class="stage-info">
+                    <div class="stage-count">1개 스테이지</div>
+                    <div class="difficulty-breakdown">
+                        <span class="difficulty-tag advanced">고급 23</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>4-5개 큐 동시 관리</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>고급 JavaScript 기능 학습</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 타입 D: 최종 통합 -->
+            <div class="layout-card type-d">
+                <div class="card-header">
+                    <div class="card-icon">🌟</div>
+                    <div>
+                        <div class="card-title">타입 D: 최종 통합</div>
+                        <div class="card-subtitle">모든 개념 종합</div>
+                    </div>
+                </div>
+                
+                <div class="stage-info">
+                    <div class="stage-count">1개 스테이지</div>
+                    <div class="difficulty-breakdown">
+                        <span class="difficulty-tag advanced">고급 24</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>모든 큐 시스템 통합</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>실무 수준의 복잡한 시나리오</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 스테이지별 레이아웃 매핑 -->
+        <div class="mapping-table">
+            <h2>📊 스테이지별 레이아웃 매핑</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>난이도</th>
+                        <th>스테이지</th>
+                        <th>레이아웃</th>
+                        <th>학습 목표</th>
+                        <th>주요 기능</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>초급</strong></td>
+                        <td>1-8</td>
+                        <td><span class="layout-badge a">타입 A</span></td>
+                        <td>함수 호출 순서 이해</td>
+                        <td>기본 콜스택, 순서 예측</td>
+                    </tr>
+                    <tr>
+                        <td><strong>중급</strong></td>
+                        <td>9-16</td>
+                        <td><span class="layout-badge a-plus">타입 A+</span></td>
+                        <td>LIFO 원칙 체득</td>
+                        <td>시작/종료 구분, Push/Pop 시각화</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="5"><strong>고급</strong></td>
+                        <td>17-20</td>
+                        <td><span class="layout-badge e">타입 E</span></td>
+                        <td>스택 상태 예측</td>
+                        <td>스냅샷, 단계별 실행</td>
+                    </tr>
+                    <tr>
+                        <td>21-22</td>
+                        <td><span class="layout-badge b">타입 B</span></td>
+                        <td>이벤트 루프 이해</td>
+                        <td>비동기 + 스택 상태</td>
+                    </tr>
+                    <tr>
+                        <td>23</td>
+                        <td><span class="layout-badge c">타입 C</span></td>
+                        <td>다중 큐 시스템</td>
+                        <td>복잡한 비동기 패턴</td>
+                    </tr>
+                    <tr>
+                        <td>24</td>
+                        <td><span class="layout-badge d">타입 D</span></td>
+                        <td>종합 마스터</td>
+                        <td>모든 개념 통합</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

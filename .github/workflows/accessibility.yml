@@ -1,0 +1,62 @@
+name: Accessibility Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  color-contrast:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        
+    - name: Install dependencies
+      run: |
+        cd apps/playground
+        npm ci
+    
+    - name: Build application
+      run: |
+        cd apps/playground
+        npm run build
+    
+    - name: Install accessibility tools
+      run: |
+        npm install -g @axe-core/cli
+        npm install -g pa11y
+    
+    - name: Start server
+      run: |
+        cd apps/playground
+        npm run start &
+        sleep 10
+    
+    - name: Run axe accessibility tests
+      run: |
+        axe http://localhost:3000 --tags wcag2aa,wcag21aa --exit
+    
+    - name: Run pa11y color contrast tests
+      run: |
+        pa11y http://localhost:3000 --standard WCAG2AA --reporter cli
+    
+    - name: Check specific color combinations
+      run: |
+        node scripts/check-color-contrast.js
+      working-directory: apps/playground
+    
+    - name: Upload accessibility report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: accessibility-report
+        path: |
+          apps/playground/accessibility-report.json
+          apps/playground/color-contrast-report.json

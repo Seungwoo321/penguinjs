@@ -1,0 +1,25 @@
+{
+  "HomePage": {
+    "slogan": "Cool Code, Warm Learning",
+    "description": "Learn JavaScript core concepts through fun and interactive games. Start your coding adventure with our friendly penguin!",
+    "viewAllGames": "View All Games",
+    "games": {
+      "closureCave": {
+        "title": "Closure Cave",
+        "description": "Explore the mysterious world of closures and understand scope and environment."
+      },
+      "promisePlanet": {
+        "title": "Promise Planet",
+        "description": "Master Promises and callbacks in the universe of asynchronous programming."
+      },
+      "asyncAdventure": {
+        "title": "Async Adventure",
+        "description": "Conquer complex asynchronous tasks with the power of async/await."
+      }
+    }
+  },
+  "GamesPage": {
+    "title": "All JavaScript Learning Games",
+    "description": "Master JavaScript core concepts through 18 interactive games"
+  }
+}

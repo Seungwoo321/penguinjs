@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타입 A - 기본 콜스택 (와이어프레임)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .wireframe-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #333;
+        }
+        
+        /* 와이어프레임 스타일 */
+        .section {
+            border: 1px solid #666;
+            position: relative;
+        }
+        
+        .section-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: white;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .box {
+            border: 1px dashed #999;
+            background: #fafafa;
+            margin: 10px;
+            padding: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .button {
+            border: 1px solid #999;
+            background: white;
+            padding: 8px 16px;
+            margin: 5px;
+            display: inline-block;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .text-area {
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px;
+            min-height: 160px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .code-line {
+            padding: 2px 0;
+            min-height: 16px;
+        }
+        
+        .code-indent {
+            padding-left: 20px;
+        }
+        
+        /* 헤더 */
+        .header {
+            height: 80px;
+            padding: 20px;
+            border-bottom: 1px solid #666;
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 메인 레이아웃 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            min-height: 500px;
+        }
+        
+        .left-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .center-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .right-panel {
+            padding: 20px;
+        }
+        
+        /* 콜스택 영역 */
+        .callstack-area {
+            height: 300px;
+            border: 2px solid #333;
+            position: relative;
+            margin: 10px 0;
+        }
+        
+        .stack-item {
+            height: 40px;
+            border: 1px solid #999;
+            margin: 2px 20px;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-family: monospace;
+        }
+        
+        /* 함수 선택 영역 */
+        .function-selector {
+            min-height: 200px;
+            border: 1px solid #999;
+            padding: 10px;
+        }
+        
+        .function-item {
+            height: 30px;
+            border: 1px solid #ccc;
+            margin: 5px 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        /* 예상 순서 영역 */
+        .prediction-area {
+            min-height: 140px;
+            border-top: 1px solid #666;
+            padding: 20px;
+        }
+        
+        .prediction-slots {
+            border: 1px dashed #999;
+            min-height: 50px;
+            background: #fafafa;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .prediction-slot {
+            width: 80px;
+            height: 30px;
+            border: 1px solid #ccc;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-family: monospace;
+        }
+        
+        /* 컨트롤 영역 */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        <!-- 헤더 -->
+        <div class="header section">
+            <div class="section-label">HEADER</div>
+            <div class="title">[GAME TITLE] 콜스택 도서관 - 타입 A</div>
+            <div class="subtitle">[STAGE INFO] 초급 1-8단계 | 함수 호출 순서 학습</div>
+        </div>
+        
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 왼쪽 패널 - 코드 영역 -->
+            <div class="left-panel section">
+                <div class="section-label">CODE EDITOR</div>
+                <div class="box">[PANEL TITLE] 📝 코드</div>
+                <div class="text-area">
+                    <div class="code-line">function greet() {</div>
+                    <div class="code-line code-indent">console.log("안녕!");</div>
+                    <div class="code-line">}</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">greet();</div>
+                    <div class="code-line">console.log("끝");</div>
+                </div>
+                <div class="box">[SYNTAX HIGHLIGHT]</div>
+                <div class="box">[LINE NUMBERS]</div>
+            </div>
+            
+            <!-- 중앙 패널 - 콜스택 시각화 -->
+            <div class="center-panel section">
+                <div class="section-label">CALLSTACK VISUALIZATION</div>
+                <div class="box">[PANEL TITLE] 📚 콜스택 책장</div>
+                
+                <div class="callstack-area">
+                    <div class="section-label">STACK AREA</div>
+                    <div class="stack-item">[BOOK 3] console.log("끝")</div>
+                    <div class="stack-item">[BOOK 2] greet()</div>
+                    <div class="stack-item">[BOOK 1] main()</div>
+                    <div class="box" style="position: absolute; bottom: 10px; left: 10px; right: 10px;">[EMPTY STACK MESSAGE]</div>
+                </div>
+                
+                <div class="box">[STACK SIZE] 현재: 3 / 최대: 5</div>
+                <div class="box">[EXECUTION STATUS] 실행 중...</div>
+            </div>
+            
+            <!-- 오른쪽 패널 - 함수 선택 -->
+            <div class="right-panel section">
+                <div class="section-label">FUNCTION SELECTOR</div>
+                <div class="box">[PANEL TITLE] 🎯 함수 선택</div>
+                
+                <div class="function-selector">
+                    <div class="box" style="margin-bottom: 10px;">[AVAILABLE FUNCTIONS]</div>
+                    <div class="function-item">main()</div>
+                    <div class="function-item">greet()</div>
+                    <div class="function-item">console.log("안녕!")</div>
+                    <div class="function-item">console.log("끝")</div>
+                </div>
+                
+                <div class="box">[DRAG & DROP HINT]</div>
+                <div class="controls">
+                    <div class="button">[CLEAR]</div>
+                    <div class="button">[HINT]</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 하단 - 예상 순서 입력 -->
+        <div class="prediction-area section">
+            <div class="section-label">PREDICTION INPUT</div>
+            
+            <div class="box">[LABEL] 예상 실행 순서:</div>
+            
+            <div class="prediction-slots">
+                <div class="prediction-slot">main</div>
+                <div class="prediction-slot">greet</div>
+                <div class="prediction-slot">log1</div>
+                <div class="prediction-slot">log2</div>
+                <div class="prediction-slot">---</div>
+                <div class="prediction-slot">---</div>
+            </div>
+            
+            <div class="controls">
+                <div class="button">[RESET]</div>
+                <div class="button">[SUBMIT]</div>
+                <div class="button">[SIMULATE]</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 와이어프레임 설명 -->
+    <div style="margin-top: 20px; padding: 15px; background: #ffffcc; border: 1px solid #999;">
+        <h3>타입 A 레이아웃 설명</h3>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+            <li><strong>대상:</strong> 초급 1-8단계</li>
+            <li><strong>목표:</strong> 함수 호출 순서 이해</li>
+            <li><strong>특징:</strong> 단순한 드래그 앤 드롭 인터페이스</li>
+            <li><strong>평가:</strong> 예측 순서와 실제 실행 순서 일치 여부</li>
+        </ul>
+    </div>
+</body>
+</html>

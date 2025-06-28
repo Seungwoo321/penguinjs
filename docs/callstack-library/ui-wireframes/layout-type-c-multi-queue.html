@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타입 C - 다중 큐 (와이어프레임)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .wireframe-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #333;
+        }
+        
+        .section {
+            border: 1px solid #666;
+            position: relative;
+        }
+        
+        .section-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: white;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .box {
+            border: 1px dashed #999;
+            background: #fafafa;
+            margin: 10px;
+            padding: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .button {
+            border: 1px solid #999;
+            background: white;
+            padding: 8px 16px;
+            margin: 5px;
+            display: inline-block;
+            font-size: 12px;
+        }
+        
+        /* 헤더 */
+        .header {
+            height: 80px;
+            padding: 20px;
+            border-bottom: 1px solid #666;
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 메인 레이아웃 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            min-height: 700px;
+        }
+        
+        .left-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .center-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .right-panel {
+            padding: 20px;
+        }
+        
+        /* 코드 에디터 */
+        .code-editor {
+            height: 300px;
+            border: 1px solid #999;
+            background: #f9f9f9;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .code-line {
+            padding: 1px 0;
+        }
+        
+        .code-line.highlight {
+            background: #e6f3ff;
+            border-left: 3px solid #0066cc;
+            padding-left: 5px;
+        }
+        
+        /* 5개 큐 시스템 */
+        .queue-system {
+            display: grid;
+            grid-template-rows: repeat(5, 1fr);
+            gap: 10px;
+            height: 600px;
+        }
+        
+        .queue-container {
+            border: 2px solid #333;
+            position: relative;
+            background: #f9f9f9;
+            padding: 8px;
+        }
+        
+        .queue-container.callstack { border-color: #0066cc; }
+        .queue-container.microtask { border-color: #10b981; }
+        .queue-container.macrotask { border-color: #f59e0b; }
+        .queue-container.animation { border-color: #8b5cf6; }
+        .queue-container.generator { border-color: #ec4899; }
+        
+        .queue-title {
+            position: absolute;
+            top: -12px;
+            left: 10px;
+            background: white;
+            padding: 4px 12px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        .queue-title.callstack { color: #0066cc; }
+        .queue-title.microtask { color: #10b981; }
+        .queue-title.macrotask { color: #f59e0b; }
+        .queue-title.animation { color: #8b5cf6; }
+        .queue-title.generator { color: #ec4899; }
+        
+        .queue-items {
+            display: flex;
+            gap: 6px;
+            height: 100%;
+            align-items: center;
+            overflow-x: auto;
+        }
+        
+        .queue-item {
+            min-width: 100px;
+            height: 30px;
+            border: 1px solid #666;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-family: monospace;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+        
+        .queue-item.callstack { border-left: 4px solid #0066cc; }
+        .queue-item.microtask { border-left: 4px solid #10b981; }
+        .queue-item.macrotask { border-left: 4px solid #f59e0b; }
+        .queue-item.animation { border-left: 4px solid #8b5cf6; }
+        .queue-item.generator { border-left: 4px solid #ec4899; }
+        
+        .item-icon {
+            margin-right: 4px;
+        }
+        
+        /* 함수 선택 패널 */
+        .function-groups {
+            display: grid;
+            grid-template-rows: repeat(5, 1fr);
+            gap: 10px;
+            height: 600px;
+        }
+        
+        .function-group {
+            border: 1px solid #999;
+            padding: 8px;
+            background: #fafafa;
+        }
+        
+        .group-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            padding: 4px;
+            background: white;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 11px;
+        }
+        
+        .group-title.callstack { background: #e6f3ff; color: #0066cc; }
+        .group-title.microtask { background: #ecfdf5; color: #10b981; }
+        .group-title.macrotask { background: #fffbeb; color: #f59e0b; }
+        .group-title.animation { background: #f3e8ff; color: #8b5cf6; }
+        .group-title.generator { background: #fdf2f8; color: #ec4899; }
+        
+        .function-card {
+            height: 25px;
+            border: 1px solid #999;
+            margin: 2px 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            font-family: monospace;
+            font-size: 10px;
+        }
+        
+        .function-card.callstack { border-left: 4px solid #0066cc; }
+        .function-card.microtask { border-left: 4px solid #10b981; }
+        .function-card.macrotask { border-left: 4px solid #f59e0b; }
+        .function-card.animation { border-left: 4px solid #8b5cf6; }
+        .function-card.generator { border-left: 4px solid #ec4899; }
+        
+        .function-icon {
+            margin-right: 4px;
+        }
+        
+        /* 하단 복잡한 스냅샷 영역 */
+        .bottom-panel {
+            border-top: 1px solid #666;
+            padding: 15px;
+            min-height: 250px;
+        }
+        
+        .complex-snapshot {
+            border: 1px dashed #999;
+            background: #fafafa;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .snapshot-timeline {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+        
+        .timeline-step {
+            min-width: 50px;
+            height: 25px;
+            border: 1px solid #999;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-family: monospace;
+        }
+        
+        .timeline-step.active {
+            background: #e6f3ff;
+            border-color: #0066cc;
+        }
+        
+        .snapshot-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            height: 120px;
+        }
+        
+        .mini-queue {
+            border: 1px solid #ccc;
+            background: white;
+            padding: 4px;
+            font-size: 9px;
+            overflow-y: auto;
+        }
+        
+        .mini-queue.callstack { border-left: 3px solid #0066cc; }
+        .mini-queue.microtask { border-left: 3px solid #10b981; }
+        .mini-queue.macrotask { border-left: 3px solid #f59e0b; }
+        .mini-queue.animation { border-left: 3px solid #8b5cf6; }
+        .mini-queue.generator { border-left: 3px solid #ec4899; }
+        
+        .mini-queue-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .mini-item {
+            padding: 2px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 2px;
+            font-size: 8px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .complexity-indicator {
+            background: #fee2e2;
+            border: 1px solid #dc2626;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            color: #991b1b;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        <!-- 헤더 -->
+        <div class="header section">
+            <div class="section-label">HEADER</div>
+            <div class="title">[GAME TITLE] 콜스택 도서관 - 타입 C</div>
+            <div class="subtitle">[STAGE INFO] 고급 23단계 | 다중 큐 시스템 마스터</div>
+        </div>
+        
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 왼쪽 패널 - 코드 -->
+            <div class="left-panel section">
+                <div class="section-label">CODE PANEL</div>
+                <div class="box">[PANEL TITLE] 📝 복합 비동기 코드</div>
+                <div class="code-editor">
+                    <div class="code-line">async function* generator() {</div>
+                    <div class="code-line">  yield Promise.resolve(1);</div>
+                    <div class="code-line">  yield 2;</div>
+                    <div class="code-line">}</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">requestAnimationFrame(() => {</div>
+                    <div class="code-line">  console.log('animation');</div>
+                    <div class="code-line">});</div>
+                    <div class="code-line"></div>
+                    <div class="code-line highlight">setTimeout(() => {</div>
+                    <div class="code-line">  console.log('timeout');</div>
+                    <div class="code-line">}, 0);</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">Promise.resolve().then(() => {</div>
+                    <div class="code-line">  console.log('promise');</div>
+                    <div class="code-line">});</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">const gen = generator();</div>
+                    <div class="code-line">gen.next();</div>
+                </div>
+                
+                <div class="box">[COMPLEXITY] 고급 패턴 활성</div>
+            </div>
+            
+            <!-- 중앙 패널 - 5개 큐 시스템 -->
+            <div class="center-panel section">
+                <div class="section-label">MULTI-QUEUE SYSTEM</div>
+                <div class="box">[PANEL TITLE] 🔮 다중 큐 시스템 (5개)</div>
+                
+                <div class="queue-system">
+                    <!-- 콜스택 -->
+                    <div class="queue-container callstack">
+                        <div class="queue-title callstack">[CALLSTACK] 콜스택</div>
+                        <div class="queue-items">
+                            <div class="queue-item callstack">
+                                <span class="item-icon">[📥]</span>
+                                gen.next()
+                            </div>
+                            <div class="queue-item callstack">
+                                <span class="item-icon">[📥]</span>
+                                main()
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 마이크로태스크 큐 -->
+                    <div class="queue-container microtask">
+                        <div class="queue-title microtask">[MICROTASK] 마이크로태스크</div>
+                        <div class="queue-items">
+                            <div class="queue-item microtask">
+                                <span class="item-icon">[⚡]</span>
+                                Promise.resolve().then
+                            </div>
+                            <div class="queue-item microtask">
+                                <span class="item-icon">[⚡]</span>
+                                yield Promise.resolve(1)
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 매크로태스크 큐 -->
+                    <div class="queue-container macrotask">
+                        <div class="queue-title macrotask">[MACROTASK] 매크로태스크</div>
+                        <div class="queue-items">
+                            <div class="queue-item macrotask">
+                                <span class="item-icon">[⏰]</span>
+                                setTimeout callback
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 애니메이션 큐 -->
+                    <div class="queue-container animation">
+                        <div class="queue-title animation">[ANIMATION] 애니메이션</div>
+                        <div class="queue-items">
+                            <div class="queue-item animation">
+                                <span class="item-icon">[🎬]</span>
+                                requestAnimationFrame
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 제너레이터 큐 -->
+                    <div class="queue-container generator">
+                        <div class="queue-title generator">[GENERATOR] 제너레이터</div>
+                        <div class="queue-items">
+                            <div class="queue-item generator">
+                                <span class="item-icon">[🔄]</span>
+                                generator() state
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box">[QUEUE INFO] C:2 | Mi:2 | Ma:1 | An:1 | Ge:1</div>
+            </div>
+            
+            <!-- 오른쪽 패널 - 함수 선택 -->
+            <div class="right-panel section">
+                <div class="section-label">FUNCTION SELECTOR</div>
+                <div class="box">[PANEL TITLE] 🎯 5개 큐별 함수</div>
+                
+                <div class="function-groups">
+                    <!-- 콜스택 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title callstack">[CS] 동기</div>
+                        <div class="function-card callstack">
+                            <span class="function-icon">[📥]</span>
+                            main()
+                        </div>
+                        <div class="function-card callstack">
+                            <span class="function-icon">[📥]</span>
+                            gen.next()
+                        </div>
+                    </div>
+                    
+                    <!-- 마이크로태스크 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title microtask">[MT] Promise</div>
+                        <div class="function-card microtask">
+                            <span class="function-icon">[⚡]</span>
+                            Promise.then
+                        </div>
+                        <div class="function-card microtask">
+                            <span class="function-icon">[⚡]</span>
+                            yield Promise
+                        </div>
+                    </div>
+                    
+                    <!-- 매크로태스크 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title macrotask">[MK] 타이머</div>
+                        <div class="function-card macrotask">
+                            <span class="function-icon">[⏰]</span>
+                            setTimeout
+                        </div>
+                    </div>
+                    
+                    <!-- 애니메이션 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title animation">[AN] 애니메이션</div>
+                        <div class="function-card animation">
+                            <span class="function-icon">[🎬]</span>
+                            requestAnimationFrame
+                        </div>
+                    </div>
+                    
+                    <!-- 제너레이터 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title generator">[GE] 제너레이터</div>
+                        <div class="function-card generator">
+                            <span class="function-icon">[🔄]</span>
+                            generator()
+                        </div>
+                        <div class="function-card generator">
+                            <span class="function-icon">[🔄]</span>
+                            yield 1
+                        </div>
+                        <div class="function-card generator">
+                            <span class="function-icon">[🔄]</span>
+                            yield 2
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 하단 - 복잡한 스냅샷 영역 -->
+        <div class="bottom-panel section">
+            <div class="section-label">COMPLEX SNAPSHOT SYSTEM</div>
+            
+            <div class="complexity-indicator">
+                [⚠️ 고급 난이도] 5개 큐의 상호작용을 동시에 추적해야 합니다
+            </div>
+            
+            <div class="complex-snapshot">
+                <div class="box" style="margin-bottom: 10px;">[LABEL] 각 실행 시점의 모든 큐 상태 예측:</div>
+                
+                <div class="snapshot-timeline">
+                    <div class="timeline-step active">[1]</div>
+                    <div class="timeline-step">[2]</div>
+                    <div class="timeline-step">[3]</div>
+                    <div class="timeline-step">[4]</div>
+                    <div class="timeline-step">[5]</div>
+                    <div class="timeline-step">[6]</div>
+                    <div class="timeline-step">[7]</div>
+                    <div class="timeline-step">[8]</div>
+                    <div class="timeline-step">[9]</div>
+                    <div class="timeline-step">[10]</div>
+                </div>
+                
+                <div class="snapshot-grid">
+                    <div class="mini-queue callstack">
+                        <div class="mini-queue-title">콜스택</div>
+                        <div class="mini-item">gen.next()</div>
+                        <div class="mini-item">main()</div>
+                    </div>
+                    <div class="mini-queue microtask">
+                        <div class="mini-queue-title">마이크로</div>
+                        <div class="mini-item">Promise.then</div>
+                        <div class="mini-item">yield Promise</div>
+                    </div>
+                    <div class="mini-queue macrotask">
+                        <div class="mini-queue-title">매크로</div>
+                        <div class="mini-item">setTimeout</div>
+                    </div>
+                    <div class="mini-queue animation">
+                        <div class="mini-queue-title">애니메이션</div>
+                        <div class="mini-item">requestAnimationFrame</div>
+                    </div>
+                    <div class="mini-queue generator">
+                        <div class="mini-queue-title">제너레이터</div>
+                        <div class="mini-item">generator state</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="button">[◀◀ FIRST]</div>
+                <div class="button">[◀ PREV]</div>
+                <div class="button">[NEXT ▶]</div>
+                <div class="button">[LAST ▶▶]</div>
+                <div class="button">[RESET]</div>
+                <div class="button">[SUBMIT]</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 와이어프레임 설명 -->
+    <div style="margin-top: 20px; padding: 15px; background: #ffffcc; border: 1px solid #999;">
+        <h3>타입 C 레이아웃 설명</h3>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+            <li><strong>대상:</strong> 고급 23단계</li>
+            <li><strong>목표:</strong> 복잡한 다중 큐 시스템 마스터</li>
+            <li><strong>특징:</strong> 5개 큐 동시 관리, 고급 JavaScript 기능</li>
+            <li><strong>평가:</strong> 모든 큐의 상호작용 정확성</li>
+        </ul>
+    </div>
+</body>
+</html>

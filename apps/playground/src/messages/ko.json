@@ -1,0 +1,25 @@
+{
+  "HomePage": {
+    "slogan": "시원한 코드, 따뜻한 학습",
+    "description": "JavaScript 핵심 개념을 재미있는 게임으로 배워보세요. 펭귄과 함께하는 인터랙티브 코딩 모험이 시작됩니다!",
+    "viewAllGames": "모든 게임 보기",
+    "games": {
+      "closureCave": {
+        "title": "클로저 동굴",
+        "description": "클로저의 신비로운 세계를 탐험하며 스코프와 환경을 이해해보세요."
+      },
+      "promisePlanet": {
+        "title": "프로미스 행성",
+        "description": "비동기 프로그래밍의 우주에서 Promise와 콜백을 마스터하세요."
+      },
+      "asyncAdventure": {
+        "title": "Async 모험",
+        "description": "async/await의 힘으로 복잡한 비동기 작업을 정복해보세요."
+      }
+    }
+  },
+  "GamesPage": {
+    "title": "모든 JavaScript 학습 게임",
+    "description": "총 18개의 인터랙티브 게임으로 JavaScript 핵심 개념을 마스터하세요"
+  }
+}

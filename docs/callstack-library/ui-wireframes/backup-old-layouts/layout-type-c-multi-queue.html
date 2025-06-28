@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>레이아웃 타입 C - 복합 큐 시스템 (와이어프레임)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            border: 2px solid #333;
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            min-height: 600px;
+        }
+        
+        .panel {
+            border: 2px solid #333;
+            background: white;
+            padding: 20px;
+        }
+        
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .callstack-area {
+            border: 1px dashed #666;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            margin-bottom: 20px;
+        }
+        
+        .queue-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .queue-area {
+            border: 1px dashed #666;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            padding: 10px;
+        }
+        
+        .code-editor-area {
+            border: 1px dashed #666;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            margin-bottom: 20px;
+        }
+        
+        .order-prediction-area {
+            border: 1px dashed #666;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+        }
+        
+        .button {
+            border: 1px solid #333;
+            padding: 10px 20px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .info-box {
+            border: 1px dashed #999;
+            padding: 15px;
+            background: #f9f9f9;
+            font-size: 13px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .queue-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>콜스택 도서관 - 레이아웃 타입 C (복합 큐 시스템)</h1>
+            <p>고급 4-7 스테이지용 와이어프레임</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- 왼쪽 패널: 복합 큐 시스템 -->
+            <div class="panel">
+                <div class="panel-title">🔄 복합 큐 시스템</div>
+                
+                <div class="callstack-area">
+                    <div style="text-align: center;">
+                        <p>콜스택 (책장)</p>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                            동기 코드 실행 영역<br>
+                            (크기가 작아짐)
+                        </p>
+                    </div>
+                </div>
+                
+                <h4 style="margin-bottom: 10px; font-size: 16px;">특수 큐 시스템 (2×2 그리드)</h4>
+                <div class="queue-grid">
+                    <div class="queue-area">
+                        <div style="text-align: center;">
+                            <p>마이크로태스크 큐</p>
+                            <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                                Promise.then
+                            </p>
+                        </div>
+                    </div>
+                    <div class="queue-area">
+                        <div style="text-align: center;">
+                            <p>매크로태스크 큐</p>
+                            <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                                setTimeout
+                            </p>
+                        </div>
+                    </div>
+                    <div class="queue-area">
+                        <div style="text-align: center;">
+                            <p>애니메이션 프레임 큐</p>
+                            <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                                requestAnimationFrame
+                            </p>
+                        </div>
+                    </div>
+                    <div class="queue-area">
+                        <div style="text-align: center;">
+                            <p>제너레이터/특수 큐</p>
+                            <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                                yield, async
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <p><strong>복합 시스템 우선순위:</strong></p>
+                    <ol style="margin-left: 20px; font-size: 12px;">
+                        <li>콜스택 (동기 코드)</li>
+                        <li>마이크로태스크 큐</li>
+                        <li>애니메이션 프레임 큐</li>
+                        <li>매크로태스크 큐</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- 오른쪽 패널: 코드 및 예측 -->
+            <div class="panel">
+                <div class="panel-title">📝 코드 분석</div>
+                
+                <div class="code-editor-area">
+                    <div style="text-align: center;">
+                        <p>코드 에디터</p>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                            복잡한 비동기 JavaScript 코드
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="panel-title" style="margin-top: 20px;">🎯 실행 순서 예측</div>
+                
+                <div class="order-prediction-area">
+                    <div style="text-align: center;">
+                        <p>드래그 앤 드롭 영역</p>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                            다양한 큐 타입의 함수 칩 배치
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="button">▶️ 실행</button>
+                    <button class="button">✓ 정답 확인</button>
+                    <button class="button">↻ 초기화</button>
+                    <button class="button">💡 힌트</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

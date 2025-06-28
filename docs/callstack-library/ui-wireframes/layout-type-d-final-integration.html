@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타입 D - 최종 통합 (와이어프레임)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .wireframe-container {
+            max-width: 1900px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #333;
+        }
+        
+        .section {
+            border: 1px solid #666;
+            position: relative;
+        }
+        
+        .section-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: white;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .box {
+            border: 1px dashed #999;
+            background: #fafafa;
+            margin: 10px;
+            padding: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .button {
+            border: 1px solid #999;
+            background: white;
+            padding: 8px 16px;
+            margin: 5px;
+            display: inline-block;
+            font-size: 12px;
+        }
+        
+        /* 헤더 */
+        .header {
+            height: 80px;
+            padding: 20px;
+            border-bottom: 1px solid #666;
+            background: linear-gradient(to right, #fee2e2, #fef3c7, #d1fae5);
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .master-badge {
+            display: inline-block;
+            background: #dc2626;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        /* 메인 레이아웃 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            min-height: 800px;
+        }
+        
+        .left-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .center-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .right-panel {
+            padding: 20px;
+        }
+        
+        /* 코드 에디터 */
+        .code-editor {
+            height: 400px;
+            border: 1px solid #999;
+            background: #f9f9f9;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 10px;
+            line-height: 1.3;
+            overflow-y: auto;
+        }
+        
+        .code-line {
+            padding: 1px 0;
+        }
+        
+        .code-line.highlight {
+            background: #e6f3ff;
+            border-left: 3px solid #0066cc;
+            padding-left: 5px;
+        }
+        
+        /* 통합 큐 시스템 */
+        .integrated-queue-system {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            gap: 8px;
+            height: 700px;
+        }
+        
+        .queue-container {
+            border: 2px solid #333;
+            position: relative;
+            background: #f9f9f9;
+            padding: 6px;
+        }
+        
+        .queue-container.callstack { border-color: #0066cc; }
+        .queue-container.microtask { border-color: #10b981; }
+        .queue-container.macrotask { border-color: #f59e0b; }
+        .queue-container.animation { border-color: #8b5cf6; }
+        .queue-container.io { border-color: #ef4444; }
+        .queue-container.worker { border-color: #6b7280; }
+        
+        .queue-title {
+            position: absolute;
+            top: -12px;
+            left: 10px;
+            background: white;
+            padding: 4px 10px;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        
+        .queue-title.callstack { color: #0066cc; }
+        .queue-title.microtask { color: #10b981; }
+        .queue-title.macrotask { color: #f59e0b; }
+        .queue-title.animation { color: #8b5cf6; }
+        .queue-title.io { color: #ef4444; }
+        .queue-title.worker { color: #6b7280; }
+        
+        .queue-items {
+            display: flex;
+            gap: 4px;
+            height: 100%;
+            align-items: center;
+            overflow-x: auto;
+        }
+        
+        .queue-item {
+            min-width: 80px;
+            height: 25px;
+            border: 1px solid #666;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            font-family: monospace;
+            font-size: 9px;
+            white-space: nowrap;
+        }
+        
+        .queue-item.callstack { border-left: 4px solid #0066cc; }
+        .queue-item.microtask { border-left: 4px solid #10b981; }
+        .queue-item.macrotask { border-left: 4px solid #f59e0b; }
+        .queue-item.animation { border-left: 4px solid #8b5cf6; }
+        .queue-item.io { border-left: 4px solid #ef4444; }
+        .queue-item.worker { border-left: 4px solid #6b7280; }
+        
+        .item-icon {
+            margin-right: 3px;
+        }
+        
+        /* 함수 선택 패널 */
+        .function-groups {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            gap: 8px;
+            height: 700px;
+        }
+        
+        .function-group {
+            border: 1px solid #999;
+            padding: 6px;
+            background: #fafafa;
+        }
+        
+        .group-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            padding: 3px;
+            background: white;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 10px;
+        }
+        
+        .group-title.callstack { background: #e6f3ff; color: #0066cc; }
+        .group-title.microtask { background: #ecfdf5; color: #10b981; }
+        .group-title.macrotask { background: #fffbeb; color: #f59e0b; }
+        .group-title.animation { background: #f3e8ff; color: #8b5cf6; }
+        .group-title.io { background: #fef2f2; color: #ef4444; }
+        .group-title.worker { background: #f9fafb; color: #6b7280; }
+        
+        .function-card {
+            height: 20px;
+            border: 1px solid #999;
+            margin: 1px 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            font-family: monospace;
+            font-size: 9px;
+        }
+        
+        .function-card.callstack { border-left: 4px solid #0066cc; }
+        .function-card.microtask { border-left: 4px solid #10b981; }
+        .function-card.macrotask { border-left: 4px solid #f59e0b; }
+        .function-card.animation { border-left: 4px solid #8b5cf6; }
+        .function-card.io { border-left: 4px solid #ef4444; }
+        .function-card.worker { border-left: 4px solid #6b7280; }
+        
+        .function-icon {
+            margin-right: 3px;
+        }
+        
+        /* 마스터 레벨 스냅샷 영역 */
+        .bottom-panel {
+            border-top: 1px solid #666;
+            padding: 15px;
+            min-height: 300px;
+            background: linear-gradient(to bottom, #fafafa, #f5f5f5);
+        }
+        
+        .master-snapshot {
+            border: 2px dashed #dc2626;
+            background: #fef2f2;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .master-indicator {
+            background: #dc2626;
+            color: white;
+            padding: 8px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .snapshot-timeline {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+        
+        .timeline-step {
+            min-width: 40px;
+            height: 25px;
+            border: 1px solid #999;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-family: monospace;
+        }
+        
+        .timeline-step.active {
+            background: #fee2e2;
+            border-color: #dc2626;
+            font-weight: bold;
+        }
+        
+        .master-snapshot-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            height: 150px;
+        }
+        
+        .mini-queue {
+            border: 1px solid #ccc;
+            background: white;
+            padding: 4px;
+            font-size: 8px;
+            overflow-y: auto;
+        }
+        
+        .mini-queue.callstack { border-left: 3px solid #0066cc; }
+        .mini-queue.microtask { border-left: 3px solid #10b981; }
+        .mini-queue.macrotask { border-left: 3px solid #f59e0b; }
+        .mini-queue.animation { border-left: 3px solid #8b5cf6; }
+        .mini-queue.io { border-left: 3px solid #ef4444; }
+        .mini-queue.worker { border-left: 3px solid #6b7280; }
+        
+        .mini-queue-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 8px;
+        }
+        
+        .mini-item {
+            padding: 1px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 1px;
+            font-size: 7px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .master-controls {
+            background: #fee2e2;
+            border: 1px solid #dc2626;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .performance-indicator {
+            background: #fffbeb;
+            border: 1px solid #f59e0b;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        <!-- 헤더 -->
+        <div class="header section">
+            <div class="section-label">HEADER</div>
+            <div class="title">[GAME TITLE] 콜스택 도서관 - 타입 D <span class="master-badge">🌟 MASTER</span></div>
+            <div class="subtitle">[STAGE INFO] 고급 24단계 | 최종 통합 마스터 레벨</div>
+        </div>
+        
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 왼쪽 패널 - 코드 -->
+            <div class="left-panel section">
+                <div class="section-label">CODE PANEL</div>
+                <div class="box">[PANEL TITLE] 📝 실무 수준 복합 코드</div>
+                <div class="code-editor">
+                    <div class="code-line">// 실무 수준의 복잡한 시나리오</div>
+                    <div class="code-line">const worker = new Worker('worker.js');</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">async function complexOperation() {</div>
+                    <div class="code-line">  // 파일 I/O</div>
+                    <div class="code-line">  const data = await fetch('/api/data');</div>
+                    <div class="code-line">  </div>
+                    <div class="code-line">  // 애니메이션</div>
+                    <div class="code-line">  requestAnimationFrame(() => {</div>
+                    <div class="code-line">    updateUI(data);</div>
+                    <div class="code-line">  });</div>
+                    <div class="code-line">  </div>
+                    <div class="code-line">  // 워커 통신</div>
+                    <div class="code-line">  worker.postMessage(data);</div>
+                    <div class="code-line">  </div>
+                    <div class="code-line">  // 마이크로태스크</div>
+                    <div class="code-line">  await Promise.all([</div>
+                    <div class="code-line">    processData(data),</div>
+                    <div class="code-line">    validateData(data)</div>
+                    <div class="code-line">  ]);</div>
+                    <div class="code-line">  </div>
+                    <div class="code-line">  // 매크로태스크</div>
+                    <div class="code-line highlight">  setTimeout(() => {</div>
+                    <div class="code-line">    cleanup();</div>
+                    <div class="code-line">  }, 1000);</div>
+                    <div class="code-line">}</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">// 즉시 실행</div>
+                    <div class="code-line">complexOperation();</div>
+                    <div class="code-line">console.log('시작됨');</div>
+                </div>
+                
+                <div class="performance-indicator">
+                    [⚡ 성능 모니터] CPU: 85% | 메모리: 78%
+                </div>
+                <div class="box">[EXECUTION CONTEXT] complexOperation</div>
+            </div>
+            
+            <!-- 중앙 패널 - 통합 큐 시스템 -->
+            <div class="center-panel section">
+                <div class="section-label">INTEGRATED QUEUE SYSTEM</div>
+                <div class="box">[PANEL TITLE] 🌟 통합 큐 시스템 (6개)</div>
+                
+                <div class="integrated-queue-system">
+                    <!-- 콜스택 -->
+                    <div class="queue-container callstack">
+                        <div class="queue-title callstack">[CALLSTACK] 콜스택</div>
+                        <div class="queue-items">
+                            <div class="queue-item callstack">
+                                <span class="item-icon">[📥]</span>
+                                cleanup()
+                            </div>
+                            <div class="queue-item callstack">
+                                <span class="item-icon">[📥]</span>
+                                complexOperation()
+                            </div>
+                            <div class="queue-item callstack">
+                                <span class="item-icon">[📥]</span>
+                                main()
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 마이크로태스크 큐 -->
+                    <div class="queue-container microtask">
+                        <div class="queue-title microtask">[MICROTASK] 마이크로태스크</div>
+                        <div class="queue-items">
+                            <div class="queue-item microtask">
+                                <span class="item-icon">[⚡]</span>
+                                Promise.all
+                            </div>
+                            <div class="queue-item microtask">
+                                <span class="item-icon">[⚡]</span>
+                                processData()
+                            </div>
+                            <div class="queue-item microtask">
+                                <span class="item-icon">[⚡]</span>
+                                validateData()
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 매크로태스크 큐 -->
+                    <div class="queue-container macrotask">
+                        <div class="queue-title macrotask">[MACROTASK] 매크로태스크</div>
+                        <div class="queue-items">
+                            <div class="queue-item macrotask">
+                                <span class="item-icon">[⏰]</span>
+                                setTimeout(cleanup)
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 애니메이션 큐 -->
+                    <div class="queue-container animation">
+                        <div class="queue-title animation">[ANIMATION] 애니메이션</div>
+                        <div class="queue-items">
+                            <div class="queue-item animation">
+                                <span class="item-icon">[🎬]</span>
+                                updateUI callback
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- I/O 큐 -->
+                    <div class="queue-container io">
+                        <div class="queue-title io">[I/O] 입출력</div>
+                        <div class="queue-items">
+                            <div class="queue-item io">
+                                <span class="item-icon">[💾]</span>
+                                fetch('/api/data')
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 워커 큐 -->
+                    <div class="queue-container worker">
+                        <div class="queue-title worker">[WORKER] 워커</div>
+                        <div class="queue-items">
+                            <div class="queue-item worker">
+                                <span class="item-icon">[👷]</span>
+                                worker.postMessage
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box">[QUEUE INFO] C:3 | Mi:3 | Ma:1 | An:1 | IO:1 | Wo:1</div>
+            </div>
+            
+            <!-- 오른쪽 패널 - 함수 선택 -->
+            <div class="right-panel section">
+                <div class="section-label">FUNCTION SELECTOR</div>
+                <div class="box">[PANEL TITLE] 🎯 전체 큐 함수</div>
+                
+                <div class="function-groups">
+                    <!-- 콜스택 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title callstack">[CS] 동기</div>
+                        <div class="function-card callstack">
+                            <span class="function-icon">[📥]</span>
+                            main()
+                        </div>
+                        <div class="function-card callstack">
+                            <span class="function-icon">[📥]</span>
+                            complexOperation()
+                        </div>
+                        <div class="function-card callstack">
+                            <span class="function-icon">[📥]</span>
+                            cleanup()
+                        </div>
+                    </div>
+                    
+                    <!-- 마이크로태스크 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title microtask">[MT] Promise</div>
+                        <div class="function-card microtask">
+                            <span class="function-icon">[⚡]</span>
+                            Promise.all
+                        </div>
+                        <div class="function-card microtask">
+                            <span class="function-icon">[⚡]</span>
+                            processData()
+                        </div>
+                        <div class="function-card microtask">
+                            <span class="function-icon">[⚡]</span>
+                            validateData()
+                        </div>
+                    </div>
+                    
+                    <!-- 매크로태스크 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title macrotask">[MK] 타이머</div>
+                        <div class="function-card macrotask">
+                            <span class="function-icon">[⏰]</span>
+                            setTimeout
+                        </div>
+                    </div>
+                    
+                    <!-- 애니메이션 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title animation">[AN] 애니메이션</div>
+                        <div class="function-card animation">
+                            <span class="function-icon">[🎬]</span>
+                            requestAnimationFrame
+                        </div>
+                        <div class="function-card animation">
+                            <span class="function-icon">[🎬]</span>
+                            updateUI()
+                        </div>
+                    </div>
+                    
+                    <!-- I/O 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title io">[IO] 입출력</div>
+                        <div class="function-card io">
+                            <span class="function-icon">[💾]</span>
+                            fetch()
+                        </div>
+                    </div>
+                    
+                    <!-- 워커 함수들 -->
+                    <div class="function-group">
+                        <div class="group-title worker">[WO] 워커</div>
+                        <div class="function-card worker">
+                            <span class="function-icon">[👷]</span>
+                            worker.postMessage
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 하단 - 마스터 레벨 스냅샷 영역 -->
+        <div class="bottom-panel section">
+            <div class="section-label">MASTER LEVEL SNAPSHOT</div>
+            
+            <div class="master-indicator">
+                [🌟 마스터 레벨] 실무 수준의 복잡한 비동기 패턴을 완벽히 이해해야 합니다
+            </div>
+            
+            <div class="master-snapshot">
+                <div class="box" style="margin-bottom: 10px;">[LABEL] 각 실행 시점의 모든 큐 상태와 성능 영향 예측:</div>
+                
+                <div class="snapshot-timeline">
+                    <div class="timeline-step active">[1]</div>
+                    <div class="timeline-step">[2]</div>
+                    <div class="timeline-step">[3]</div>
+                    <div class="timeline-step">[4]</div>
+                    <div class="timeline-step">[5]</div>
+                    <div class="timeline-step">[6]</div>
+                    <div class="timeline-step">[7]</div>
+                    <div class="timeline-step">[8]</div>
+                    <div class="timeline-step">[9]</div>
+                    <div class="timeline-step">[10]</div>
+                    <div class="timeline-step">[11]</div>
+                    <div class="timeline-step">[12]</div>
+                    <div class="timeline-step">[13]</div>
+                    <div class="timeline-step">[14]</div>
+                    <div class="timeline-step">[15]</div>
+                </div>
+                
+                <div class="master-snapshot-grid">
+                    <div class="mini-queue callstack">
+                        <div class="mini-queue-title">콜스택</div>
+                        <div class="mini-item">cleanup()</div>
+                        <div class="mini-item">complexOperation()</div>
+                        <div class="mini-item">main()</div>
+                    </div>
+                    <div class="mini-queue microtask">
+                        <div class="mini-queue-title">마이크로</div>
+                        <div class="mini-item">Promise.all</div>
+                        <div class="mini-item">processData()</div>
+                        <div class="mini-item">validateData()</div>
+                    </div>
+                    <div class="mini-queue macrotask">
+                        <div class="mini-queue-title">매크로</div>
+                        <div class="mini-item">setTimeout</div>
+                    </div>
+                    <div class="mini-queue animation">
+                        <div class="mini-queue-title">애니메이션</div>
+                        <div class="mini-item">requestAnimationFrame</div>
+                        <div class="mini-item">updateUI()</div>
+                    </div>
+                    <div class="mini-queue io">
+                        <div class="mini-queue-title">I/O</div>
+                        <div class="mini-item">fetch()</div>
+                    </div>
+                    <div class="mini-queue worker">
+                        <div class="mini-queue-title">워커</div>
+                        <div class="mini-item">postMessage</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="master-controls">
+                <div class="controls">
+                    <div class="button">[◀◀ FIRST]</div>
+                    <div class="button">[◀ PREV]</div>
+                    <div class="button">[PAUSE]</div>
+                    <div class="button">[NEXT ▶]</div>
+                    <div class="button">[LAST ▶▶]</div>
+                    <div class="button">[ANALYZE]</div>
+                    <div class="button">[RESET]</div>
+                    <div class="button">[SUBMIT]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 와이어프레임 설명 -->
+    <div style="margin-top: 20px; padding: 15px; background: #ffffcc; border: 1px solid #999;">
+        <h3>타입 D 레이아웃 설명</h3>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+            <li><strong>대상:</strong> 고급 24단계 (최종 마스터 레벨)</li>
+            <li><strong>목표:</strong> 실무 수준의 복잡한 비동기 패턴 완전 이해</li>
+            <li><strong>특징:</strong> 6개 큐 통합, 성능 모니터링, 실시간 분석</li>
+            <li><strong>평가:</strong> 모든 큐의 완벽한 상호작용과 성능 영향 이해</li>
+        </ul>
+    </div>
+</body>
+</html>

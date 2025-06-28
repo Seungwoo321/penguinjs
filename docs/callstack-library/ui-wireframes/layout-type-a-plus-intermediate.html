@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타입 A+ - 중급 시작/종료 (와이어프레임)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .wireframe-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #333;
+        }
+        
+        .section {
+            border: 1px solid #666;
+            position: relative;
+        }
+        
+        .section-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: white;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .box {
+            border: 1px dashed #999;
+            background: #fafafa;
+            margin: 10px;
+            padding: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .button {
+            border: 1px solid #999;
+            background: white;
+            padding: 8px 16px;
+            margin: 5px;
+            display: inline-block;
+            font-size: 12px;
+        }
+        
+        /* 헤더 */
+        .header {
+            height: 80px;
+            padding: 20px;
+            border-bottom: 1px solid #666;
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 메인 레이아웃 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            min-height: 500px;
+        }
+        
+        .left-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .center-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .right-panel {
+            padding: 20px;
+        }
+        
+        /* 코드 에디터 */
+        .code-editor {
+            height: 350px;
+            border: 1px solid #999;
+            background: #f9f9f9;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .code-line {
+            padding: 2px 0;
+        }
+        
+        .code-line.highlight {
+            background: #e6f3ff;
+            border-left: 3px solid #0066cc;
+            padding-left: 5px;
+        }
+        
+        /* 콜스택 영역 */
+        .callstack-container {
+            height: 350px;
+            border: 2px solid #333;
+            position: relative;
+            background: #f9f9f9;
+        }
+        
+        .lifo-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border: 1px solid #999;
+            background: white;
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+        
+        .stack-books {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+        }
+        
+        .book {
+            height: 35px;
+            border: 1px solid #666;
+            margin: 2px 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .book.push {
+            border-left: 4px solid #0066cc;
+        }
+        
+        .book.pop {
+            border-left: 4px solid #cc0000;
+        }
+        
+        .book-icon {
+            margin-right: 8px;
+        }
+        
+        /* 함수 선택 패널 */
+        .function-group {
+            margin-bottom: 20px;
+        }
+        
+        .group-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: #eee;
+            border: 1px solid #ccc;
+        }
+        
+        .function-card {
+            height: 35px;
+            border: 1px solid #999;
+            margin: 5px 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .function-card.push {
+            border-left: 4px solid #0066cc;
+        }
+        
+        .function-card.pop {
+            border-left: 4px solid #cc0000;
+        }
+        
+        .function-icon {
+            margin-right: 8px;
+        }
+        
+        .function-type {
+            margin-left: auto;
+            font-size: 10px;
+            padding: 2px 6px;
+            border: 1px solid #999;
+        }
+        
+        /* 예상 순서 영역 */
+        .bottom-panel {
+            border-top: 1px solid #666;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .prediction-slots {
+            flex: 1;
+            border: 1px dashed #999;
+            min-height: 80px;
+            background: #fafafa;
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            overflow-x: auto;
+        }
+        
+        .prediction-item {
+            min-width: 120px;
+            height: 30px;
+            border: 1px solid #999;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 11px;
+            font-family: monospace;
+        }
+        
+        .prediction-item.push {
+            border-left: 4px solid #0066cc;
+        }
+        
+        .prediction-item.pop {
+            border-left: 4px solid #cc0000;
+        }
+        
+        .remove-btn {
+            margin-left: auto;
+            cursor: pointer;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        <!-- 헤더 -->
+        <div class="header section">
+            <div class="section-label">HEADER</div>
+            <div class="title">[GAME TITLE] 콜스택 도서관 - 타입 A+</div>
+            <div class="subtitle">[STAGE INFO] 중급 9-16단계 | 함수 시작/종료 예측</div>
+        </div>
+        
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 왼쪽 패널 - 코드 -->
+            <div class="left-panel section">
+                <div class="section-label">CODE PANEL</div>
+                <div class="box">[PANEL TITLE] 📝 코드</div>
+                <div class="code-editor">
+                    <div class="code-line">function outer() {</div>
+                    <div class="code-line highlight">  console.log("외부 시작");</div>
+                    <div class="code-line">  inner();</div>
+                    <div class="code-line">  console.log("외부 끝");</div>
+                    <div class="code-line">}</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">function inner() {</div>
+                    <div class="code-line">  console.log("내부 실행");</div>
+                    <div class="code-line">}</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">outer();</div>
+                </div>
+            </div>
+            
+            <!-- 중앙 패널 - 콜스택 -->
+            <div class="center-panel section">
+                <div class="section-label">CALLSTACK PANEL</div>
+                <div class="box">[PANEL TITLE] 📚 콜스택 (LIFO 원칙)</div>
+                
+                <div class="callstack-container">
+                    <div class="lifo-indicator">[LIFO CHECK] ✓ 유효</div>
+                    <div class="stack-books">
+                        <div class="book push">
+                            <span class="book-icon">[📥]</span>
+                            inner()
+                        </div>
+                        <div class="book push">
+                            <span class="book-icon">[📥]</span>
+                            outer()
+                        </div>
+                        <div class="book push">
+                            <span class="book-icon">[📥]</span>
+                            main()
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box">[STACK INFO] 현재: 3개 | 최대: 5개</div>
+            </div>
+            
+            <!-- 오른쪽 패널 - 함수 선택 -->
+            <div class="right-panel section">
+                <div class="section-label">FUNCTION SELECTOR</div>
+                <div class="box">[PANEL TITLE] 🎯 함수 선택</div>
+                
+                <div class="function-group">
+                    <div class="group-title">[GROUP] 함수 시작 (Push)</div>
+                    <div class="function-card push">
+                        <span class="function-icon">[📥]</span>
+                        main()
+                        <span class="function-type">[시작]</span>
+                    </div>
+                    <div class="function-card push">
+                        <span class="function-icon">[📥]</span>
+                        outer()
+                        <span class="function-type">[시작]</span>
+                    </div>
+                    <div class="function-card push">
+                        <span class="function-icon">[📥]</span>
+                        inner()
+                        <span class="function-type">[시작]</span>
+                    </div>
+                </div>
+                
+                <div class="function-group">
+                    <div class="group-title">[GROUP] 함수 종료 (Pop)</div>
+                    <div class="function-card pop">
+                        <span class="function-icon">[📤]</span>
+                        inner()
+                        <span class="function-type">[종료]</span>
+                    </div>
+                    <div class="function-card pop">
+                        <span class="function-icon">[📤]</span>
+                        outer()
+                        <span class="function-type">[종료]</span>
+                    </div>
+                    <div class="function-card pop">
+                        <span class="function-icon">[📤]</span>
+                        main()
+                        <span class="function-type">[종료]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 하단 - 예상 순서 -->
+        <div class="bottom-panel section">
+            <div class="section-label">PREDICTION AREA</div>
+            <div class="box">[LABEL] 예상 실행 순서:</div>
+            
+            <div class="prediction-slots">
+                <div class="prediction-item push">
+                    [📥] main() 시작
+                    <span class="remove-btn">[❌]</span>
+                </div>
+                <div class="prediction-item push">
+                    [📥] outer() 시작
+                    <span class="remove-btn">[❌]</span>
+                </div>
+                <div class="prediction-item push">
+                    [📥] inner() 시작
+                    <span class="remove-btn">[❌]</span>
+                </div>
+                <div class="prediction-item pop">
+                    [📤] inner() 종료
+                    <span class="remove-btn">[❌]</span>
+                </div>
+                <div class="prediction-item pop">
+                    [📤] outer() 종료
+                    <span class="remove-btn">[❌]</span>
+                </div>
+                <div class="prediction-item pop">
+                    [📤] main() 종료
+                    <span class="remove-btn">[❌]</span>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="button">[RESET]</div>
+                <div class="button">[SUBMIT]</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 와이어프레임 설명 -->
+    <div style="margin-top: 20px; padding: 15px; background: #ffffcc; border: 1px solid #999;">
+        <h3>타입 A+ 레이아웃 설명</h3>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+            <li><strong>대상:</strong> 중급 9-16단계</li>
+            <li><strong>목표:</strong> 함수 시작/종료와 LIFO 원칙 이해</li>
+            <li><strong>특징:</strong> Push/Pop 구분, 실시간 LIFO 검증</li>
+            <li><strong>평가:</strong> 시작/종료 순서와 LIFO 원칙 준수 여부</li>
+        </ul>
+    </div>
+</body>
+</html>

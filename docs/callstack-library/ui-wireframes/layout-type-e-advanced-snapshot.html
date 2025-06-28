@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타입 E - 스택 스냅샷 (와이어프레임)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .wireframe-container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #333;
+        }
+        
+        .section {
+            border: 1px solid #666;
+            position: relative;
+        }
+        
+        .section-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: white;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .box {
+            border: 1px dashed #999;
+            background: #fafafa;
+            margin: 10px;
+            padding: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .button {
+            border: 1px solid #999;
+            background: white;
+            padding: 8px 16px;
+            margin: 5px;
+            display: inline-block;
+            font-size: 12px;
+        }
+        
+        /* 헤더 */
+        .header {
+            height: 80px;
+            padding: 20px;
+            border-bottom: 1px solid #666;
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 메인 레이아웃 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 400px;
+            min-height: 600px;
+        }
+        
+        .left-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .center-panel {
+            padding: 20px;
+            border-right: 1px solid #666;
+        }
+        
+        .right-panel {
+            padding: 20px;
+        }
+        
+        /* 코드 에디터 */
+        .code-editor {
+            height: 300px;
+            border: 1px solid #999;
+            background: #f9f9f9;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .code-line {
+            padding: 2px 0;
+            position: relative;
+        }
+        
+        .code-line.highlight {
+            background: #e6f3ff;
+            border-left: 3px solid #0066cc;
+            padding-left: 8px;
+        }
+        
+        .code-line.breakpoint {
+            background: #fef2f2;
+            border-left: 3px solid #dc2626;
+            padding-left: 8px;
+        }
+        
+        .line-number {
+            position: absolute;
+            left: -30px;
+            color: #999;
+            font-size: 10px;
+            width: 25px;
+            text-align: right;
+        }
+        
+        /* 타임라인 기반 콜스택 */
+        .timeline-callstack {
+            height: 450px;
+            border: 2px solid #333;
+            position: relative;
+            background: #f9f9f9;
+            padding: 15px;
+        }
+        
+        .timeline-header {
+            background: #e6f3ff;
+            border: 1px solid #0066cc;
+            padding: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .timeline-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        
+        .timeline-button {
+            padding: 4px 8px;
+            border: 1px solid #999;
+            background: white;
+            font-size: 10px;
+        }
+        
+        .timeline-button.active {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .stack-visualization {
+            height: 300px;
+            position: relative;
+            border: 1px dashed #999;
+            background: white;
+            padding: 10px;
+        }
+        
+        .stack-frame {
+            height: 40px;
+            border: 1px solid #666;
+            margin: 3px 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-family: monospace;
+            font-size: 11px;
+            position: relative;
+        }
+        
+        .stack-frame.active {
+            border-left: 4px solid #0066cc;
+            background: #e6f3ff;
+        }
+        
+        .frame-icon {
+            margin-right: 8px;
+        }
+        
+        .frame-info {
+            flex: 1;
+        }
+        
+        .frame-line {
+            position: absolute;
+            right: 10px;
+            font-size: 9px;
+            color: #666;
+        }
+        
+        /* 스냅샷 구성 패널 */
+        .snapshot-builder {
+            background: #fafafa;
+            border: 1px solid #999;
+            padding: 15px;
+            height: 500px;
+            overflow-y: auto;
+        }
+        
+        .builder-header {
+            background: #ec4899;
+            color: white;
+            padding: 8px;
+            margin: -15px -15px 15px -15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .execution-steps {
+            margin-bottom: 20px;
+        }
+        
+        .step-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .step-button {
+            height: 30px;
+            border: 1px solid #999;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-family: monospace;
+        }
+        
+        .step-button.active {
+            background: #ec4899;
+            color: white;
+            border-color: #ec4899;
+        }
+        
+        .step-button.completed {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .stack-constructor {
+            border: 1px dashed #999;
+            background: white;
+            padding: 10px;
+            min-height: 200px;
+        }
+        
+        .constructor-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ec4899;
+            font-size: 12px;
+        }
+        
+        .available-functions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .function-chip {
+            height: 25px;
+            border: 1px solid #999;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-family: monospace;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .function-chip:hover {
+            background: #f0f0f0;
+        }
+        
+        .function-chip.used {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+        
+        .constructed-stack {
+            border: 1px solid #ec4899;
+            background: #fdf2f8;
+            padding: 8px;
+            min-height: 120px;
+        }
+        
+        .constructed-frame {
+            height: 25px;
+            border: 1px solid #ec4899;
+            background: white;
+            margin: 2px 0;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-family: monospace;
+            font-size: 10px;
+            position: relative;
+        }
+        
+        .remove-frame {
+            position: absolute;
+            right: 5px;
+            cursor: pointer;
+            color: #dc2626;
+        }
+        
+        /* 하단 패널 */
+        .bottom-panel {
+            border-top: 1px solid #666;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            min-height: 100px;
+        }
+        
+        .progress-area {
+            flex: 1;
+            border: 1px dashed #999;
+            background: #fafafa;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .progress-bar {
+            flex: 1;
+            height: 20px;
+            border: 1px solid #999;
+            background: white;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #10b981, #ec4899);
+            width: 35%;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .validation-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .validation-result {
+            padding: 8px 12px;
+            border: 1px solid #999;
+            background: white;
+            font-size: 12px;
+        }
+        
+        .validation-result.correct {
+            background: #ecfdf5;
+            border-color: #10b981;
+            color: #166534;
+        }
+        
+        .validation-result.incorrect {
+            background: #fef2f2;
+            border-color: #dc2626;
+            color: #991b1b;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        <!-- 헤더 -->
+        <div class="header section">
+            <div class="section-label">HEADER</div>
+            <div class="title">[GAME TITLE] 콜스택 도서관 - 타입 E</div>
+            <div class="subtitle">[STAGE INFO] 고급 17-20단계 | 스택 상태 스냅샷 구성</div>
+        </div>
+        
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 왼쪽 패널 - 코드 -->
+            <div class="left-panel section">
+                <div class="section-label">CODE PANEL</div>
+                <div class="box">[PANEL TITLE] 📝 단계별 실행 코드</div>
+                <div class="code-editor">
+                    <div class="code-line">
+                        <span class="line-number">1</span>
+                        function outer() {
+                    </div>
+                    <div class="code-line breakpoint">
+                        <span class="line-number">2</span>
+                        console.log("외부 시작");
+                    </div>
+                    <div class="code-line">
+                        <span class="line-number">3</span>
+                        inner();
+                    </div>
+                    <div class="code-line">
+                        <span class="line-number">4</span>
+                        console.log("외부 끝");
+                    </div>
+                    <div class="code-line">
+                        <span class="line-number">5</span>
+                        }
+                    </div>
+                    <div class="code-line">
+                        <span class="line-number">6</span>
+                    </div>
+                    <div class="code-line">
+                        <span class="line-number">7</span>
+                        function inner() {
+                    </div>
+                    <div class="code-line highlight">
+                        <span class="line-number">8</span>
+                        console.log("내부 실행");
+                    </div>
+                    <div class="code-line">
+                        <span class="line-number">9</span>
+                        }
+                    </div>
+                    <div class="code-line">
+                        <span class="line-number">10</span>
+                    </div>
+                    <div class="code-line">
+                        <span class="line-number">11</span>
+                        outer();
+                    </div>
+                </div>
+                
+                <div class="box">[CURRENT LINE] 8: console.log("내부 실행")</div>
+                <div class="box">[BREAKPOINTS] 2, 8, 11</div>
+            </div>
+            
+            <!-- 중앙 패널 - 타임라인 기반 콜스택 -->
+            <div class="center-panel section">
+                <div class="section-label">TIMELINE CALLSTACK</div>
+                <div class="timeline-callstack">
+                    <div class="timeline-header">
+                        [TIMELINE] 📸 실행 시점별 콜스택 상태
+                    </div>
+                    
+                    <div class="timeline-controls">
+                        <div class="timeline-button">[◀◀]</div>
+                        <div class="timeline-button">[◀]</div>
+                        <div class="timeline-button active">[⏸]</div>
+                        <div class="timeline-button">[▶]</div>
+                        <div class="timeline-button">[▶▶]</div>
+                    </div>
+                    
+                    <div class="stack-visualization">
+                        <div class="stack-frame active">
+                            <span class="frame-icon">[📥]</span>
+                            <span class="frame-info">console.log("내부 실행")</span>
+                            <span class="frame-line">line 8</span>
+                        </div>
+                        <div class="stack-frame">
+                            <span class="frame-icon">[📥]</span>
+                            <span class="frame-info">inner()</span>
+                            <span class="frame-line">line 7</span>
+                        </div>
+                        <div class="stack-frame">
+                            <span class="frame-icon">[📥]</span>
+                            <span class="frame-info">outer()</span>
+                            <span class="frame-line">line 1</span>
+                        </div>
+                        <div class="stack-frame">
+                            <span class="frame-icon">[📥]</span>
+                            <span class="frame-info">main()</span>
+                            <span class="frame-line">global</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box">[STACK DEPTH] 현재: 4 | 최대: 4</div>
+                <div class="box">[EXECUTION STEP] 5 / 12</div>
+            </div>
+            
+            <!-- 오른쪽 패널 - 스냅샷 구성 -->
+            <div class="right-panel section">
+                <div class="section-label">SNAPSHOT BUILDER</div>
+                <div class="snapshot-builder">
+                    <div class="builder-header">
+                        [BUILDER] 📸 스냅샷 구성 도구
+                    </div>
+                    
+                    <div class="execution-steps">
+                        <div class="box" style="margin-bottom: 10px;">[LABEL] 실행 단계 선택:</div>
+                        <div class="step-selector">
+                            <div class="step-button completed">[1]</div>
+                            <div class="step-button completed">[2]</div>
+                            <div class="step-button completed">[3]</div>
+                            <div class="step-button completed">[4]</div>
+                            <div class="step-button active">[5]</div>
+                            <div class="step-button">[6]</div>
+                            <div class="step-button">[7]</div>
+                            <div class="step-button">[8]</div>
+                            <div class="step-button">[9]</div>
+                            <div class="step-button">[10]</div>
+                            <div class="step-button">[11]</div>
+                            <div class="step-button">[12]</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stack-constructor">
+                        <div class="constructor-title">단계 5의 스택 상태 구성:</div>
+                        
+                        <div class="box" style="margin-bottom: 10px; font-size: 11px;">[FUNCTIONS] 사용 가능한 함수들:</div>
+                        <div class="available-functions">
+                            <div class="function-chip">main()</div>
+                            <div class="function-chip">outer()</div>
+                            <div class="function-chip">inner()</div>
+                            <div class="function-chip">console.log("외부 시작")</div>
+                            <div class="function-chip used">console.log("내부 실행")</div>
+                            <div class="function-chip">console.log("외부 끝")</div>
+                        </div>
+                        
+                        <div class="box" style="margin-bottom: 8px; font-size: 11px;">[STACK] 구성된 스택 (위에서부터):</div>
+                        <div class="constructed-stack">
+                            <div class="constructed-frame">
+                                console.log("내부 실행")
+                                <span class="remove-frame">[❌]</span>
+                            </div>
+                            <div class="constructed-frame">
+                                inner()
+                                <span class="remove-frame">[❌]</span>
+                            </div>
+                            <div class="constructed-frame">
+                                outer()
+                                <span class="remove-frame">[❌]</span>
+                            </div>
+                            <div class="constructed-frame">
+                                main()
+                                <span class="remove-frame">[❌]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 하단 - 진행상황 및 검증 -->
+        <div class="bottom-panel section">
+            <div class="section-label">PROGRESS & VALIDATION</div>
+            
+            <div class="progress-area">
+                <div class="box" style="margin: 0;">[PROGRESS] 스냅샷 완성도:</div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                    <div class="progress-text">5 / 12 완료</div>
+                </div>
+            </div>
+            
+            <div class="validation-area">
+                <div class="validation-result correct">
+                    [✓] 단계 5 정확
+                </div>
+                <div class="validation-result">
+                    [?] 단계 6 대기
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="button">[HINT]</div>
+                <div class="button">[VALIDATE]</div>
+                <div class="button">[RESET]</div>
+                <div class="button">[SUBMIT]</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 와이어프레임 설명 -->
+    <div style="margin-top: 20px; padding: 15px; background: #ffffcc; border: 1px solid #999;">
+        <h3>타입 E 레이아웃 설명</h3>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+            <li><strong>대상:</strong> 고급 17-20단계</li>
+            <li><strong>목표:</strong> 코드 실행 단계별 스택 상태 예측</li>
+            <li><strong>특징:</strong> 타임라인 네비게이션, 스냅샷 구성 도구</li>
+            <li><strong>평가:</strong> 각 실행 시점의 정확한 스택 구성</li>
+        </ul>
+    </div>
+</body>
+</html>
