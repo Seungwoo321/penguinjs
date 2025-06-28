@@ -1,11 +1,14 @@
 // 다중 큐 시각화 패널 (Layout B용)
 // 콜스택, 마이크로태스크, 매크로태스크 큐를 동시에 표시
 
-import React from 'react'
+import React, { useRef } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { MultiQueueVisualizationPanelProps } from '../../../types/layout'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, Zap, BookOpen, Book, ArrowRight, Calendar, Users } from 'lucide-react'
+import { useCallStackLibraryTheme, useCallStackLibraryCSSVariables } from '../../../hooks/useCallStackLibraryTheme'
+import { useContainerResponsive } from '../../../hooks/useResponsiveLayout'
+import type { CallStackQueueType } from '../../../theme/callstackLibraryTheme'
 
 /**
  * 다중 큐 시각화 패널
@@ -19,6 +22,12 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
   maxSize = 8,
   className
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  
+  // 테마 및 반응형 시스템
+  const libraryTheme = useCallStackLibraryTheme()
+  const cssVariables = useCallStackLibraryCSSVariables()
+  const responsiveLayout = useContainerResponsive(containerRef)
   
   const handleQueueItemClick = (queueType: 'callstack' | 'microtask' | 'macrotask') => {
     return (item: any) => {
@@ -28,56 +37,95 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
 
   return (
     <GamePanel 
+      ref={containerRef}
       title="📚 콜스택 도서관" 
-      className={cn("flex flex-col overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20", className)}
+      className={cn("flex flex-col overflow-hidden", className)}
+      style={{
+        ...cssVariables,
+        background: libraryTheme.theme.library.elements.libraryBackground
+      }}
     >
-      {/* 도서관 헤더 - 나무 텍스처 스타일 */}
-      <div className="px-4 py-3 border-b border-amber-300/50 dark:border-amber-700/50 flex-shrink-0 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 shadow-sm">
+      {/* 도서관 헤더 - 반응형 나무 텍스처 스타일 */}
+      <div 
+        className="flex-shrink-0 shadow-sm"
+        style={{
+          padding: responsiveLayout.getResponsiveSpacing(16),
+          borderBottom: `1px solid ${libraryTheme.getQueueBorder('callstack', 'light')}`,
+          background: libraryTheme.getQueueColor('callstack', 'light'),
+          backgroundImage: libraryTheme.theme.library.textures.wood,
+          backgroundBlendMode: 'overlay'
+        }}
+      >
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-amber-900 dark:text-amber-100 flex items-center gap-2">
+            <h3 
+              className="font-bold flex items-center gap-2"
+              style={{ 
+                fontSize: responsiveLayout.config.fontSize.title,
+                color: libraryTheme.getQueueText('callstack', 'primary')
+              }}
+            >
               <BookOpen className="w-5 h-5" />
               콜스택 도서관 시스템
             </h3>
-            <p className="text-xs text-amber-700 dark:text-amber-300 mt-1 flex items-center gap-2">
-              <Users className="w-3 h-3" />
-              처리 순서: 메인 서가 → 긴급 처리대 → 예약 처리대
-            </p>
+            {!responsiveLayout.isCompact && (
+              <p 
+                className="mt-1 flex items-center gap-2"
+                style={{ 
+                  fontSize: responsiveLayout.config.fontSize.caption,
+                  color: libraryTheme.getQueueText('callstack', 'secondary')
+                }}
+              >
+                <Users className="w-3 h-3" />
+                처리 순서: 메인 서가 → 긴급 처리대 → 예약 처리대
+              </p>
+            )}
           </div>
-          <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
+          <div className="flex items-center gap-2">
             {isExecuting && (
-              <span className="flex items-center gap-1 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+              <span 
+                className="flex items-center gap-1 px-2 py-1 rounded-full"
+                style={{
+                  backgroundColor: '#dcfce7',
+                  fontSize: responsiveLayout.config.fontSize.caption
+                }}
+              >
                 <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
-                사서 처리 중
+                {responsiveLayout.isMobile ? '처리중' : '사서 처리 중'}
               </span>
             )}
           </div>
         </div>
       </div>
       
-      {/* 메인 도서관 시각화 영역 - 나무 텍스처 배경 */}
-      <div className="flex-1 p-4 overflow-hidden relative">
-        {/* 나무 바닥 패턴 */}
+      {/* 메인 도서관 시각화 영역 - 반응형 나무 텍스처 배경 */}
+      <div 
+        className="flex-1 overflow-hidden relative"
+        style={{
+          padding: responsiveLayout.getResponsiveSpacing(16)
+        }}
+      >
+        {/* 도서관 나무 바닥 패턴 */}
         <div 
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-10 pointer-events-none"
           style={{
-            backgroundImage: `repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 40px,
-              rgba(139, 69, 19, 0.1) 40px,
-              rgba(139, 69, 19, 0.1) 41px
-            ), repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 80px,
-              rgba(139, 69, 19, 0.05) 80px,
-              rgba(139, 69, 19, 0.05) 81px
-            )`
+            backgroundImage: libraryTheme.theme.library.textures.wood
           }}
         />
         
-        <div className="grid grid-rows-3 gap-4 h-full relative z-10">
+        {/* 반응형 그리드 시스템 */}
+        <div 
+          className={cn(
+            "h-full relative z-10",
+            responsiveLayout.config.layoutDirection === 'vertical' ? "flex flex-col" : "grid"
+          )}
+          style={{
+            gap: responsiveLayout.config.queueGap,
+            ...(responsiveLayout.config.layoutDirection === 'horizontal' && {
+              gridTemplateRows: 'repeat(3, minmax(0, 1fr))'
+            })
+          }}
+        >
           
           {/* 콜스택 영역 - 메인 서가 */}
           <motion.div

@@ -7,6 +7,8 @@ import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { X, Check, AlertCircle, Plus, ChevronLeft, ChevronRight, BookOpen, Users, Sparkles, Calendar } from 'lucide-react'
 import { QueueSnapshotBuilderPanelProps } from '../../../types/layout'
 import { QueueType, QueueItem } from '../../../types'
+import { useCallStackLibraryTheme, useCallStackLibraryCSSVariables } from '../../../hooks/useCallStackLibraryTheme'
+import type { CallStackQueueType } from '../../../theme/callstackLibraryTheme'
 
 /**
  * 큐 스냅샷 빌더 패널 (Layout B 전용)
@@ -24,6 +26,10 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
 }) => {
   const [selectedQueue, setSelectedQueue] = useState<QueueType>('callstack')
   const [selectedFunctions, setSelectedFunctions] = useState<Set<string>>(new Set())
+  
+  // 콜스택 도서관 테마 사용
+  const libraryTheme = useCallStackLibraryTheme()
+  const cssVariables = useCallStackLibraryCSSVariables()
   
   const currentStepData = executionSteps[currentStep]
   const currentQueueStates = queueStates[currentStep]
@@ -130,11 +136,13 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
     <GamePanel 
       title="📋 사서 업무 일지" 
       className={cn("flex flex-col overflow-hidden", className)}
+      style={cssVariables}
     >
-      {/* 나무 질감 배경 */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none"
+      {/* 도서관 나무 질감 배경 */}
+      <div 
+        className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
-          backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(139, 69, 19, 0.1) 60px, rgba(139, 69, 19, 0.1) 61px)`,
+          backgroundImage: libraryTheme.theme.library.textures.wood,
         }}
       />
 
@@ -158,13 +166,24 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
 
       {/* 현재 단계 정보 */}
       {currentStepData && (
-        <div className="px-4 py-2 border-b border-editor-border bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+        <div 
+          className="px-4 py-2 border-b border-editor-border"
+          style={{
+            background: libraryTheme.getQueueColor('callstack', 'light'),
+          }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+              <p 
+                className="text-sm font-medium"
+                style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
+              >
                 단계 {currentStep + 1}: {currentStepData.description}
               </p>
-              <p className="text-xs text-amber-700 dark:text-amber-300">
+              <p 
+                className="text-xs"
+                style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+              >
                 라인 {currentStepData.currentLine}
               </p>
             </div>
@@ -198,16 +217,42 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
       </div>
 
       {/* 검증 버튼 */}
-      <div className="p-4 border-t border-editor-border bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+      <div 
+        className="p-4 border-t border-editor-border"
+        style={{
+          background: libraryTheme.getQueueColor('callstack', 'light'),
+        }}
+      >
         <button
           onClick={handleValidateStep}
           disabled={!currentQueueStates}
-          className={cn(
-            "w-full px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2",
+          className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+          style={
             currentQueueStates
-              ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700 shadow-lg hover:shadow-xl"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-slate-600 dark:text-slate-400"
-          )}
+              ? {
+                  background: libraryTheme.getQueueColor('callstack', 'button'),
+                  color: libraryTheme.getQueueText('callstack', 'contrast'),
+                  boxShadow: libraryTheme.theme.shadows.button,
+                  border: `1px solid ${libraryTheme.getQueueBorder('callstack')}`,
+                }
+              : {
+                  background: '#e5e7eb',
+                  color: '#6b7280',
+                  cursor: 'not-allowed'
+                }
+          }
+          onMouseEnter={(e) => {
+            if (currentQueueStates) {
+              e.currentTarget.style.background = libraryTheme.getQueueColor('callstack', 'hover')
+              e.currentTarget.style.transform = 'translateY(-1px)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (currentQueueStates) {
+              e.currentTarget.style.background = libraryTheme.getQueueColor('callstack', 'button')
+              e.currentTarget.style.transform = 'translateY(0)'
+            }
+          }}
         >
           <BookOpen className="w-4 h-4" />
           단계 {currentStep + 1} 업무 확인
@@ -233,14 +278,29 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
   validationResults,
   onStepChange
 }) => {
+  const libraryTheme = useCallStackLibraryTheme()
+  
   return (
-    <div className="px-4 py-3 border-b border-editor-border bg-gradient-to-r from-amber-100/50 to-orange-100/50 dark:from-amber-800/20 dark:to-orange-800/20">
+    <div 
+      className="px-4 py-3 border-b border-editor-border"
+      style={{
+        background: libraryTheme.getQueueColor('callstack', 'light'),
+        backgroundImage: libraryTheme.theme.library.textures.wood,
+        backgroundBlendMode: 'overlay'
+      }}
+    >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2">
+        <h3 
+          className="text-sm font-semibold flex items-center gap-2"
+          style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
+        >
           <Users className="w-4 h-4" />
           사서 업무 단계
         </h3>
-        <div className="text-xs text-amber-700 dark:text-amber-300">
+        <div 
+          className="text-xs"
+          style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+        >
           {currentStep + 1}/{executionSteps.length}
         </div>
       </div>
@@ -250,16 +310,33 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
           <button
             key={index}
             onClick={() => onStepChange(index)}
-            className={cn(
-              "flex-shrink-0 w-8 h-8 rounded-full border-2 text-xs font-medium transition-all transform hover:scale-110",
+            className="flex-shrink-0 min-w-11 min-h-11 rounded-full border-2 text-xs font-medium transition-all transform hover:scale-110 flex items-center justify-center"
+            style={
               index === currentStep
-                ? "bg-gradient-to-br from-amber-500 to-orange-500 border-amber-600 text-white shadow-lg"
+                ? {
+                    background: libraryTheme.getQueueColor('callstack', 'button'),
+                    borderColor: libraryTheme.getQueueBorder('callstack'),
+                    color: libraryTheme.getQueueText('callstack', 'contrast'),
+                    boxShadow: libraryTheme.theme.shadows.button
+                  }
                 : validationResults[index]?.isValid
-                  ? "bg-green-100 border-green-300 text-green-800 dark:bg-green-900/50 dark:border-green-600"
+                  ? {
+                      background: '#dcfce7',
+                      borderColor: '#86efac',
+                      color: '#166534'
+                    }
                   : validationResults[index]?.isValid === false
-                    ? "bg-red-100 border-red-300 text-red-800 dark:bg-red-900/50 dark:border-red-600"
-                    : "bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:border-amber-600 dark:hover:bg-amber-900/50"
-            )}
+                    ? {
+                        background: '#fecaca',
+                        borderColor: '#fca5a5',
+                        color: '#dc2626'
+                      }
+                    : {
+                        background: libraryTheme.getQueueColor('callstack', 'light'),
+                        borderColor: libraryTheme.getQueueBorder('callstack', 'light'),
+                        color: libraryTheme.getQueueText('callstack', 'primary')
+                      }
+            }
           >
             {index + 1}
           </button>
@@ -283,45 +360,38 @@ const QueueSelector: React.FC<QueueSelectorProps> = ({
   onQueueSelect,
   queueStates
 }) => {
+  const libraryTheme = useCallStackLibraryTheme()
+  
   const queueTabs = [
-    { type: 'callstack' as QueueType, label: '📚 메인 서가', color: 'amber', icon: BookOpen },
-    { type: 'microtask' as QueueType, label: '⚡ 긴급 처리대', color: 'blue', icon: Sparkles },
-    { type: 'macrotask' as QueueType, label: '📅 예약 처리대', color: 'orange', icon: Calendar }
+    { type: 'callstack' as QueueType, label: '📚 메인 서가', icon: BookOpen },
+    { type: 'microtask' as QueueType, label: '⚡ 긴급 처리대', icon: Sparkles },
+    { type: 'macrotask' as QueueType, label: '📅 예약 처리대', icon: Calendar }
   ]
 
   return (
     <div className="flex border-b border-editor-border">
-      {queueTabs.map(({ type, label, color, icon: Icon }) => {
+      {queueTabs.map(({ type, label, icon: Icon }) => {
         const count = queueStates?.[type]?.length || 0
         const isSelected = selectedQueue === type
+        const queueTheme = libraryTheme.getQueueTheme(type as CallStackQueueType)
         
         return (
           <button
             key={type}
             onClick={() => onQueueSelect(type)}
-            className={cn(
-              "flex-1 px-4 py-3 text-sm font-medium transition-all border-b-2 relative overflow-hidden",
-              isSelected
-                ? `border-${color}-500 text-${color}-800 dark:text-${color}-200`
-                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-            )}
+            className="flex-1 px-4 py-3 text-sm font-medium transition-all border-b-2 relative overflow-hidden"
             style={{
-              background: isSelected 
-                ? `linear-gradient(to bottom, var(--tw-gradient-from), var(--tw-gradient-to))`
-                : undefined,
-              '--tw-gradient-from': isSelected && type === 'callstack' ? 'rgb(254, 243, 199)' : 
-                                   isSelected && type === 'microtask' ? 'rgb(219, 234, 254)' :
-                                   isSelected && type === 'macrotask' ? 'rgb(254, 235, 200)' : '',
-              '--tw-gradient-to': isSelected && type === 'callstack' ? 'rgb(253, 230, 138)' :
-                                 isSelected && type === 'microtask' ? 'rgb(191, 219, 254)' :
-                                 isSelected && type === 'macrotask' ? 'rgb(253, 224, 171)' : ''
-            } as React.CSSProperties}
+              background: isSelected ? queueTheme.gradients.light : undefined,
+              borderBottomColor: isSelected ? queueTheme.border.main : 'transparent',
+              color: isSelected ? queueTheme.text.primary : '#6b7280'
+            }}
           >
-            {/* 나무 질감 오버레이 */}
+            {/* 도서관 나무 질감 오버레이 */}
             {isSelected && (
-              <div className="absolute inset-0 opacity-10"
+              <div 
+                className="absolute inset-0 opacity-10"
                 style={{
-                  backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,0,0,0.05) 20px, rgba(0,0,0,0.05) 21px)`
+                  backgroundImage: libraryTheme.theme.library.textures.wood
                 }}
               />
             )}
@@ -329,14 +399,20 @@ const QueueSelector: React.FC<QueueSelectorProps> = ({
             <div className="flex items-center justify-center gap-2 relative z-10">
               <Icon className="w-4 h-4" />
               <span>{label}</span>
-              <span className={cn(
-                "text-xs px-2 py-0.5 rounded-full",
-                isSelected 
-                  ? type === 'callstack' ? "bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-200" :
-                    type === 'microtask' ? "bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200" :
-                    "bg-orange-200 text-orange-800 dark:bg-orange-800 dark:text-orange-200"
-                  : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
-              )}>
+              <span 
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={
+                  isSelected 
+                    ? {
+                        backgroundColor: queueTheme.background.main,
+                        color: queueTheme.text.primary
+                      }
+                    : {
+                        backgroundColor: '#f3f4f6',
+                        color: '#6b7280'
+                      }
+                }
+              >
                 {count}
               </span>
             </div>
@@ -367,16 +443,28 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
   onRemoveFunction,
   onReorderItems
 }) => {
+  const libraryTheme = useCallStackLibraryTheme()
+  
   // 이미 추가된 함수 제외한 사용 가능한 함수들
   const remainingFunctions = availableFunctions.filter(func => 
     !items.some(item => item.functionName === func)
   )
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-amber-50/50 to-orange-50/50 dark:from-amber-900/10 dark:to-orange-900/10">
+    <div 
+      className="h-full flex flex-col"
+      style={{
+        background: libraryTheme.getQueueColor('callstack', 'light'),
+        backgroundImage: libraryTheme.theme.library.textures.wood,
+        backgroundBlendMode: 'overlay'
+      }}
+    >
       {/* 상단: 사용 가능한 함수들 */}
       <div className="h-1/2 border-b border-editor-border p-4">
-        <h4 className="text-sm font-medium text-amber-900 dark:text-amber-200 mb-3 flex items-center gap-2">
+        <h4 
+          className="text-sm font-medium mb-3 flex items-center gap-2"
+          style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
+        >
           <BookOpen className="w-4 h-4" />
           처리 대기 도서
         </h4>
@@ -387,25 +475,38 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
               onClick={() => onAddFunction(funcName)}
               className="w-full p-3 text-left border rounded-lg transition-all text-sm relative overflow-hidden group"
               style={{
-                background: 'linear-gradient(to right, rgb(254, 243, 199), rgb(254, 235, 200))',
-                borderColor: 'rgb(251, 191, 36)'
+                background: libraryTheme.getQueueColor('callstack', 'light'),
+                borderColor: libraryTheme.getQueueBorder('callstack', 'light'),
+                borderRadius: libraryTheme.theme.borderRadius.book
               }}
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{
-                  background: 'linear-gradient(to right, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1))'
+                  background: libraryTheme.getQueueColor('callstack', 'hover')
                 }}
               />
               <div className="flex items-center justify-between relative z-10">
-                <span className="font-mono font-medium text-amber-900 dark:text-amber-100">{funcName}</span>
-                <Plus className="w-4 h-4 text-amber-700 dark:text-amber-300" />
+                <span 
+                  className="font-mono font-medium"
+                  style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
+                >
+                  {funcName}
+                </span>
+                <Plus 
+                  className="w-4 h-4"
+                  style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+                />
               </div>
             </motion.button>
           ))}
           {remainingFunctions.length === 0 && (
-            <p className="text-sm text-amber-700 dark:text-amber-300 text-center py-4">
+            <p 
+              className="text-sm text-center py-4"
+              style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+            >
               모든 도서가 처리 중입니다
             </p>
           )}
@@ -414,7 +515,10 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
 
       {/* 하단: 현재 큐 상태 */}
       <div className="h-1/2 p-4">
-        <h4 className="text-sm font-medium text-amber-900 dark:text-amber-200 mb-3 flex items-center gap-2">
+        <h4 
+          className="text-sm font-medium mb-3 flex items-center gap-2"
+          style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
+        >
           {queueType === 'callstack' ? <BookOpen className="w-4 h-4" /> :
            queueType === 'microtask' ? <Sparkles className="w-4 h-4" /> :
            <Calendar className="w-4 h-4" />}
@@ -437,43 +541,41 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                 <motion.div
                   className="flex items-center justify-between p-3 border rounded-lg transition-all cursor-move relative overflow-hidden group"
                   style={{
-                    background: queueType === 'callstack' 
-                      ? 'linear-gradient(to right, rgb(254, 243, 199), rgb(253, 230, 138))'
-                      : queueType === 'microtask'
-                      ? 'linear-gradient(to right, rgb(219, 234, 254), rgb(191, 219, 254))'
-                      : 'linear-gradient(to right, rgb(254, 235, 200), rgb(253, 224, 171))',
-                    borderColor: queueType === 'callstack' ? 'rgb(217, 119, 6)' :
-                                queueType === 'microtask' ? 'rgb(59, 130, 246)' :
-                                'rgb(234, 88, 12)'
+                    background: libraryTheme.getQueueColor(queueType as CallStackQueueType, 'light'),
+                    borderColor: libraryTheme.getQueueBorder(queueType as CallStackQueueType),
+                    borderRadius: libraryTheme.theme.borderRadius.book,
+                    boxShadow: libraryTheme.theme.shadows.button
                   }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   whileHover={{ scale: 1.02 }}
                 >
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     style={{
-                      background: 'linear-gradient(to right, rgba(255,255,255,0.3), rgba(255,255,255,0.1))'
+                      background: libraryTheme.getQueueColor(queueType as CallStackQueueType, 'hover')
                     }}
                   />
                   <div className="flex items-center gap-3 relative z-10">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium opacity-60">
+                      <span 
+                        className="text-xs font-medium opacity-60"
+                        style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'secondary') }}
+                      >
                         {queueType === 'callstack' ? items.length - index : index + 1}
                       </span>
-                      <span className={cn(
-                        "font-mono text-sm font-medium",
-                        queueType === 'callstack' ? "text-amber-900" :
-                        queueType === 'microtask' ? "text-blue-900" :
-                        "text-orange-900"
-                      )}>
+                      <span 
+                        className="font-mono text-sm font-medium"
+                        style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'primary') }}
+                      >
                         {item.functionName}
                       </span>
                     </div>
                   </div>
                   <button
                     onClick={() => onRemoveFunction(index)}
-                    className="text-red-500 hover:text-red-700 p-1 relative z-10"
+                    className="text-red-500 hover:text-red-700 p-1 relative z-10 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -482,7 +584,10 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
             ))}
           </Reorder.Group>
         ) : (
-          <div className="text-center py-8 text-amber-700 dark:text-amber-300">
+          <div 
+            className="text-center py-8"
+            style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+          >
             <div className="text-2xl mb-2">
               {queueType === 'callstack' ? '📚' : 
                queueType === 'microtask' ? '⚡' : '📅'}
