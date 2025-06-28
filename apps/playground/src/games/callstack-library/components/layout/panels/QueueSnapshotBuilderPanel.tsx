@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
-import { X, Check, AlertCircle, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, Check, AlertCircle, Plus, ChevronLeft, ChevronRight, BookOpen, Users, Sparkles, Calendar } from 'lucide-react'
 import { QueueSnapshotBuilderPanelProps } from '../../../types/layout'
 import { QueueType, QueueItem } from '../../../types'
 
@@ -128,9 +128,16 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
 
   return (
     <GamePanel 
-      title="📋 반납 처리 계획서" 
+      title="📋 사서 업무 일지" 
       className={cn("flex flex-col overflow-hidden", className)}
     >
+      {/* 나무 질감 배경 */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none"
+        style={{
+          backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(139, 69, 19, 0.1) 60px, rgba(139, 69, 19, 0.1) 61px)`,
+        }}
+      />
+
       {/* 실행 단계 선택기 */}
       <ExecutionStepSelector
         executionSteps={executionSteps}
@@ -151,24 +158,25 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
 
       {/* 현재 단계 정보 */}
       {currentStepData && (
-        <div className="px-4 py-2 border-b border-editor-border bg-surface-secondary">
+        <div className="px-4 py-2 border-b border-editor-border bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-game-text">
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
                 단계 {currentStep + 1}: {currentStepData.description}
               </p>
-              <p className="text-xs text-game-text-secondary">
+              <p className="text-xs text-amber-700 dark:text-amber-300">
                 라인 {currentStepData.currentLine}
               </p>
             </div>
             <div className="flex items-center gap-2">
               {isValidated !== undefined && (
                 <span className={cn(
-                  "text-xs px-2 py-1 rounded",
+                  "text-xs px-2 py-1 rounded flex items-center gap-1",
                   isValidated 
                     ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
                     : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
                 )}>
+                  {isValidated ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
                   {isValidated ? "✓ 정답" : "✗ 오답"}
                 </span>
               )}
@@ -190,18 +198,19 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
       </div>
 
       {/* 검증 버튼 */}
-      <div className="p-4 border-t border-editor-border bg-surface-secondary">
+      <div className="p-4 border-t border-editor-border bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
         <button
           onClick={handleValidateStep}
           disabled={!currentQueueStates}
           className={cn(
-            "w-full px-4 py-2 rounded-lg text-sm font-medium transition-all",
+            "w-full px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2",
             currentQueueStates
-              ? "bg-blue-500 text-white hover:bg-blue-600 shadow-sm"
+              ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700 shadow-lg hover:shadow-xl"
               : "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-slate-600 dark:text-slate-400"
           )}
         >
-          단계 {currentStep + 1} 검증하기
+          <BookOpen className="w-4 h-4" />
+          단계 {currentStep + 1} 업무 확인
         </button>
       </div>
     </GamePanel>
@@ -225,10 +234,13 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
   onStepChange
 }) => {
   return (
-    <div className="px-4 py-3 border-b border-editor-border">
+    <div className="px-4 py-3 border-b border-editor-border bg-gradient-to-r from-amber-100/50 to-orange-100/50 dark:from-amber-800/20 dark:to-orange-800/20">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-game-text">처리 단계</h3>
-        <div className="text-xs text-game-text-secondary">
+        <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2">
+          <Users className="w-4 h-4" />
+          사서 업무 단계
+        </h3>
+        <div className="text-xs text-amber-700 dark:text-amber-300">
           {currentStep + 1}/{executionSteps.length}
         </div>
       </div>
@@ -239,14 +251,14 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
             key={index}
             onClick={() => onStepChange(index)}
             className={cn(
-              "flex-shrink-0 w-8 h-8 rounded-full border-2 text-xs font-medium transition-all",
+              "flex-shrink-0 w-8 h-8 rounded-full border-2 text-xs font-medium transition-all transform hover:scale-110",
               index === currentStep
-                ? "bg-blue-500 border-blue-500 text-white"
+                ? "bg-gradient-to-br from-amber-500 to-orange-500 border-amber-600 text-white shadow-lg"
                 : validationResults[index]?.isValid
                   ? "bg-green-100 border-green-300 text-green-800 dark:bg-green-900/50 dark:border-green-600"
                   : validationResults[index]?.isValid === false
                     ? "bg-red-100 border-red-300 text-red-800 dark:bg-red-900/50 dark:border-red-600"
-                    : "bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200 dark:bg-slate-700 dark:border-slate-600"
+                    : "bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:border-amber-600 dark:hover:bg-amber-900/50"
             )}
           >
             {index + 1}
@@ -272,14 +284,14 @@ const QueueSelector: React.FC<QueueSelectorProps> = ({
   queueStates
 }) => {
   const queueTabs = [
-    { type: 'callstack' as QueueType, label: '📚 대출함', color: 'amber' },
-    { type: 'microtask' as QueueType, label: '⚡ 긴급반납대', color: 'emerald' },
-    { type: 'macrotask' as QueueType, label: '⏰ 일반반납대', color: 'orange' }
+    { type: 'callstack' as QueueType, label: '📚 메인 서가', color: 'amber', icon: BookOpen },
+    { type: 'microtask' as QueueType, label: '⚡ 긴급 처리대', color: 'blue', icon: Sparkles },
+    { type: 'macrotask' as QueueType, label: '📅 예약 처리대', color: 'orange', icon: Calendar }
   ]
 
   return (
     <div className="flex border-b border-editor-border">
-      {queueTabs.map(({ type, label, color }) => {
+      {queueTabs.map(({ type, label, color, icon: Icon }) => {
         const count = queueStates?.[type]?.length || 0
         const isSelected = selectedQueue === type
         
@@ -288,19 +300,42 @@ const QueueSelector: React.FC<QueueSelectorProps> = ({
             key={type}
             onClick={() => onQueueSelect(type)}
             className={cn(
-              "flex-1 px-4 py-3 text-sm font-medium transition-all border-b-2",
+              "flex-1 px-4 py-3 text-sm font-medium transition-all border-b-2 relative overflow-hidden",
               isSelected
-                ? `border-${color}-500 bg-${color}-50 text-${color}-800 dark:bg-${color}-900/20 dark:text-${color}-400`
-                : "border-transparent text-game-text-secondary hover:text-game-text hover:bg-surface-secondary"
+                ? `border-${color}-500 text-${color}-800 dark:text-${color}-200`
+                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             )}
+            style={{
+              background: isSelected 
+                ? `linear-gradient(to bottom, var(--tw-gradient-from), var(--tw-gradient-to))`
+                : undefined,
+              '--tw-gradient-from': isSelected && type === 'callstack' ? 'rgb(254, 243, 199)' : 
+                                   isSelected && type === 'microtask' ? 'rgb(219, 234, 254)' :
+                                   isSelected && type === 'macrotask' ? 'rgb(254, 235, 200)' : '',
+              '--tw-gradient-to': isSelected && type === 'callstack' ? 'rgb(253, 230, 138)' :
+                                 isSelected && type === 'microtask' ? 'rgb(191, 219, 254)' :
+                                 isSelected && type === 'macrotask' ? 'rgb(253, 224, 171)' : ''
+            } as React.CSSProperties}
           >
-            <div className="flex items-center justify-center gap-2">
+            {/* 나무 질감 오버레이 */}
+            {isSelected && (
+              <div className="absolute inset-0 opacity-10"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,0,0,0.05) 20px, rgba(0,0,0,0.05) 21px)`
+                }}
+              />
+            )}
+            
+            <div className="flex items-center justify-center gap-2 relative z-10">
+              <Icon className="w-4 h-4" />
               <span>{label}</span>
               <span className={cn(
-                "text-xs px-2 py-1 rounded-full",
+                "text-xs px-2 py-0.5 rounded-full",
                 isSelected 
-                  ? `bg-${color}-100 text-${color}-800 dark:bg-${color}-800 dark:text-${color}-300`
-                  : "bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-400"
+                  ? type === 'callstack' ? "bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-200" :
+                    type === 'microtask' ? "bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200" :
+                    "bg-orange-200 text-orange-800 dark:bg-orange-800 dark:text-orange-200"
+                  : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
               )}>
                 {count}
               </span>
@@ -338,30 +373,40 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
   )
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-gradient-to-b from-amber-50/50 to-orange-50/50 dark:from-amber-900/10 dark:to-orange-900/10">
       {/* 상단: 사용 가능한 함수들 */}
       <div className="h-1/2 border-b border-editor-border p-4">
-        <h4 className="text-sm font-medium text-game-text mb-3">
-          반납할 책들
+        <h4 className="text-sm font-medium text-amber-900 dark:text-amber-200 mb-3 flex items-center gap-2">
+          <BookOpen className="w-4 h-4" />
+          처리 대기 도서
         </h4>
         <div className="space-y-2 max-h-full overflow-y-auto">
           {remainingFunctions.map(funcName => (
             <motion.button
               key={funcName}
               onClick={() => onAddFunction(funcName)}
-              className="w-full p-3 text-left border rounded-lg transition-all text-sm bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 dark:hover:bg-blue-900/20 dark:hover:border-blue-600 dark:hover:text-blue-400"
-              whileHover={{ scale: 1.02 }}
+              className="w-full p-3 text-left border rounded-lg transition-all text-sm relative overflow-hidden group"
+              style={{
+                background: 'linear-gradient(to right, rgb(254, 243, 199), rgb(254, 235, 200))',
+                borderColor: 'rgb(251, 191, 36)'
+              }}
+              whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="flex items-center justify-between">
-                <span className="font-mono font-medium">{funcName}</span>
-                <Plus className="w-4 h-4" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{
+                  background: 'linear-gradient(to right, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1))'
+                }}
+              />
+              <div className="flex items-center justify-between relative z-10">
+                <span className="font-mono font-medium text-amber-900 dark:text-amber-100">{funcName}</span>
+                <Plus className="w-4 h-4 text-amber-700 dark:text-amber-300" />
               </div>
             </motion.button>
           ))}
           {remainingFunctions.length === 0 && (
-            <p className="text-sm text-game-text-secondary text-center py-4">
-              모든 책이 반납대에 배치되었습니다
+            <p className="text-sm text-amber-700 dark:text-amber-300 text-center py-4">
+              모든 도서가 처리 중입니다
             </p>
           )}
         </div>
@@ -369,8 +414,11 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
 
       {/* 하단: 현재 큐 상태 */}
       <div className="h-1/2 p-4">
-        <h4 className="text-sm font-medium text-game-text mb-3">
-          {getQueueDisplayName(queueType)} 상태
+        <h4 className="text-sm font-medium text-amber-900 dark:text-amber-200 mb-3 flex items-center gap-2">
+          {queueType === 'callstack' ? <BookOpen className="w-4 h-4" /> :
+           queueType === 'microtask' ? <Sparkles className="w-4 h-4" /> :
+           <Calendar className="w-4 h-4" />}
+          {getQueueDisplayName(queueType)} 현황
         </h4>
         
         {items.length > 0 ? (
@@ -387,25 +435,45 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                 className="cursor-move"
               >
                 <motion.div
-                  className="flex items-center justify-between p-3 border rounded-lg transition-all cursor-move bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-600"
+                  className="flex items-center justify-between p-3 border rounded-lg transition-all cursor-move relative overflow-hidden group"
+                  style={{
+                    background: queueType === 'callstack' 
+                      ? 'linear-gradient(to right, rgb(254, 243, 199), rgb(253, 230, 138))'
+                      : queueType === 'microtask'
+                      ? 'linear-gradient(to right, rgb(219, 234, 254), rgb(191, 219, 254))'
+                      : 'linear-gradient(to right, rgb(254, 235, 200), rgb(253, 224, 171))',
+                    borderColor: queueType === 'callstack' ? 'rgb(217, 119, 6)' :
+                                queueType === 'microtask' ? 'rgb(59, 130, 246)' :
+                                'rgb(234, 88, 12)'
+                  }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   whileHover={{ scale: 1.02 }}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{
+                      background: 'linear-gradient(to right, rgba(255,255,255,0.3), rgba(255,255,255,0.1))'
+                    }}
+                  />
+                  <div className="flex items-center gap-3 relative z-10">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-game-text-secondary font-medium">
+                      <span className="text-xs font-medium opacity-60">
                         {queueType === 'callstack' ? items.length - index : index + 1}
                       </span>
-                      <span className="font-mono text-sm font-medium text-amber-800 dark:text-amber-200">
+                      <span className={cn(
+                        "font-mono text-sm font-medium",
+                        queueType === 'callstack' ? "text-amber-900" :
+                        queueType === 'microtask' ? "text-blue-900" :
+                        "text-orange-900"
+                      )}>
                         {item.functionName}
                       </span>
                     </div>
                   </div>
                   <button
                     onClick={() => onRemoveFunction(index)}
-                    className="text-red-500 hover:text-red-700 p-1"
+                    className="text-red-500 hover:text-red-700 p-1 relative z-10"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -414,13 +482,17 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
             ))}
           </Reorder.Group>
         ) : (
-          <div className="text-center py-8 text-game-text-secondary">
-            <div className="text-2xl mb-2">📭</div>
+          <div className="text-center py-8 text-amber-700 dark:text-amber-300">
+            <div className="text-2xl mb-2">
+              {queueType === 'callstack' ? '📚' : 
+               queueType === 'microtask' ? '⚡' : '📅'}
+            </div>
             <p className="text-sm">
-              {queueType === 'callstack' ? '대출함이' : '반납대가'} 비어있습니다
+              {queueType === 'callstack' ? '메인 서가가' : 
+               queueType === 'microtask' ? '긴급 처리대가' : '예약 처리대가'} 비어있습니다
             </p>
-            <p className="text-xs mt-1">
-              왼쪽에서 책을 선택해 배치하세요
+            <p className="text-xs mt-1 opacity-75">
+              위에서 도서를 선택해 배치하세요
             </p>
           </div>
         )}
@@ -443,9 +515,9 @@ function getFunctionColor(functionName: string): string {
 
 function getQueueDisplayName(queueType: QueueType): string {
   switch (queueType) {
-    case 'callstack': return '현재 대출함'
-    case 'microtask': return '긴급 반납대'
-    case 'macrotask': return '일반 반납대'
-    default: return '반납대'
+    case 'callstack': return '메인 서가'
+    case 'microtask': return '긴급 처리대'
+    case 'macrotask': return '예약 처리대'
+    default: return '처리대'
   }
 }

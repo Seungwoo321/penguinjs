@@ -70,11 +70,12 @@
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 5px;
+            color: #92400e;
         }
         
         .subtitle {
             font-size: 14px;
-            color: #666;
+            color: #92400e;
         }
         
         /* 메인 레이아웃 - 1열 3영역 */
@@ -122,10 +123,11 @@
         }
         
         .queue-container {
-            border: 2px solid #333;
+            border: 2px solid #92400e;
             position: relative;
-            background: #f9f9f9;
+            background: linear-gradient(to bottom, #fef3c7, #fde68a);
             padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .queue-container.callstack {
@@ -336,12 +338,12 @@
             <!-- 두 번째 패널 - 3개 큐 시스템 -->
             <div class="panel section">
                 <div class="section-label">QUEUE SYSTEM</div>
-                <div class="box">[PANEL TITLE] 📚 도서관 반납 처리 시스템</div>
+                <div class="box">[PANEL TITLE] 📚 콜스택 도서관</div>
                 
                 <div class="queue-system">
                     <!-- 콜스택 -->
                     <div class="queue-container callstack">
-                        <div class="queue-title callstack">[CALLSTACK] 📚 현재 대출함 (LIFO)</div>
+                        <div class="queue-title callstack">[CALLSTACK] 📚 메인 서가 (LIFO)</div>
                         <div class="queue-items">
                             <div class="queue-item callstack">
                                 <span class="item-icon">[📚]</span>
@@ -356,7 +358,7 @@
                     
                     <!-- 마이크로태스크 큐 -->
                     <div class="queue-container microtask">
-                        <div class="queue-title microtask">[MICROTASK] ⚡ 긴급 반납대 (FIFO)</div>
+                        <div class="queue-title microtask">[MICROTASK] ⚡ 긴급 처리대 (FIFO)</div>
                         <div class="queue-items">
                             <div class="queue-item microtask">
                                 <span class="item-icon">[⚡]</span>
@@ -367,7 +369,7 @@
                     
                     <!-- 매크로태스크 큐 -->
                     <div class="queue-container macrotask">
-                        <div class="queue-title macrotask">[MACROTASK] ⏰ 일반 반납대 (FIFO)</div>
+                        <div class="queue-title macrotask">[MACROTASK] 📅 예약 처리대 (FIFO)</div>
                         <div class="queue-items">
                             <div class="queue-item macrotask">
                                 <span class="item-icon">[⏰]</span>
@@ -377,17 +379,17 @@
                     </div>
                 </div>
                 
-                <div class="box">[QUEUE INFO] 대출함:2 | 긴급:1 | 일반:1</div>
+                <div class="box">[QUEUE INFO] 메인 서가:2 | 긴급:1 | 예약:1</div>
             </div>
             
             <!-- 세 번째 패널 - 반납 계획서 -->
             <div class="panel section">
                 <div class="section-label">MANAGEMENT PANEL</div>
-                <div class="box">[PANEL TITLE] 📋 반납 처리 계획서</div>
+                <div class="box">[PANEL TITLE] 📋 사서 업무 일지</div>
                 
                 <div class="function-groups">
                     <div class="function-group">
-                        <div class="group-title callstack">📚 대출함용 함수</div>
+                        <div class="group-title callstack">📚 메인 서가 도서</div>
                         <div class="function-card callstack">
                             <span class="function-icon">[📚]</span>
                             console.log
@@ -399,7 +401,7 @@
                     </div>
                     
                     <div class="function-group">
-                        <div class="group-title microtask">⚡ 긴급 반납 함수</div>
+                        <div class="group-title microtask">⚡ 긴급 처리 도서</div>
                         <div class="function-card microtask">
                             <span class="function-icon">[⚡]</span>
                             Promise.resolve().then
@@ -411,7 +413,7 @@
                     </div>
                     
                     <div class="function-group">
-                        <div class="group-title macrotask">⏰ 일반 반납 함수</div>
+                        <div class="group-title macrotask">📅 예약 처리 도서</div>
                         <div class="function-card macrotask">
                             <span class="function-icon">[⏰]</span>
                             setTimeout
@@ -423,17 +425,17 @@
                     </div>
                 </div>
                 
-                <div class="box">[INSTRUCTIONS] 드래그하여 각 단계별 책장 상태 구성</div>
+                <div class="box">[INSTRUCTIONS] 드래그하여 각 단계별 도서관 상태 구성</div>
             </div>
         </div>
         
         <!-- 하단 - 예상 결과 (100% 너비) -->
         <div class="evaluation-panel section">
             <div class="section-label">EVALUATION RESULT</div>
-            <div class="box">[PANEL TITLE] 📊 도서관 업무 평가</div>
+            <div class="box">[PANEL TITLE] 📊 사서 업무 평가</div>
             
-            <div class="box" style="background: #f0f8ff; border-color: #0066cc;">
-                [RESULT] 반납 처리 검증 결과: 처리 순서 정확도 100% | 큐 상태 완료
+            <div class="box" style="background: linear-gradient(to right, #fef3c7, #fed7aa); border-color: #92400e;">
+                [RESULT] 사서 업무 검증 결과: 처리 순서 정확도 100% | 큐 상태 완료
             </div>
             
             <div class="controls">
@@ -450,11 +452,11 @@
         <h3>타입 B 레이아웃 설명</h3>
         <ul style="margin-top: 10px; padding-left: 20px;">
             <li><strong>대상:</strong> 고급 21-22단계</li>
-            <li><strong>목표:</strong> 도서관 반납 처리 순서와 우선순위 시스템 이해</li>
-            <li><strong>특징:</strong> 3개 큐 시스템 (현재 대출함, 긴급 반납대, 일반 반납대)</li>
-            <li><strong>레이아웃:</strong> 1열 3영역 배치 (코드 | 반납 시스템 | 반납 계획서)</li>
+            <li><strong>목표:</strong> 도서관 처리 순서와 우선순위 시스템 이해</li>
+            <li><strong>특징:</strong> 3개 큐 시스템 (메인 서가, 긴급 처리대, 예약 처리대)</li>
+            <li><strong>레이아웃:</strong> 1열 3영역 배치 (코드 | 도서관 시스템 | 사서 업무 일지)</li>
             <li><strong>평가:</strong> 각 처리 단계별 큐 상태의 정확성</li>
-            <li><strong>컨셉:</strong> 도서관 반납 처리 시스템</li>
+            <li><strong>컨셉:</strong> 콜스택 도서관 시스템</li>
         </ul>
     </div>
 </body>
