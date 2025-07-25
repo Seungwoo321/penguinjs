@@ -1,4 +1,6 @@
 import { CallStackLibraryGame } from '@/games/callstack-library'
+import { CallStackLibraryProvider } from '@/games/callstack-library/contexts/CallStackLibraryContext'
+import { DesignSystemProvider } from '@/games/callstack-library/components/ui/DesignSystemProvider'
 
 interface CallStackLibraryPageProps {
   searchParams: Promise<{
@@ -9,5 +11,11 @@ interface CallStackLibraryPageProps {
 
 export default async function CallStackLibraryPage({ searchParams }: CallStackLibraryPageProps) {
   const params = await searchParams
-  return <CallStackLibraryGame searchParams={params} />
+  return (
+    <DesignSystemProvider>
+      <CallStackLibraryProvider>
+        <CallStackLibraryGame searchParams={params} />
+      </CallStackLibraryProvider>
+    </DesignSystemProvider>
+  )
 }

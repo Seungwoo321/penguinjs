@@ -1,20 +1,32 @@
 // 큐 스냅샷 빌더 패널 (Layout B용)
 // 이벤트 루프의 각 단계에서 3개 큐의 상태를 구성
 
-import React, { useState } from 'react'
+import React, { useState, useCallback, useMemo, memo } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { X, Check, AlertCircle, Plus, ChevronLeft, ChevronRight, BookOpen, Users, Sparkles, Calendar } from 'lucide-react'
 import { QueueSnapshotBuilderPanelProps } from '../../../types/layout'
 import { QueueType, QueueItem } from '../../../types'
 import { useCallStackLibraryTheme, useCallStackLibraryCSSVariables } from '../../../hooks/useCallStackLibraryTheme'
+import { useOptimizedAnimations } from '../../../hooks/useOptimizedAnimations'
+import { useResponsiveLayout } from '../../../hooks/useResponsiveLayout'
 import type { CallStackQueueType } from '../../../theme/callstackLibraryTheme'
+import { useFunctionNameOverflow } from '../../../hooks/useTextOverflow'
+import { FunctionNameTooltip } from '../../ui/AdaptiveTooltip'
+import { typography, createTextOverflowStyles } from '../../../utils/textUtils'
+import { usePerformanceOptimization } from '../../../hooks/usePerformanceOptimization'
+import { useMemoryManagement, useLeakDetection } from '../../../hooks/useMemoryManagement'
+import { QueueItemComponent } from '../../common/QueueItemComponent'
+import { ExecutionController } from '../../common/ExecutionController'
+import { ProgressIndicator } from '../../common/ProgressIndicator'
+import { useCallStackLibraryContext, ActionType } from '../../../contexts/CallStackLibraryContext'
+import { gameEvents } from '../../../utils/eventSystem'
 
 /**
  * 큐 스냅샷 빌더 패널 (Layout B 전용)
  * 실행 단계별로 콜스택, 마이크로태스크, 매크로태스크 큐의 상태를 구성
  */
-export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps> = ({
+export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps> = memo(({
   executionSteps,
   currentStep,
   queueStates,
@@ -24,35 +36,103 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
   availableFunctions,
   className
 }) => {
+  // Context API 사용으로 중앙 상태 관리
+  const { state, dispatch } = useCallStackLibraryContext();
+  
   const [selectedQueue, setSelectedQueue] = useState<QueueType>('callstack')
   const [selectedFunctions, setSelectedFunctions] = useState<Set<string>>(new Set())
   
-  // 콜스택 도서관 테마 사용
+  // 성능 최적화 및 메모리 관리
+  const { metrics } = usePerformanceOptimization({
+    enableMetrics: process.env.NODE_ENV === 'development',
+    maxRenderCount: 30
+  })
+  const { registerCleanup, isMemoryPressure } = useMemoryManagement({
+    enableMonitoring: process.env.NODE_ENV === 'development'
+  })
+  useLeakDetection('QueueSnapshotBuilderPanel')
+  
+  // 공통 컴포넌트를 위한 이벤트 핸들러
+  const handleStepChange = useCallback(
+    (step: number) => {
+      dispatch({ type: ActionType.SET_EXECUTION_STEP, payload: step });
+      gameEvents.executionStepForward(step, state?.executionSteps?.length || 0);
+    },
+    [dispatch, state?.executionSteps?.length]
+  );
+  
+  const handleQueueStateUpdate = useCallback(
+    (step: number, newState: any) => {
+      dispatch({ type: 'execution/updateQueueState', payload: { step, state: newState } });
+      gameEvents.evaluationSubmit(newState);
+      onQueueStateChange?.(step, newState);
+    },
+    [dispatch, onQueueStateChange]
+  );
+  
+  // 콜스택 도서관 테마 및 성능 최적화 사용
   const libraryTheme = useCallStackLibraryTheme()
   const cssVariables = useCallStackLibraryCSSVariables()
+  const optimizedAnimations = useOptimizedAnimations()
   
-  const currentStepData = executionSteps[currentStep]
-  const currentQueueStates = queueStates[currentStep]
-  const isValidated = validationResults[currentStep]?.isValid
+  // 상태 계산 (Context 우선)
+  const currentExecutionSteps = useMemo(
+    () => state.executionSteps || executionSteps,
+    [state.executionSteps, executionSteps]
+  );
+  
+  const currentStepValue = useMemo(
+    () => state.currentStep ?? currentStep,
+    [state.currentStep, currentStep]
+  );
+  
+  const contextQueueStates = useMemo(
+    () => state.queueStates || queueStates,
+    [state.queueStates, queueStates]
+  );
+  
+  const currentValidationResults = useMemo(
+    () => state.validationResults || validationResults,
+    [state.validationResults, validationResults]
+  );
+  const responsiveLayout = useResponsiveLayout()
+  
+  // 메모이제이션된 데이터
+  const currentStepData = useMemo(
+    () => executionSteps[currentStep],
+    [executionSteps, currentStep]
+  )
+  const currentQueueStates = useMemo(
+    () => contextQueueStates[currentStep] || queueStates[currentStep],
+    [contextQueueStates, queueStates, currentStep]
+  )
+  const isValidated = useMemo(
+    () => validationResults[currentStep]?.isValid,
+    [validationResults, currentStep]
+  )
 
-  // 현재 선택된 큐의 아이템들
-  const getCurrentQueueItems = (): QueueItem[] => {
-    if (!currentQueueStates) return []
-    
-    switch (selectedQueue) {
-      case 'callstack':
-        return currentQueueStates.callstack
-      case 'microtask':
-        return currentQueueStates.microtask
-      case 'macrotask':
-        return currentQueueStates.macrotask
-      default:
-        return []
-    }
-  }
+  // 현재 선택된 큐의 아이템들 (메모이제이션)
+  const currentQueueItems = useMemo(
+    (): QueueItem[] => {
+      if (!currentQueueStates) return []
+      
+      switch (selectedQueue) {
+        case 'callstack':
+          return currentQueueStates.callstack
+        case 'microtask':
+          return currentQueueStates.microtask
+        case 'macrotask':
+          return currentQueueStates.macrotask
+        default:
+          return []
+      }
+    },
+    [currentQueueStates, selectedQueue]
+  )
 
-  // 큐에 함수 추가
-  const handleAddFunction = (funcName: string) => {
+  // 큐에 함수 추가 (최적화)
+  const handleAddFunction = useCallback(
+    (funcName: string) => {
     if (!currentQueueStates) {
       // currentQueueStates가 없으면 기본 상태 생성
       const defaultQueueStates = {
@@ -89,22 +169,24 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
       height: 40,
       queueType: selectedQueue,
       timestamp: Date.now(),
-      position: getCurrentQueueItems().length
+      position: currentQueueItems.length
     }
 
     const newQueueStates = {
       ...currentQueueStates,
-      [selectedQueue]: [...getCurrentQueueItems(), newItem]
+      [selectedQueue]: [...currentQueueItems, newItem]
     }
 
     onQueueStateChange(currentStep, newQueueStates)
-  }
+  },
+  [currentStep, selectedQueue, currentQueueStates, currentQueueItems, onQueueStateChange]
+)
 
   // 큐에서 함수 제거
   const handleRemoveFunction = (index: number) => {
     if (!currentQueueStates) return
     
-    const currentItems = getCurrentQueueItems()
+    const currentItems = currentQueueItems
     const newItems = currentItems.filter((_, i) => i !== index)
     
     const newQueueStates = {
@@ -134,9 +216,12 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
 
   return (
     <GamePanel 
-      title="📋 사서 업무 일지" 
+      title="📸 큐 스냅샷 빌더" 
       className={cn("flex flex-col overflow-hidden", className)}
-      style={cssVariables}
+      style={{
+        ...cssVariables,
+        background: libraryTheme.getLibraryBackground()
+      }}
     >
       {/* 도서관 나무 질감 배경 */}
       <div 
@@ -175,14 +260,21 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
           <div className="flex items-center justify-between">
             <div>
               <p 
-                className="text-sm font-medium"
-                style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
+                className="font-medium"
+                style={{ 
+                  color: libraryTheme.getQueueText('callstack', 'primary'),
+                  fontSize: typography.body.medium,
+                  ...createTextOverflowStyles({ maxLines: 2, breakWord: true })
+                }}
               >
                 단계 {currentStep + 1}: {currentStepData.description}
               </p>
               <p 
-                className="text-xs"
-                style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+                className="mt-1"
+                style={{ 
+                  color: libraryTheme.getQueueText('callstack', 'secondary'),
+                  fontSize: typography.caption.large
+                }}
               >
                 라인 {currentStepData.currentLine}
               </p>
@@ -208,7 +300,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
       <div className="flex-1 overflow-hidden">
         <QueueStateBuilder
           queueType={selectedQueue}
-          items={getCurrentQueueItems()}
+          items={currentQueueItems}
           availableFunctions={availableFunctions}
           onAddFunction={handleAddFunction}
           onRemoveFunction={handleRemoveFunction}
@@ -226,9 +318,12 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
         <button
           onClick={handleValidateStep}
           disabled={!currentQueueStates}
-          className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
-          style={
-            currentQueueStates
+          className="w-full rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+          style={{
+            minHeight: responsiveLayout.config.buttonSize.minHeight,
+            padding: responsiveLayout.config.buttonSize.padding,
+            fontSize: responsiveLayout.config.fontSize.body,
+            ...(currentQueueStates
               ? {
                   background: libraryTheme.getQueueColor('callstack', 'button'),
                   color: libraryTheme.getQueueText('callstack', 'contrast'),
@@ -239,8 +334,8 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
                   background: '#e5e7eb',
                   color: '#6b7280',
                   cursor: 'not-allowed'
-                }
-          }
+                })
+          }}
           onMouseEnter={(e) => {
             if (currentQueueStates) {
               e.currentTarget.style.background = libraryTheme.getQueueColor('callstack', 'hover')
@@ -260,7 +355,9 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
       </div>
     </GamePanel>
   )
-}
+})
+
+QueueSnapshotBuilderPanel.displayName = 'QueueSnapshotBuilderPanel'
 
 /**
  * 실행 단계 선택기
@@ -291,8 +388,11 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
     >
       <div className="flex items-center justify-between">
         <h3 
-          className="text-sm font-semibold flex items-center gap-2"
-          style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
+          className="font-semibold flex items-center gap-2"
+          style={{ 
+            color: libraryTheme.getQueueText('callstack', 'primary'),
+            fontSize: typography.body.medium
+          }}
         >
           <Users className="w-4 h-4" />
           사서 업무 단계
@@ -306,11 +406,17 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
       </div>
       
       <div className="flex items-center gap-2 mt-2 overflow-x-auto">
-        {executionSteps.map((step, index) => (
-          <button
-            key={index}
-            onClick={() => onStepChange(index)}
-            className="flex-shrink-0 min-w-11 min-h-11 rounded-full border-2 text-xs font-medium transition-all transform hover:scale-110 flex items-center justify-center"
+        {executionSteps.map((step, index) => {
+          const isValidated = validationResults[index]?.isValid
+          const stepLabel = `단계 ${index + 1}${index === currentStep ? ' (현재 단계)' : ''}${isValidated === true ? ' (정답)' : isValidated === false ? ' (오답)' : ' (미검증)'}`
+          
+          return (
+            <button
+              key={index}
+              onClick={() => onStepChange(index)}
+              className="flex-shrink-0 min-w-11 min-h-11 rounded-full border-2 text-xs font-medium transition-all transform hover:scale-110 flex items-center justify-center"
+              aria-label={stepLabel}
+              aria-current={index === currentStep ? 'step' : undefined}
             style={
               index === currentStep
                 ? {
@@ -337,10 +443,11 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
                         color: libraryTheme.getQueueText('callstack', 'primary')
                       }
             }
-          >
-            {index + 1}
-          </button>
-        ))}
+            >
+              {index + 1}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
@@ -444,6 +551,7 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
   onReorderItems
 }) => {
   const libraryTheme = useCallStackLibraryTheme()
+  const optimizedAnimations = useOptimizedAnimations()
   
   // 이미 추가된 함수 제외한 사용 가능한 함수들
   const remainingFunctions = availableFunctions.filter(func => 
@@ -462,46 +570,27 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
       {/* 상단: 사용 가능한 함수들 */}
       <div className="h-1/2 border-b border-editor-border p-4">
         <h4 
-          className="text-sm font-medium mb-3 flex items-center gap-2"
-          style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
+          className="font-medium mb-3 flex items-center gap-2"
+          style={{ 
+            color: libraryTheme.getQueueText('callstack', 'primary'),
+            fontSize: typography.body.medium
+          }}
         >
           <BookOpen className="w-4 h-4" />
           처리 대기 도서
         </h4>
         <div className="space-y-2 max-h-full overflow-y-auto">
-          {remainingFunctions.map(funcName => (
-            <motion.button
-              key={funcName}
-              onClick={() => onAddFunction(funcName)}
-              className="w-full p-3 text-left border rounded-lg transition-all text-sm relative overflow-hidden group"
-              style={{
-                background: libraryTheme.getQueueColor('callstack', 'light'),
-                borderColor: libraryTheme.getQueueBorder('callstack', 'light'),
-                borderRadius: libraryTheme.theme.borderRadius.book
-              }}
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{
-                  background: libraryTheme.getQueueColor('callstack', 'hover')
-                }}
+          {remainingFunctions.map(funcName => {
+            return (
+              <FunctionButton
+                key={funcName}
+                functionName={funcName}
+                onClick={() => onAddFunction(funcName)}
+                libraryTheme={libraryTheme}
+                optimizedAnimations={optimizedAnimations}
               />
-              <div className="flex items-center justify-between relative z-10">
-                <span 
-                  className="font-mono font-medium"
-                  style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
-                >
-                  {funcName}
-                </span>
-                <Plus 
-                  className="w-4 h-4"
-                  style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
-                />
-              </div>
-            </motion.button>
-          ))}
+            );
+          })}
           {remainingFunctions.length === 0 && (
             <p 
               className="text-sm text-center py-4"
@@ -516,8 +605,11 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
       {/* 하단: 현재 큐 상태 */}
       <div className="h-1/2 p-4">
         <h4 
-          className="text-sm font-medium mb-3 flex items-center gap-2"
-          style={{ color: libraryTheme.getQueueText('callstack', 'primary') }}
+          className="font-medium mb-3 flex items-center gap-2"
+          style={{ 
+            color: libraryTheme.getQueueText('callstack', 'primary'),
+            fontSize: typography.body.medium
+          }}
         >
           {queueType === 'callstack' ? <BookOpen className="w-4 h-4" /> :
            queueType === 'microtask' ? <Sparkles className="w-4 h-4" /> :
@@ -546,10 +638,13 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                     borderRadius: libraryTheme.theme.borderRadius.book,
                     boxShadow: libraryTheme.theme.shadows.button
                   }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  whileHover={{ scale: 1.02 }}
+                  {...(optimizedAnimations.shouldAnimate('queueTransition') ? optimizedAnimations.variants.queueTransition : {
+                    initial: { opacity: 0 },
+                    animate: { opacity: 1 },
+                    exit: { opacity: 0 }
+                  })}
+                  whileHover={optimizedAnimations.shouldAnimate('bookHover') ? { scale: 1.02 } : undefined}
+                  transition={optimizedAnimations.getOptimizedTransition({ duration: 0.2 })}
                 >
                   <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -557,20 +652,19 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                       background: libraryTheme.getQueueColor(queueType as CallStackQueueType, 'hover')
                     }}
                   />
-                  <div className="flex items-center gap-3 relative z-10">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3 relative z-10 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       <span 
-                        className="text-xs font-medium opacity-60"
+                        className="text-xs font-medium opacity-60 flex-shrink-0"
                         style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'secondary') }}
                       >
                         {queueType === 'callstack' ? items.length - index : index + 1}
                       </span>
-                      <span 
-                        className="font-mono text-sm font-medium"
-                        style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'primary') }}
-                      >
-                        {item.functionName}
-                      </span>
+                      <QueueItemLabel
+                        functionName={item.functionName}
+                        queueType={queueType as CallStackQueueType}
+                        libraryTheme={libraryTheme}
+                      />
                     </div>
                   </div>
                   <button
@@ -626,3 +720,103 @@ function getQueueDisplayName(queueType: QueueType): string {
     default: return '처리대'
   }
 }
+
+/**
+ * 함수명 버튼 컴포넌트 - 텍스트 오버플로우 처리
+ */
+interface FunctionButtonProps {
+  functionName: string;
+  onClick: () => void;
+  libraryTheme: any;
+  optimizedAnimations: any;
+}
+
+const FunctionButton: React.FC<FunctionButtonProps> = ({ 
+  functionName, 
+  onClick, 
+  libraryTheme, 
+  optimizedAnimations 
+}) => {
+  const textOverflow = useFunctionNameOverflow(functionName);
+  
+  return (
+    <FunctionNameTooltip
+      text={functionName}
+      isOverflowing={textOverflow.isOverflowing}
+    >
+      <motion.button
+        ref={textOverflow.ref as any}
+        onClick={onClick}
+        className="w-full p-3 text-left border rounded-lg transition-all relative overflow-hidden group"
+        style={{
+          background: libraryTheme.getQueueColor('callstack', 'light'),
+          borderColor: libraryTheme.getQueueBorder('callstack', 'light'),
+          borderRadius: libraryTheme.theme.borderRadius.book,
+          minHeight: '44px', // 접근성 터치 타겟
+          fontSize: typography.body.medium
+        }}
+        whileHover={optimizedAnimations.shouldAnimate('bookHover') ? { scale: 1.02, y: -2 } : undefined}
+        whileTap={optimizedAnimations.shouldAnimate('bookHover') ? { scale: 0.98 } : undefined}
+        transition={optimizedAnimations.getOptimizedTransition({ duration: 0.15 })}
+      >
+        <div 
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{
+            background: libraryTheme.getQueueColor('callstack', 'hover')
+          }}
+        />
+        <div className="flex items-center justify-between relative z-10 min-w-0">
+          <span 
+            className="font-mono font-medium flex-1 min-w-0"
+            style={{ 
+              color: libraryTheme.getQueueText('callstack', 'primary'),
+              ...textOverflow.styles
+            }}
+          >
+            {textOverflow.displayText}
+          </span>
+          <Plus 
+            className="w-4 h-4 ml-2 flex-shrink-0"
+            style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+          />
+        </div>
+      </motion.button>
+    </FunctionNameTooltip>
+  );
+};
+
+/**
+ * 큐 아이템 라벨 컴포넌트 - 텍스트 오버플로우 처리
+ */
+interface QueueItemLabelProps {
+  functionName: string;
+  queueType: CallStackQueueType;
+  libraryTheme: any;
+}
+
+const QueueItemLabel: React.FC<QueueItemLabelProps> = ({
+  functionName,
+  queueType,
+  libraryTheme
+}) => {
+  const textOverflow = useFunctionNameOverflow(functionName);
+  
+  return (
+    <FunctionNameTooltip
+      text={functionName}
+      isOverflowing={textOverflow.isOverflowing}
+    >
+      <span 
+        ref={textOverflow.ref as any}
+        className="font-mono font-medium min-w-0 flex-1"
+        style={{ 
+          color: libraryTheme.getQueueText(queueType, 'primary'),
+          fontSize: typography.body.medium,
+          ...textOverflow.styles
+        }}
+      >
+        {textOverflow.displayText}
+      </span>
+    </FunctionNameTooltip>
+  );
+};

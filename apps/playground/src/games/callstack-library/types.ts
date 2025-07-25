@@ -2,7 +2,7 @@
 export interface StackItem {
   id: string
   functionName: string
-  returnValue?: any
+  returnValue?: string | number | boolean | null
   color: string
   height: number
   queueType?: QueueType
@@ -27,13 +27,13 @@ export type QueueType =
 export interface QueueItem {
   id: string
   functionName: string
-  returnValue?: any
+  returnValue?: string | number | boolean | null
   color: string
   height: number
   queueType: QueueType
   priority?: number
   timestamp?: number
-  data?: any
+  data?: Record<string, unknown>
   position?: number
 }
 
@@ -59,8 +59,8 @@ export interface AsyncTask {
 // 함수 호출 정보
 export interface FunctionCall {
   name: string
-  params?: any[]
-  returns?: any
+  params?: Array<string | number | boolean | null>
+  returns?: string | number | boolean | null
   calls?: FunctionCall[]
   queueType?: QueueType
   priority?: number

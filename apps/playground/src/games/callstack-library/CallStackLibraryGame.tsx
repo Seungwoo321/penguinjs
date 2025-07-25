@@ -10,6 +10,8 @@ import { GameManager } from '../shared/GameManager'
 import { GameDifficulty } from '../shared/types'
 import { CallStackLevel, QueueItem, StackItem, QueueType, CallStackGameState } from './types'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
+import { useCallStackLibraryTheme } from './hooks/useCallStackLibraryTheme'
+import { useCSSThemeSync } from './hooks/useCSSThemeSync'
 import { IntegratedCallStackBoard } from './IntegratedCallStackBoard'
 import { EnhancedCallStackBoard } from './EnhancedCallStackBoard'
 import { UniversalQueueBoard } from './UniversalQueueBoard'
@@ -24,6 +26,9 @@ import { CALLSTACK_STAGE_RANGES } from './game-config'
 import { simulateExecution, interpolateFromSnapshots, SimulatorConfig } from './utils/executionSimulator'
 import { simulateEventLoop, createEmptyQueueSnapshot } from './utils/queueSimulator'
 import { QueueStatesSnapshot, EventLoopStep, QueueValidationResult } from './types/layout'
+import { isValidLayoutType, isValidDifficulty, isValidStage, safeArray } from './utils/validation'
+import { useCallStackLibraryContext, ActionType } from './contexts/CallStackLibraryContext'
+import { getRelativeStageNumber, getAbsoluteStageNumber } from './utils/stageMapping'
 
 interface CallStackLibraryGameProps {
   onScoreUpdate?: (score: number) => void
@@ -34,9 +39,20 @@ interface CallStackLibraryGameProps {
 }
 
 export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackLibraryGameProps) {
-  // URL 파라미터로부터 초기 값 설정
-  const urlDifficulty = (searchParams?.difficulty as GameDifficulty) || null
-  const urlStage = searchParams?.stage ? parseInt(searchParams.stage, 10) : null
+  // 테마 시스템
+  const libraryTheme = useCallStackLibraryTheme()
+  
+  // 마운트 상태 먼저 확인
+  const [mounted, setMounted] = useState(false)
+  
+  // CSS 변수 동기화
+  useCSSThemeSync(libraryTheme.isDarkMode)
+  
+  // URL 파라미터로부터 초기 값 설정 (검증 포함)
+  const rawDifficulty = searchParams?.difficulty
+  const urlDifficulty = isValidDifficulty(rawDifficulty) ? rawDifficulty : null
+  const rawStage = searchParams?.stage ? parseInt(searchParams.stage, 10) : null
+  const urlStage = isValidStage(rawStage) ? rawStage : null
   
   // 난이도에 맞는 기본 스테이지 설정
   const getDefaultStage = (difficulty: GameDifficulty) => {
@@ -47,35 +63,13 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   const initialDifficulty = urlDifficulty || 'beginner'
   const initialStage = urlStage || getDefaultStage(initialDifficulty)
   
-  console.log('CallStackLibraryGame Props:', { searchParams, initialDifficulty, initialStage })
-  
-  const [mounted, setMounted] = useState(false)
+  // console.log 제거 (프로덕션 빌드 경고 방지)
   
   // 통합된 게임 설정 상태
   const [gameConfig, setGameConfig] = useState({
     difficulty: initialDifficulty,
     stage: initialStage
   })
-  
-  // 기존 코드 호환성을 위한 변수
-  const selectedDifficulty = gameConfig.difficulty
-  const currentStage = gameConfig.stage
-  
-  // 상태 변경 추적
-  useEffect(() => {
-    console.log('🔄 gameConfig changed:', gameConfig)
-  }, [gameConfig])
-  
-  // URL 파라미터 변경 감지 및 상태 동기화
-  useEffect(() => {
-    if (urlDifficulty && urlDifficulty !== gameConfig.difficulty) {
-      const newStage = urlStage || getDefaultStage(urlDifficulty)
-      setGameConfig({
-        difficulty: urlDifficulty,
-        stage: newStage
-      })
-    }
-  }, [urlDifficulty, urlStage])
   const [userOrder, setUserOrder] = useState<string[]>([])
   const [isExecuting, setIsExecuting] = useState(false)
   const [showHints, setShowHints] = useState(false)
@@ -111,8 +105,16 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   
   // 모든 실행 단계의 정확한 스택 상태 계산
   const calculateAllStackStates = (level: CallStackLevel): StackItem[][] => {
+    console.log('🔧 calculateAllStackStates 시작:', {
+      levelId: level.id,
+      hasSimulationSteps: level.simulationSteps?.length || 0,
+      hasExpectedSnapshots: Object.keys(level.expectedSnapshots || {}).length,
+      hasExecutionSteps: level.executionSteps?.length || 0
+    })
+    
     // simulationSteps가 있으면 시뮬레이터 사용
     if (level.simulationSteps && level.simulationSteps.length > 0) {
+      console.log('📊 simulateExecution 사용 중...')
       // 레이아웃별 시뮬레이터 설정
       const layoutType = getLayoutType(level.difficulty, level.stageNumber)
       const config: SimulatorConfig = {
@@ -126,11 +128,110 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           : undefined
       }
       
-      return simulateExecution(level, config)
+      const result = simulateExecution(level, config)
+      console.log('📊 simulateExecution 결과:', {
+        총단계수: result.length,
+        각단계별스택크기: result.map(stack => stack.length),
+        첫번째단계: result[0]?.map(s => s.functionName),
+        마지막단계: result[result.length - 1]?.map(s => s.functionName)
+      })
+      return result
     }
     
     // simulationSteps가 없는 경우 expectedSnapshots 기반 보간
-    return interpolateFromSnapshots(level)
+    console.log('📈 interpolateFromSnapshots 사용 중...')
+    const result = interpolateFromSnapshots(level)
+    console.log('📈 interpolateFromSnapshots 결과:', {
+      총단계수: result.length,
+      각단계별스택크기: result.map(stack => stack.length)
+    })
+    
+    // Fallback: 결과가 비어있거나 문제가 있으면 expectedSnapshots로 직접 생성
+    if (result.length === 0 || result.every(stack => stack.length === 0) || result.length < (level.executionSteps?.length || 0)) {
+      console.log('⚠️ 시뮬레이션 결과가 부족함, expectedSnapshots로 Fallback 생성')
+      const executionStepsLength = level.executionSteps?.length || 0
+      const fallbackResult: StackItem[][] = []
+      
+      for (let i = 0; i < executionStepsLength; i++) {
+        if (level.expectedSnapshots && level.expectedSnapshots[i]) {
+          // expectedSnapshots에 해당 단계가 있으면 사용
+          fallbackResult[i] = level.expectedSnapshots[i].map((item, idx) => ({
+            ...item,
+            id: item.id || `${item.functionName}-fallback-${i}-${idx}`,
+            height: item.height || 40,
+            color: item.color || 'rgb(var(--game-callstack-queue-secondary))',
+            isGlobalContext: item.isGlobalContext || item.functionName === '<global>'
+          }))
+        } else {
+          // 없으면 가장 가까운 이전 체크포인트의 스택 상태 사용
+          const previousCheckpoint = level.snapshotCheckpoints?.slice().reverse().find(cp => cp < i)
+          if (previousCheckpoint !== undefined && level.expectedSnapshots && level.expectedSnapshots[previousCheckpoint]) {
+            fallbackResult[i] = level.expectedSnapshots[previousCheckpoint].map((item, idx) => ({
+              ...item,
+              id: item.id || `${item.functionName}-fallback-${i}-${idx}`,
+              height: item.height || 40,
+              color: item.color || 'rgb(var(--game-callstack-queue-secondary))',
+              isGlobalContext: item.isGlobalContext || item.functionName === '<global>'
+            }))
+          } else {
+            // 전역 컨텍스트만 있는 기본 상태
+            fallbackResult[i] = [{ 
+              id: `global-fallback-${i}`, 
+              functionName: '<global>', 
+              isGlobalContext: true, 
+              color: 'rgb(var(--game-callstack-queue-secondary))', 
+              height: 40 
+            }]
+          }
+        }
+      }
+      
+      console.log('🔄 Fallback 결과:', {
+        총단계수: fallbackResult.length,
+        각단계별스택크기: fallbackResult.map(stack => stack.length),
+        체크포인트들: level.snapshotCheckpoints,
+        expectedSnapshots키들: Object.keys(level.expectedSnapshots || {})
+      })
+      
+      return fallbackResult
+    }
+    
+    return result
+  }
+
+  // 현재 표시할 스택 계산 (Type E 전용)
+  const getCurrentDisplayStack = (): StackItem[] => {
+    if (!currentLevel || currentLayoutType !== 'E') return []
+    
+    const checkpoints = currentLevel.snapshotCheckpoints || []
+    const isCheckpoint = checkpoints.includes(currentStep)
+    
+    const computedStack = callstackHistory[currentStep] || []
+    const userStack = userSnapshots[currentStep] || []
+    
+    console.log('🔍 getCurrentDisplayStack Debug:', {
+      currentStep,
+      isCheckpoint,
+      checkpoints,
+      computedStackLength: computedStack.length,
+      userStackLength: userStack.length,
+      computedStack: computedStack.map(s => s.functionName),
+      userStack: userStack.map(s => s.functionName),
+      callstackHistoryLength: callstackHistory.length,
+      전체히스토리: callstackHistory.map((stack, idx) => ({ 
+        단계: idx, 
+        크기: stack.length, 
+        함수들: stack.map(s => s.functionName) 
+      }))
+    })
+    
+    if (isCheckpoint) {
+      // 체크포인트인 경우 사용자가 구성한 스택 표시
+      return userStack
+    } else {
+      // 체크포인트가 아닌 경우 계산된 스택 상태 표시
+      return computedStack
+    }
   }
   
   // 함수별 큐 타입 결정 (Layout B, C, D용)
@@ -149,30 +250,61 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   const [currentLevel, setCurrentLevel] = useState<CallStackLevel | null>(null)
   const [availableFunctions, setAvailableFunctions] = useState<{name: string, queueType?: QueueType}[]>([])
   
-  // 현재 레벨 변경 추적
-  useEffect(() => {
-    console.log('🎮 currentLevel changed:', currentLevel ? { 
-      id: currentLevel.id, 
-      title: currentLevel.title, 
-      stageNumber: currentLevel.stageNumber,
-      difficulty: currentLevel.difficulty 
-    } : 'null')
-  }, [currentLevel])
+  // Context 사용 - 모든 useState 이후에 위치
+  const { state: contextState, dispatch } = useCallStackLibraryContext();
   
-  // 레이아웃 타입 결정
-  const layoutInfo = useLayoutType(selectedDifficulty, currentStage)
+  // 레이아웃 타입 결정 - custom hook은 다른 hooks와 함께 위치
+  const layoutInfo = useLayoutType(gameConfig.difficulty, gameConfig.stage)
+  
+  // 스테이지 네비게이션 훅 사용 - 다른 hooks와 함께 위치
+  const { handleStageChange, canGoPrev, canGoNext } = useStageNavigation(
+    CALLSTACK_STAGE_RANGES,
+    gameConfig.stage,
+    gameConfig.difficulty,
+    (newStage) => {
+      setGameConfig(prev => ({
+        ...prev,
+        stage: newStage
+      }))
+    }
+  )
+  
+  // 기존 코드 호환성을 위한 변수
+  const selectedDifficulty = gameConfig.difficulty
+  const currentStage = gameConfig.stage
   const currentLayoutType = getLayoutType(selectedDifficulty, currentStage)
   const layoutConfig = getLayoutConfig(currentLayoutType)
   
+  // URL 파라미터 변경 감지 및 상태 동기화
+  useEffect(() => {
+    if (urlDifficulty && urlDifficulty !== gameConfig.difficulty) {
+      const newStage = urlStage || getDefaultStage(urlDifficulty)
+      setGameConfig({
+        difficulty: urlDifficulty,
+        stage: newStage
+      })
+    }
+  }, [urlDifficulty, urlStage, gameConfig.difficulty])
+  
+  // 현재 레벨 변경 추적
+  useEffect(() => {
+    // console.log('🎮 currentLevel changed:', currentLevel ? { 
+    //   id: currentLevel.id, 
+    //   title: currentLevel.title, 
+    //   stageNumber: currentLevel.stageNumber,
+    //   difficulty: currentLevel.difficulty 
+    // } : 'null')
+  }, [currentLevel])
+  
   // 디버그 로깅
   useEffect(() => {
-    console.log('CallStackLibraryGame Debug:', {
-      selectedDifficulty,
-      currentStage,
-      currentLayoutType,
-      currentLevel: !!currentLevel,
-      layoutConfig
-    })
+    // console.log('CallStackLibraryGame Debug:', {
+    //   selectedDifficulty,
+    //   currentStage,
+    //   currentLayoutType,
+    //   currentLevel: !!currentLevel,
+    //   layoutConfig
+    // })
   }, [selectedDifficulty, currentStage, currentLayoutType, currentLevel])
   
 
@@ -246,7 +378,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
 
   // 답안 확인
   const handleCheckAnswer = () => {
-    console.log('handleCheckAnswer called', { currentLevel, userOrder, currentLayoutType })
+    // console.log('handleCheckAnswer called', { currentLevel, userOrder, currentLayoutType })
     if (!currentLevel) return
     
     // Layout E는 별도 처리
@@ -340,8 +472,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     }
   }
 
-  // 코드 실행 시뮬레이션 - 선언만 하고 나중에 정의
-  let handleRunSimulation: () => void
+  // 코드 실행 시뮬레이션 함수는 아래에서 정의됨 (타입 E 핸들러들 이후)
   
   // 타입 E 전용 핸들러들을 먼저 정의
   const handleReorderSnapshot = useCallback((step: number, newOrder: StackItem[]) => {
@@ -373,7 +504,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   }, [currentStep])
   
   const handleStepChange = useCallback((step: number) => {
-    console.log('handleStepChange called with step:', step)
+    // console.log('handleStepChange called with step:', step)
     setCurrentStep(step)
   }, [])
   
@@ -397,6 +528,27 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     
     const currentSnapshot = userSnapshots[currentStep] || []
     const expectedSnapshot = currentLevel.expectedSnapshots?.[currentStep] || []
+    
+    // 이미 검증이 실패한 상태에서 다시 시도 버튼을 클릭한 경우
+    if (validationResults[currentStep] === false) {
+      // 현재 스냅샷을 초기화
+      setUserSnapshots(prev => ({
+        ...prev,
+        [currentStep]: []
+      }))
+      // 검증 결과도 초기화
+      setValidationResults(prev => {
+        const newResults = { ...prev }
+        delete newResults[currentStep]
+        return newResults
+      })
+      setMessage({
+        type: 'info',
+        text: '스냅샷을 초기화했습니다. 다시 구성해보세요.'
+      })
+      setTimeout(() => setMessage(null), 2000)
+      return
+    }
     
     // 스냅샷 검증 로직
     const isValid = gameEngine.validateSnapshot(currentSnapshot, expectedSnapshot)
@@ -472,11 +624,14 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       [step]: newQueueStates
     }))
     
+    // Context에 큐 상태 업데이트
+    dispatch({ type: ActionType.UPDATE_CURRENT_QUEUE_STATES, payload: newQueueStates })
+    
     // 현재 단계인 경우 현재 큐 상태도 업데이트
     if (step === currentStep) {
       setCurrentQueueStates(newQueueStates)
     }
-  }, [currentStep])
+  }, [currentStep, dispatch])
 
   const handleValidateQueueStep = useCallback((step: number) => {
     if (!currentLevel || !eventLoopSteps[step]) {
@@ -528,6 +683,9 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       ...prev,
       [step]: validationResult
     }))
+    
+    // Context에 검증 결과 저장
+    dispatch({ type: ActionType.ADD_QUEUE_VALIDATION_RESULT, payload: { step, result: validationResult } })
 
     setMessage({
       type: isValid ? 'success' : 'error',
@@ -644,20 +802,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     setTimeout(() => setHighlightedQueue(undefined), 1000)
   }, [])
 
-  // 타임라인에서 표시할 스택 결정 (이중 스택 시스템)
-  const getCurrentDisplayStack = () => {
-    if (currentLayoutType !== 'E' || !currentLevel?.snapshotCheckpoints) {
-      return callstackHistory[currentStep] || []
-    }
-    
-    // 체크포인트인 경우 사용자 스냅샷 사용 (비어있을 수 있음)
-    if (currentLevel.snapshotCheckpoints.includes(currentStep)) {
-      return userSnapshots[currentStep] || []
-    }
-    
-    // 비체크포인트인 경우 계산된 스택 사용
-    return callstackHistory[currentStep] || []
-  }
 
   // 새로운 레이아웃 시스템을 위한 데이터 준비
   const gameData: GameData = {
@@ -693,7 +837,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   const gameHandlers: GameHandlers = {
     onFunctionSelect: handleFunctionSelect,
     onSnapshotChange: (step: number, snapshot: any) => {
-      console.log('Snapshot change:', step, snapshot)
+      // console.log('Snapshot change:', step, snapshot)
     },
     onSubmit: handleCheckAnswer,
     onReset: () => setUserOrder([]),
@@ -865,12 +1009,31 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       if (layoutType === 'E' && level.snapshotCheckpoints && level.executionSteps) {
         // 이중 스택 시스템: 계산된 스택 + 사용자 스택
         const computedHistory = calculateAllStackStates(level)
-        const userHistory: StackItem[][] = Array(level.executionSteps.length).fill(null).map(() => [])
+        
+        console.log('🔍 Type E Initialization Debug:', {
+          levelId: level.id,
+          executionStepsLength: level.executionSteps.length,
+          simulationStepsLength: level.simulationSteps?.length || 0,
+          computedHistoryLength: computedHistory.length,
+          snapshotCheckpoints: level.snapshotCheckpoints,
+          computedHistory: computedHistory.map((stack, index) => ({ 
+            step: index, 
+            stackLength: stack.length, 
+            functions: stack.map(s => s.functionName) 
+          }))
+        })
         
         // 사용자 스냅샷은 체크포인트만 빈 상태로 초기화
         const initialUserSnapshots: Record<number, StackItem[]> = {}
         level.snapshotCheckpoints.forEach(checkpoint => {
           initialUserSnapshots[checkpoint] = []
+        })
+        
+        console.log('🎯 Type E 초기화 완료:', {
+          callstackHistoryLength: computedHistory.length,
+          userSnapshotsKeys: Object.keys(initialUserSnapshots),
+          현재단계: currentStep,
+          체크포인트들: level.snapshotCheckpoints
         })
         
         setCallstackHistory(computedHistory) // 계산된 전체 스택 상태
@@ -892,6 +1055,9 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         })
         setEventLoopSteps(loopSteps)
         
+        // Context에 이벤트 루프 단계 설정
+        dispatch({ type: ActionType.SET_EVENT_LOOP_STEPS, payload: loopSteps })
+        
         // 초기 큐 상태들 설정
         const initialQueueStates: Record<number, QueueStatesSnapshot> = {}
         loopSteps.forEach((step, index) => {
@@ -899,9 +1065,14 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         })
         setQueueStates(initialQueueStates)
         
+        // Context에 큐 상태 히스토리 설정
+        dispatch({ type: ActionType.SET_QUEUE_STATES_HISTORY, payload: initialQueueStates })
+        
         // 첫 번째 단계의 큐 상태를 현재 상태로 설정
         if (loopSteps.length > 0) {
           setCurrentQueueStates(loopSteps[0].beforeState)
+          // Context에 현재 큐 상태 설정
+          dispatch({ type: ActionType.UPDATE_CURRENT_QUEUE_STATES, payload: loopSteps[0].beforeState })
         }
       }
       
@@ -941,7 +1112,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   
   // 레벨 로드
   useEffect(() => {
-    console.log('🔄 Level load useEffect triggered:', { mounted, gameConfig })
+    // console.log('🔄 Level load useEffect triggered:', { mounted, gameConfig })
     if (!mounted) return
     
     // 유효한 difficulty-stage 조합인지 검증
@@ -949,11 +1120,11 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     const isValidStage = gameConfig.stage >= stageRange.min && gameConfig.stage <= stageRange.max
     
     if (!isValidStage) {
-      console.warn('⚠️ Invalid stage for difficulty:', { 
-        difficulty: gameConfig.difficulty, 
-        stage: gameConfig.stage, 
-        validRange: stageRange 
-      })
+      // console.warn('⚠️ Invalid stage for difficulty:', { 
+      //   difficulty: gameConfig.difficulty, 
+      //   stage: gameConfig.stage, 
+      //   validRange: stageRange 
+      // })
       // 유효한 스테이지로 자동 보정
       const correctedStage = stageRange.min
       setGameConfig(prev => ({
@@ -968,10 +1139,10 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   
   // 난이도 변경 - useCallback으로 메모이제이션하고 원자적 상태 업데이트
   const handleDifficultyChange = useCallback((difficulty: GameDifficulty) => {
-    console.log('🎚️ handleDifficultyChange called:', { difficulty, currentDifficulty: selectedDifficulty, currentStage })
+    // console.log('🎚️ handleDifficultyChange called:', { difficulty, currentDifficulty: selectedDifficulty, currentStage })
     
     const progress = gameManager.getGameProgress('callstack-library', difficulty)
-    console.log('📈 Progress for', difficulty + ':', progress)
+    // console.log('📈 Progress for', difficulty + ':', progress)
     
     if (!progress?.isUnlocked) {
       setMessage({ 
@@ -984,7 +1155,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     // 난이도별 시작 스테이지 계산
     const startStage = CALLSTACK_STAGE_RANGES[difficulty].min
     const targetStage = progress.currentStage || startStage
-    console.log('🎯 Setting new stage:', { startStage, targetStage, range: CALLSTACK_STAGE_RANGES[difficulty] })
+    // console.log('🎯 Setting new stage:', { startStage, targetStage, range: CALLSTACK_STAGE_RANGES[difficulty] })
     
     // 원자적 상태 업데이트 - React 18의 자동 배치 활용
     setGameConfig({ 
@@ -996,7 +1167,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   }, [gameManager, selectedDifficulty, currentStage])
   
   // 코드 실행 시뮬레이션
-  handleRunSimulation = () => {
+  const handleRunSimulation = () => {
     if (!currentLevel || isExecuting) return
     
     if (userOrder.length === 0) {
@@ -1028,7 +1199,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         let macroQueue: QueueItem[] = []
         
         // 1. 동기 코드 실행
-        console.log('1. 동기 코드 실행 시작')
+        // console.log('1. 동기 코드 실행 시작')
         
         // 전역 실행 컨텍스트 시작
         simulationStack.push({
@@ -1230,7 +1401,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         }))
         await new Promise(resolve => setTimeout(resolve, getDelay('stackPush', simulationSpeed)))
         
-        console.log('2. 콜스택이 비었음 - 마이크로태스크 처리')
+        // console.log('2. 콜스택이 비었음 - 마이크로태스크 처리')
         
         // 2. 마이크로태스크 큐 처리
         while (microQueue.length > 0) {
@@ -1284,7 +1455,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           await new Promise(resolve => setTimeout(resolve, getDelay('stackPush', simulationSpeed)))
         }
         
-        console.log('3. 마이크로태스크 큐가 비었음 - 매크로태스크 처리')
+        // console.log('3. 마이크로태스크 큐가 비었음 - 매크로태스크 처리')
         
         // 3. 매크로태스크 큐 처리 (하나만)
         if (macroQueue.length > 0) {
@@ -1510,22 +1681,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     setValidationResults({})
   }
   
-  // 스테이지 네비게이션 훅 사용
-  const { handleStageChange, canGoPrev, canGoNext } = useStageNavigation(
-    CALLSTACK_STAGE_RANGES,
-    currentStage,
-    selectedDifficulty,
-    (newStage) => {
-      console.log('📍 Stage navigation callback called:', { newStage, currentStage, selectedDifficulty })
-      // 원자적 상태 업데이트
-      setGameConfig(prev => ({
-        ...prev,
-        stage: newStage
-      }))
-      // initializeLevel은 useEffect에서 자동으로 호출됨
-    }
-  )
-  
   // 진행 상황 데이터
   const progress = gameManager.getGameProgress('callstack-library', selectedDifficulty)
   
@@ -1546,20 +1701,25 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     return () => clearTimeout(timer)
   }, [isTimelinePlaying, currentStep, currentLayoutType, currentLevel])
   
-  if (!mounted || !currentLevel) {
-    return <div className="flex items-center justify-center h-96">로딩 중...</div>
-  }
-
+  // 모든 훅을 조건문 전에 실행 - Hook 에러 방지
   return (
-    <div>
+    <React.Fragment>
       <GameGuideModal 
         isOpen={showGuide}
         onClose={() => setShowGuide(false)}
         onStart={() => setShowGuide(false)}
       />
       <div className="min-h-screen bg-background">
-      
-      <div className="max-w-7xl mx-auto p-4">
+        <div className="max-w-7xl mx-auto p-4">
+          {!mounted || !currentLevel ? (
+            <div className="flex items-center justify-center h-96">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">로딩 중...</p>
+              </div>
+            </div>
+          ) : (
+            <React.Fragment>
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -1674,7 +1834,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                       : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  {progress?.completedStages.has(stageNumber) ? <Star className="h-4 w-4" /> : index + 1}
+                  {progress?.completedStages.has(stageNumber) ? <Star className="h-4 w-4" /> : getRelativeStageNumber(stageNumber)}
                 </div>
               ))
             })()}
@@ -2462,8 +2622,10 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           </div>
         </div>
         )}
+            </React.Fragment>
+          )}
+        </div>
       </div>
-    </div>
-    </div>
+    </React.Fragment>
   )
 }

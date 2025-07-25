@@ -1,5 +1,5 @@
 
-> @penguinjs/ui@0.0.0 lint /Users/mzc01-swlee/dev/repository/github/study/penguinjs/packages/ui
+> @penguinjs/ui@0.0.0 lint /Users/mzc01-swlee/dev/repository/github/claude-code/js-game-project/penguinjs/packages/ui
 > eslint .
 
 
@@ -18,3 +18,4 @@ https://eslint.org/docs/latest/use/configure/migration-guide
 If you still have problems after following the migration guide, please stop by
 https://eslint.org/chat/help to chat with the team.
 
+ ELIFECYCLE  Command failed with exit code 2.

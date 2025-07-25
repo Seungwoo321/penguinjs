@@ -71,7 +71,13 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
 
     // 스택에서 제거
     this.gameState.currentStack.pop()
-    this.gameState.currentFunction = this.gameState.currentStack[this.gameState.currentStack.length - 1]?.functionName || null
+    // null 체크 강화
+    const currentStack = this.gameState.currentStack
+    if (currentStack && currentStack.length > 0) {
+      this.gameState.currentFunction = currentStack[currentStack.length - 1]?.functionName || null
+    } else {
+      this.gameState.currentFunction = null
+    }
   }
 
   // 큐 타입에 따른 색상 반환
@@ -85,6 +91,11 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
       // Type E 레이아웃의 경우 스냅샷 검증
       if (layoutType === 'E') {
         return this.validateTypeESnapshots(level, userOrder)
+      }
+
+      // Type B 레이아웃의 경우 큐 상태 검증
+      if (layoutType === 'B') {
+        return this.validateTypeBQueues(level, userOrder)
       }
 
       // Type A+ 레이아웃의 경우 시뮬레이션 스텝과 비교
@@ -223,6 +234,41 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
       return {
         success: false,
         message: `스냅샷 검증 중 오류가 발생했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`
+      }
+    }
+  }
+
+  // 타입 B 큐 상태 검증
+  private validateTypeBQueues(level: CallStackLevel, userQueues: any): GameValidationResult {
+    try {
+      // 기본적으로 expectedOrder를 사용하여 검증
+      if (level.expectedOrder && Array.isArray(userQueues)) {
+        const isCorrect = JSON.stringify(userQueues) === JSON.stringify(level.expectedOrder)
+        
+        if (isCorrect) {
+          const score = this.calculateScore(userQueues.length, level.hints.length)
+          return {
+            success: true,
+            message: '완벽합니다! 이벤트 루프의 실행 순서를 정확히 이해하셨네요! 🎉',
+            score
+          }
+        } else {
+          return {
+            success: false,
+            message: '실행 순서가 올바르지 않습니다. 큐의 우선순위를 다시 확인해보세요.',
+            hint: '마이크로태스크는 매크로태스크보다 먼저 실행됩니다.'
+          }
+        }
+      }
+      
+      return {
+        success: false,
+        message: '큐 상태 검증에 필요한 데이터가 없습니다.'
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: `큐 검증 중 오류가 발생했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`
       }
     }
   }

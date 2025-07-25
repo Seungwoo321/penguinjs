@@ -129,8 +129,7 @@ export class EventLoopSimulator {
   private isAsyncFunction(funcName: string): boolean {
     const asyncFunctions = [
       'setTimeout', 'setInterval', 'setImmediate',
-      'queueMicrotask', 'Promise', 'requestAnimationFrame',
-      'requestIdleCallback'
+      'queueMicrotask', 'Promise', 'requestAnimationFrame'
     ]
     
     return asyncFunctions.some(asyncFunc => funcName.includes(asyncFunc))
@@ -143,7 +142,7 @@ export class EventLoopSimulator {
     if (funcName.includes('queueMicrotask') || funcName.includes('Promise')) {
       // 마이크로태스크 큐에 추가
       return this.addToMicrotaskQueue(funcName, stepIndex)
-    } else if (funcName.includes('setTimeout') || funcName.includes('setInterval')) {
+    } else if (funcName.includes('setTimeout') || funcName.includes('setInterval') || funcName.includes('setImmediate')) {
       // 매크로태스크 큐에 추가
       return this.addToMacrotaskQueue(funcName, stepIndex)
     } else if (funcName.includes('requestAnimationFrame')) {
@@ -151,7 +150,9 @@ export class EventLoopSimulator {
       return this.addToMacrotaskQueue(funcName, stepIndex)
     }
     
-    return null
+    // isAsyncFunction이 true를 반환했지만 여기서 처리되지 않은 경우
+    // 이는 버그이므로 에러를 던짐
+    throw new Error(`Unknown async function type: ${funcName}`)
   }
 
   /**

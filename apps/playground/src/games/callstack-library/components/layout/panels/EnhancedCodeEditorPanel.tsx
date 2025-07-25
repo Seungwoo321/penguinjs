@@ -1,4 +1,4 @@
-// 도서관 코드 열람 패널 컴포넌트 (타입 E 전용)
+// 고급 코드 에디터 패널 컴포넌트 (타입 E 전용)
 
 import React, { useMemo } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
@@ -13,8 +13,8 @@ interface EnhancedCodeEditorPanelProps {
 }
 
 /**
- * 도서관 코드 열람 패널
- * 체크포인트와 실행 경로를 시각적으로 표시
+ * 고급 코드 에디터 패널
+ * 브레이크포인트와 실행 경로를 시각적으로 표시
  */
 export const EnhancedCodeEditorPanel: React.FC<EnhancedCodeEditorPanelProps> = ({
   code,
@@ -36,32 +36,32 @@ export const EnhancedCodeEditorPanel: React.FC<EnhancedCodeEditorPanelProps> = (
 
   return (
     <GamePanel 
-      title="📜 도서관 코드 열람" 
+      title="📝 코드" 
       className={cn("flex flex-col", className)}
     >
       {/* 정보 헤더 */}
-      <div className="px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700">
+      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
         <div className="text-center">
-          <h3 className="text-sm font-bold text-amber-800 dark:text-amber-200">
-            코드 열람 모드
+          <h3 className="text-sm font-bold text-blue-800 dark:text-blue-200">
+            고급 코드 에디터
           </h3>
-          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-            현재 읽고 있는 코드와 체크포인트를 확인하세요
+          <p className="text-xs mt-1 text-blue-600 dark:text-blue-300">
+            브레이크포인트와 실행 경로를 확인하세요
           </p>
         </div>
         
         {/* 실행 정보 */}
         <div className="mt-3 flex items-center justify-center gap-4 text-xs">
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            <span className="text-gray-600 dark:text-gray-400">체크포인트 ({breakpoints.length})</span>
+            <div className="w-2 h-2 rounded-full bg-red-500"></div>
+            <span className="text-gray-600 dark:text-gray-400">브레이크포인트 ({breakpoints.length})</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
             <span className="text-gray-600 dark:text-gray-400">현재 위치: 라인 {currentLine || '-'}</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <div className="w-2 h-2 rounded-full bg-green-500"></div>
             <span className="text-gray-600 dark:text-gray-400">실행 완료: {executionPath.length}줄</span>
           </div>
         </div>
@@ -72,7 +72,7 @@ export const EnhancedCodeEditorPanel: React.FC<EnhancedCodeEditorPanelProps> = (
         <div className="h-full overflow-auto bg-white dark:bg-gray-900">
           <div className="flex">
             {/* 거터 영역 (라인 번호 + 브레이크포인트) */}
-            <div className="flex-shrink-0 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+            <div className="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
               {codeLines.map((line) => (
                 <div 
                   key={line.number}
@@ -92,7 +92,7 @@ export const EnhancedCodeEditorPanel: React.FC<EnhancedCodeEditorPanelProps> = (
                   <div className={cn(
                     "w-8 text-right font-mono",
                     line.isCurrentLine 
-                      ? "text-blue-700 dark:text-blue-300 font-bold" 
+                      ? "text-blue-700 dark:text-blue-300 font-bold"
                       : "text-gray-500 dark:text-gray-400"
                   )}>
                     {line.number}
@@ -115,15 +115,15 @@ export const EnhancedCodeEditorPanel: React.FC<EnhancedCodeEditorPanelProps> = (
                   key={line.number}
                   className={cn(
                     "h-6 px-3 py-0.5 text-xs font-mono leading-tight flex items-center",
-                    line.isCurrentLine && "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500",
+                    line.isCurrentLine && "bg-blue-100 dark:bg-blue-900/30 border-l-4 border-blue-500",
                     line.isBreakpoint && !line.isCurrentLine && "bg-red-50 dark:bg-red-900/20 border-l-2 border-red-500",
-                    line.isExecuted && !line.isCurrentLine && !line.isBreakpoint && "bg-green-50 dark:bg-green-900/10"
+                    line.isExecuted && !line.isCurrentLine && !line.isBreakpoint && "bg-green-50 dark:bg-green-900/20"
                   )}
                 >
                   <span className={cn(
                     "whitespace-pre",
                     line.isCurrentLine 
-                      ? "text-blue-900 dark:text-blue-100 font-medium" 
+                      ? "text-blue-800 dark:text-blue-200 font-medium"
                       : "text-gray-800 dark:text-gray-200"
                   )}>
                     {line.content || " "}

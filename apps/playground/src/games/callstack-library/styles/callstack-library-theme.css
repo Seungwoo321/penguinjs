@@ -1,0 +1,139 @@
+/* CallStack Library Theme CSS Variables for Tailwind v4 */
+
+@layer base {
+  :root {
+    /* CallStack (메인 서가) - 중립 그레이 톤 */
+    --color-callstack-primary: 74 74 74;
+    --color-callstack-secondary: 97 97 97;
+    --color-callstack-accent: 137 116 92;
+    --color-callstack-bg-light: 252 251 250;
+    --color-callstack-bg-main: 247 245 242;
+    --color-callstack-bg-dark: 237 233 228;
+    --color-callstack-border-main: 137 116 92;
+    --color-callstack-border-light: 181 163 143;
+    --color-callstack-border-focus: 115 92 69;
+
+    /* MicroTask (긴급 처리대) - 차분한 청록 */
+    --color-microtask-primary: 21 94 117;
+    --color-microtask-secondary: 31 120 139;
+    --color-microtask-accent: 64 158 171;
+    --color-microtask-bg-light: 243 251 252;
+    --color-microtask-bg-main: 225 244 246;
+    --color-microtask-bg-dark: 203 235 238;
+    --color-microtask-border-main: 64 158 171;
+    --color-microtask-border-light: 147 205 212;
+    --color-microtask-border-focus: 15 71 88;
+
+    /* MacroTask (예약 처리대) - 따뜻한 코랄 */
+    --color-macrotask-primary: 171 71 73;
+    --color-macrotask-secondary: 194 94 94;
+    --color-macrotask-accent: 229 127 116;
+    --color-macrotask-bg-light: 255 248 246;
+    --color-macrotask-bg-main: 254 236 231;
+    --color-macrotask-bg-dark: 252 217 209;
+    --color-macrotask-border-main: 229 127 116;
+    --color-macrotask-border-light: 244 182 174;
+    --color-macrotask-border-focus: 136 52 54;
+
+    /* 의미론적 색상 (도서관 컨셉) */
+    --color-library-success: 34 139 34;      /* 포리스트 그린 (대출 성공) */
+    --color-library-error: 178 34 34;        /* 파이어브릭 레드 (연체/분실) */
+    --color-library-warning: 218 165 32;     /* 골든로드 (예약 마감) */
+    --color-library-info: 70 130 180;        /* 스틸 블루 (도서관 안내) */
+    --color-library-processing: 64 158 171;  /* 라이트 씨 그린 (처리 중) */
+
+    /* 라이브러리 배경 레벨 */
+    --color-library-bg-1: 255 255 255;
+    --color-library-bg-2: 252 251 250;
+    --color-library-bg-3: 247 245 242;
+    --color-library-bg-4: 237 233 228;
+  }
+
+  /* 다크 모드 */
+  .dark {
+    /* CallStack - 다크 */
+    --color-callstack-primary: 229 229 229;
+    --color-callstack-secondary: 212 212 212;
+    --color-callstack-accent: 205 184 158;
+    --color-callstack-bg-light: 38 38 38;
+    --color-callstack-bg-main: 26 26 26;
+    --color-callstack-bg-dark: 20 20 20;
+    --color-callstack-border-main: 205 184 158;
+    --color-callstack-border-light: 115 92 69;
+    --color-callstack-border-focus: 205 184 158;
+
+    /* MicroTask - 다크 */
+    --color-microtask-primary: 147 209 217;
+    --color-microtask-secondary: 127 189 197;
+    --color-microtask-accent: 147 209 217;
+    --color-microtask-bg-light: 15 47 58;
+    --color-microtask-bg-main: 10 25 31;
+    --color-microtask-bg-dark: 5 15 20;
+    --color-microtask-border-main: 147 209 217;
+    --color-microtask-border-light: 64 158 171;
+    --color-microtask-border-focus: 147 209 217;
+
+    /* MacroTask - 다크 */
+    --color-macrotask-primary: 249 167 156;
+    --color-macrotask-secondary: 239 147 136;
+    --color-macrotask-accent: 249 167 156;
+    --color-macrotask-bg-light: 68 28 29;
+    --color-macrotask-bg-main: 38 18 18;
+    --color-macrotask-bg-dark: 26 12 12;
+    --color-macrotask-border-main: 249 167 156;
+    --color-macrotask-border-light: 229 127 116;
+    --color-macrotask-border-focus: 249 167 156;
+
+    /* 라이브러리 배경 레벨 - 다크 */
+    --color-library-bg-1: 13 13 13;
+    --color-library-bg-2: 26 26 26;
+    --color-library-bg-3: 38 38 38;
+    --color-library-bg-4: 45 45 45;
+  }
+}
+
+/* Tailwind v4 커스텀 유틸리티 */
+@layer utilities {
+  /* CallStack 큐 색상 */
+  .bg-callstack-primary { background-color: rgb(var(--color-callstack-primary)); }
+  .bg-callstack-light { background-color: rgb(var(--color-callstack-bg-light)); }
+  .bg-callstack-main { background-color: rgb(var(--color-callstack-bg-main)); }
+  .text-callstack { color: rgb(var(--color-callstack-primary)); }
+  .border-callstack { border-color: rgb(var(--color-callstack-border-main)); }
+  
+  /* MicroTask 큐 색상 */
+  .bg-microtask-primary { background-color: rgb(var(--color-microtask-primary)); }
+  .bg-microtask-light { background-color: rgb(var(--color-microtask-bg-light)); }
+  .bg-microtask-main { background-color: rgb(var(--color-microtask-bg-main)); }
+  .text-microtask { color: rgb(var(--color-microtask-primary)); }
+  .border-microtask { border-color: rgb(var(--color-microtask-border-main)); }
+  
+  /* MacroTask 큐 색상 */
+  .bg-macrotask-primary { background-color: rgb(var(--color-macrotask-primary)); }
+  .bg-macrotask-light { background-color: rgb(var(--color-macrotask-bg-light)); }
+  .bg-macrotask-main { background-color: rgb(var(--color-macrotask-bg-main)); }
+  .text-macrotask { color: rgb(var(--color-macrotask-primary)); }
+  .border-macrotask { border-color: rgb(var(--color-macrotask-border-main)); }
+
+  /* 그라디언트 유틸리티 */
+  .bg-gradient-callstack {
+    background-image: linear-gradient(to bottom right, 
+      rgb(var(--color-callstack-bg-light)), 
+      rgb(var(--color-callstack-bg-main))
+    );
+  }
+  
+  .bg-gradient-microtask {
+    background-image: linear-gradient(to bottom right, 
+      rgb(var(--color-microtask-bg-light)), 
+      rgb(var(--color-microtask-bg-main))
+    );
+  }
+  
+  .bg-gradient-macrotask {
+    background-image: linear-gradient(to bottom right, 
+      rgb(var(--color-macrotask-bg-light)), 
+      rgb(var(--color-macrotask-bg-main))
+    );
+  }
+}

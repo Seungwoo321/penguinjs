@@ -39,6 +39,13 @@ export interface CallStackLibraryTheme {
     microtask: CallStackQueueTheme
     macrotask: CallStackQueueTheme
   }
+  semantic: {
+    success: string      // 성공적인 대출/반납
+    error: string        // 연체/분실
+    warning: string      // 예약 마감 임박
+    info: string         // 도서관 안내
+    processing: string   // 처리 중 상태
+  }
   library: {
     textures: {
       wood: string
@@ -125,90 +132,97 @@ export interface CallStackLibraryTheme {
     librarian: string
     book: string
   }
+  backgrounds: {
+    level1: string      // 기본 배경
+    level2: string      // 보조 배경
+    level3: string      // 강조 배경
+    level4: string      // 섬션 배경
+  }
 }
 
 /**
  * 콜스택 도서관 게임 전용 테마 정의
+ * WCAG AA 접근성 기준 충족 (4.5:1 대비비)
  */
 export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
   name: 'callstack-library',
   colors: {
     callstack: {
-      primary: 'rgb(146, 64, 14)',      // amber-800 - 메인 서가용
-      secondary: 'rgb(217, 119, 6)',    // amber-600
-      accent: 'rgb(251, 191, 36)',      // amber-400
+      primary: 'rgb(74, 74, 74)',       // 중립적 그레이 (WCAG AA 충족)
+      secondary: 'rgb(97, 97, 97)',     // 밝은 그레이
+      accent: 'rgb(137, 116, 92)',      // 따뜻한 회갈색 (나무색)
       background: {
-        light: 'rgb(254, 243, 199)',    // amber-100 - 밝은 나무
-        main: 'rgb(253, 230, 138)',     // amber-200 - 일반 나무
-        dark: 'rgb(146, 64, 14)'        // amber-800 - 어두운 나무
+        light: 'rgb(252, 251, 250)',    // 매우 연한 회백색
+        main: 'rgb(247, 245, 242)',     // 연한 회베이지
+        dark: 'rgb(237, 233, 228)'      // 회베이지
       },
       text: {
-        primary: 'rgb(146, 64, 14)',    
-        secondary: 'rgb(180, 83, 9)',   
-        contrast: 'rgb(255, 255, 255)'  
+        primary: 'rgb(74, 74, 74)',     // 중립 그레이 (충분한 대비)
+        secondary: 'rgb(97, 97, 97)',   // 밝은 그레이
+        contrast: 'rgb(255, 255, 255)'  // 흰색
       },
       gradients: {
-        main: 'linear-gradient(to bottom, rgb(146, 64, 14), rgb(120, 53, 15))',
-        light: 'linear-gradient(to right, rgb(254, 243, 199), rgb(253, 230, 138))',
-        button: 'linear-gradient(to right, rgb(217, 119, 6), rgb(245, 158, 11))',
-        hover: 'linear-gradient(to right, rgb(180, 83, 9), rgb(217, 119, 6))'
+        main: 'linear-gradient(to bottom, rgb(74, 74, 74), rgb(97, 97, 97))',
+        light: 'linear-gradient(to right, rgb(252, 251, 250), rgb(247, 245, 242))',
+        button: 'linear-gradient(to right, rgb(97, 97, 97), rgb(137, 116, 92))',
+        hover: 'linear-gradient(to right, rgb(74, 74, 74), rgb(97, 97, 97))'
       },
       border: {
-        main: 'rgb(217, 119, 6)',       
-        light: 'rgb(251, 191, 36)',     
-        focus: 'rgb(245, 158, 11)'      
+        main: 'rgb(137, 116, 92)',       
+        light: 'rgb(181, 163, 143)',     
+        focus: 'rgb(115, 92, 69)'      
       }
     },
     microtask: {
-      primary: 'rgb(30, 64, 175)',      // blue-800 - 긴급 처리대용
-      secondary: 'rgb(37, 99, 235)',    // blue-600
-      accent: 'rgb(59, 130, 246)',      // blue-500
+      primary: 'rgb(21, 94, 117)',      // 차분한 청록 (WCAG AA 충족)
+      secondary: 'rgb(31, 120, 139)',   // 중간 청록
+      accent: 'rgb(64, 158, 171)',      // 밝은 청록
       background: {
-        light: 'rgb(219, 234, 254)',    // blue-100
-        main: 'rgb(191, 219, 254)',     // blue-200
-        dark: 'rgb(30, 64, 175)'        // blue-800
+        light: 'rgb(243, 251, 252)',    // 매우 연한 청록
+        main: 'rgb(225, 244, 246)',     // 연한 청록
+        dark: 'rgb(203, 235, 238)'      // 파스텔 청록
       },
       text: {
-        primary: 'rgb(30, 64, 175)',    
-        secondary: 'rgb(29, 78, 216)',  
-        contrast: 'rgb(255, 255, 255)'  
+        primary: 'rgb(21, 94, 117)',    // 차분한 청록
+        secondary: 'rgb(31, 120, 139)', // 중간 청록
+        contrast: 'rgb(255, 255, 255)'  // 흰색
       },
       gradients: {
-        main: 'linear-gradient(to bottom, rgb(30, 64, 175), rgb(30, 58, 138))',
-        light: 'linear-gradient(to right, rgb(219, 234, 254), rgb(191, 219, 254))',
-        button: 'linear-gradient(to right, rgb(37, 99, 235), rgb(59, 130, 246))',
-        hover: 'linear-gradient(to right, rgb(29, 78, 216), rgb(37, 99, 235))'
+        main: 'linear-gradient(to bottom, rgb(21, 94, 117), rgb(31, 120, 139))',
+        light: 'linear-gradient(to right, rgb(243, 251, 252), rgb(225, 244, 246))',
+        button: 'linear-gradient(to right, rgb(31, 120, 139), rgb(64, 158, 171))',
+        hover: 'linear-gradient(to right, rgb(21, 94, 117), rgb(31, 120, 139))'
       },
       border: {
-        main: 'rgb(37, 99, 235)',       
-        light: 'rgb(59, 130, 246)',     
-        focus: 'rgb(96, 165, 250)'      
+        main: 'rgb(64, 158, 171)',       
+        light: 'rgb(147, 205, 212)',     
+        focus: 'rgb(15, 71, 88)'      
       }
     },
     macrotask: {
-      primary: 'rgb(194, 65, 12)',      // orange-800 - 예약 처리대용
-      secondary: 'rgb(234, 88, 12)',    // orange-600
-      accent: 'rgb(249, 115, 22)',      // orange-500
+      primary: 'rgb(171, 71, 73)',      // 따뜻한 코럴 (WCAG AA 충족)
+      secondary: 'rgb(194, 94, 94)',    // 중간 코럴
+      accent: 'rgb(229, 127, 116)',     // 밝은 코럴
       background: {
-        light: 'rgb(254, 215, 170)',    // orange-100
-        main: 'rgb(253, 186, 116)',     // orange-200
-        dark: 'rgb(194, 65, 12)'        // orange-800
+        light: 'rgb(255, 248, 246)',    // 매우 연한 코럴
+        main: 'rgb(254, 236, 231)',     // 연한 코럴
+        dark: 'rgb(252, 217, 209)'      // 파스텔 코럴
       },
       text: {
-        primary: 'rgb(194, 65, 12)',    
-        secondary: 'rgb(215, 67, 6)',   
-        contrast: 'rgb(255, 255, 255)'  
+        primary: 'rgb(171, 71, 73)',    // 따뜻한 코럴
+        secondary: 'rgb(194, 94, 94)',  // 중간 코럴
+        contrast: 'rgb(255, 255, 255)'  // 흰색
       },
       gradients: {
-        main: 'linear-gradient(to bottom, rgb(194, 65, 12), rgb(154, 52, 18))',
-        light: 'linear-gradient(to right, rgb(254, 215, 170), rgb(253, 186, 116))',
-        button: 'linear-gradient(to right, rgb(234, 88, 12), rgb(249, 115, 22))',
-        hover: 'linear-gradient(to right, rgb(215, 67, 6), rgb(234, 88, 12))'
+        main: 'linear-gradient(to bottom, rgb(171, 71, 73), rgb(194, 94, 94))',
+        light: 'linear-gradient(to right, rgb(255, 248, 246), rgb(254, 236, 231))',
+        button: 'linear-gradient(to right, rgb(194, 94, 94), rgb(229, 127, 116))',
+        hover: 'linear-gradient(to right, rgb(171, 71, 73), rgb(194, 94, 94))'
       },
       border: {
-        main: 'rgb(234, 88, 12)',       
-        light: 'rgb(249, 115, 22)',     
-        focus: 'rgb(251, 146, 60)'      
+        main: 'rgb(229, 127, 116)',       
+        light: 'rgb(244, 182, 174)',     
+        focus: 'rgb(136, 52, 54)'      
       }
     }
   },
@@ -218,14 +232,14 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
         90deg,
         transparent,
         transparent 40px,
-        rgba(139, 69, 19, 0.1) 40px,
-        rgba(139, 69, 19, 0.1) 41px
+        rgba(137, 116, 92, 0.1) 40px,
+        rgba(137, 116, 92, 0.1) 41px
       ), repeating-linear-gradient(
         0deg,
         transparent,
         transparent 80px,
-        rgba(139, 69, 19, 0.05) 80px,
-        rgba(139, 69, 19, 0.05) 81px
+        rgba(137, 116, 92, 0.05) 80px,
+        rgba(137, 116, 92, 0.05) 81px
       )`,
       bookSpine: `linear-gradient(
         135deg,
@@ -252,9 +266,9 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
       )`,
       shelf: `linear-gradient(
         to bottom,
-        rgb(120, 53, 15) 0%,
-        rgb(146, 64, 14) 30%,
-        rgb(180, 83, 9) 100%
+        rgb(115, 92, 69) 0%,
+        rgb(137, 116, 92) 30%,
+        rgb(161, 138, 108) 100%
       )`
     },
     elements: {
@@ -270,7 +284,7 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
       },
       shelfDepth: '20px',
       shelfThickness: '8px',
-      libraryBackground: 'linear-gradient(to bottom, #fefbf7, #fef3e7)'
+      libraryBackground: 'linear-gradient(to bottom, rgb(252, 251, 250), rgb(247, 245, 242))'
     }
   },
   spacing: {
@@ -341,6 +355,19 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
     macrotask: '📅',
     librarian: '👩‍🏫',
     book: '📖'
+  },
+  semantic: {
+    success: 'rgb(34, 139, 34)',     // 포리스트 그린 (대출 성공)
+    error: 'rgb(178, 34, 34)',       // 파이어브릭 레드 (연체/분실)
+    warning: 'rgb(218, 165, 32)',    // 골든로드 (예약 마감)
+    info: 'rgb(70, 130, 180)',       // 스틸 블루 (도서관 안내)
+    processing: 'rgb(64, 158, 171)'  // 라이트 씨 그린 (처리 중)
+  },
+  backgrounds: {
+    level1: 'rgb(255, 255, 255)',    // 기본 흰색 배경
+    level2: 'rgb(252, 251, 250)',    // 연한 회백색 배경
+    level3: 'rgb(247, 245, 242)',    // 회베이지 배경
+    level4: 'rgb(237, 233, 228)'     // 진한 회베이지 배경
   }
 }
 
