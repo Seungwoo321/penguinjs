@@ -36,8 +36,8 @@ export const useMemoryManagement = (
 ): UseMemoryManagementResult => {
   const {
     enableMonitoring = process.env.NODE_ENV === 'development',
-    leakThreshold = 100, // 100MB (더 관대하게)
-    cleanupInterval = 60000, // 60초 (주기 늘림)
+    leakThreshold = 80, // 80MB로 조정
+    cleanupInterval = 30000, // 30초로 단축
     maxComponentAge = 300000 // 5분
   } = options;
 
@@ -145,13 +145,7 @@ export const useMemoryManagement = (
       });
     }
 
-    // 이미지 캐시 정리
-    const images = document.querySelectorAll('img');
-    images.forEach(img => {
-      if (!img.complete || img.naturalWidth === 0) {
-        img.src = '';
-      }
-    });
+    // 이미지 캐시 정리 제거 - React 방식으로 처리해야 함
 
     collectMemoryStats();
   }, [forceCleanup, maxComponentAge, collectMemoryStats]);
@@ -165,10 +159,15 @@ export const useMemoryManagement = (
     intervalRef.current = setInterval(() => {
       collectMemoryStats();
       
-      // 메모리 압박 시 자동 최적화
-      if (isMemoryPressure) {
+      // 메모리 압박 시 자동 최적화 (직접 조건 확인)
+      if (stats.usedJSHeapSize && stats.usedJSHeapSize / (1024 * 1024) > leakThreshold * 0.8) {
         console.log('🧹 Auto-optimizing memory due to pressure');
-        optimizeMemory();
+        // 직접 최적화 함수 호출
+        const now = Date.now();
+        if (now - componentTimestampRef.current > maxComponentAge) {
+          forceCleanup();
+          componentTimestampRef.current = now;
+        }
       }
     }, cleanupInterval);
 
@@ -177,7 +176,7 @@ export const useMemoryManagement = (
         clearInterval(intervalRef.current);
       }
     };
-  }, [enableMonitoring, cleanupInterval, collectMemoryStats, isMemoryPressure, optimizeMemory]);
+  }, [enableMonitoring, cleanupInterval, collectMemoryStats, stats.usedJSHeapSize, leakThreshold, maxComponentAge, forceCleanup]);
 
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
