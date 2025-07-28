@@ -133,10 +133,7 @@ export class GameEventManager {
       });
     }
     
-    // 개발 모드에서 이벤트 로깅
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🎮 Game Event: ${eventType}`, data);
-    }
+    // 개발 모드에서 이벤트 로깅 제거 (메모리 최적화)
   }
   
   /**
@@ -377,7 +374,10 @@ export class MiddlewareEventManager extends GameEventManager {
 
 // 미들웨어 예시들
 export const loggingMiddleware: EventMiddleware = (eventType, data, next) => {
-  console.log(`[Event] ${eventType}`, data);
+  // 개발 환경에서만 로깅 (메모리 최적화)
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[Event] ${eventType}`, data);
+  }
   next();
 };
 

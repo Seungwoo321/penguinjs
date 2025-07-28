@@ -305,7 +305,7 @@ export const useSafeAsync = () => {
       return result;
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log('Request was aborted');
+        // Request was aborted
         return null;
       }
       throw error;

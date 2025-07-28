@@ -107,16 +107,8 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   
   // 모든 실행 단계의 정확한 스택 상태 계산
   const calculateAllStackStates = (level: CallStackLevel): StackItem[][] => {
-    console.log('🔧 calculateAllStackStates 시작:', {
-      levelId: level.id,
-      hasSimulationSteps: level.simulationSteps?.length || 0,
-      hasExpectedSnapshots: Object.keys(level.expectedSnapshots || {}).length,
-      hasExecutionSteps: level.executionSteps?.length || 0
-    })
-    
     // simulationSteps가 있으면 시뮬레이터 사용
     if (level.simulationSteps && level.simulationSteps.length > 0) {
-      console.log('📊 simulateExecution 사용 중...')
       // 레이아웃별 시뮬레이터 설정
       const layoutType = getLayoutType(level.difficulty, level.stageNumber)
       const config: SimulatorConfig = {
@@ -131,26 +123,14 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       }
       
       const result = simulateExecution(level, config)
-      console.log('📊 simulateExecution 결과:', {
-        총단계수: result.length,
-        각단계별스택크기: result.map(stack => stack.length),
-        첫번째단계: result[0]?.map(s => s.functionName),
-        마지막단계: result[result.length - 1]?.map(s => s.functionName)
-      })
       return result
     }
     
     // simulationSteps가 없는 경우 expectedSnapshots 기반 보간
-    console.log('📈 interpolateFromSnapshots 사용 중...')
     const result = interpolateFromSnapshots(level)
-    console.log('📈 interpolateFromSnapshots 결과:', {
-      총단계수: result.length,
-      각단계별스택크기: result.map(stack => stack.length)
-    })
     
     // Fallback: 결과가 비어있거나 문제가 있으면 expectedSnapshots로 직접 생성
     if (result.length === 0 || result.every(stack => stack.length === 0) || result.length < (level.executionSteps?.length || 0)) {
-      console.log('⚠️ 시뮬레이션 결과가 부족함, expectedSnapshots로 Fallback 생성')
       const executionStepsLength = level.executionSteps?.length || 0
       const fallbackResult: StackItem[][] = []
       
@@ -188,13 +168,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         }
       }
       
-      console.log('🔄 Fallback 결과:', {
-        총단계수: fallbackResult.length,
-        각단계별스택크기: fallbackResult.map(stack => stack.length),
-        체크포인트들: level.snapshotCheckpoints,
-        expectedSnapshots키들: Object.keys(level.expectedSnapshots || {})
-      })
-      
       return fallbackResult
     }
     
@@ -211,21 +184,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     const computedStack = callstackHistory[currentStep] || []
     const userStack = userSnapshots[currentStep] || []
     
-    console.log('🔍 getCurrentDisplayStack Debug:', {
-      currentStep,
-      isCheckpoint,
-      checkpoints,
-      computedStackLength: computedStack.length,
-      userStackLength: userStack.length,
-      computedStack: computedStack.map(s => s.functionName),
-      userStack: userStack.map(s => s.functionName),
-      callstackHistoryLength: callstackHistory.length,
-      전체히스토리: callstackHistory.map((stack, idx) => ({ 
-        단계: idx, 
-        크기: stack.length, 
-        함수들: stack.map(s => s.functionName) 
-      }))
-    })
     
     if (isCheckpoint) {
       // 체크포인트인 경우 사용자가 구성한 스택 표시
@@ -1128,18 +1086,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         // 이중 스택 시스템: 계산된 스택 + 사용자 스택
         const computedHistory = calculateAllStackStates(level)
         
-        console.log('🔍 Type E Initialization Debug:', {
-          levelId: level.id,
-          executionStepsLength: level.executionSteps.length,
-          simulationStepsLength: level.simulationSteps?.length || 0,
-          computedHistoryLength: computedHistory.length,
-          snapshotCheckpoints: level.snapshotCheckpoints,
-          computedHistory: computedHistory.map((stack, index) => ({ 
-            step: index, 
-            stackLength: stack.length, 
-            functions: stack.map(s => s.functionName) 
-          }))
-        })
         
         // 사용자 스냅샷은 체크포인트만 빈 상태로 초기화
         const initialUserSnapshots: Record<number, StackItem[]> = {}
@@ -1147,12 +1093,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           initialUserSnapshots[checkpoint] = []
         })
         
-        console.log('🎯 Type E 초기화 완료:', {
-          callstackHistoryLength: computedHistory.length,
-          userSnapshotsKeys: Object.keys(initialUserSnapshots),
-          현재단계: currentStep,
-          체크포인트들: level.snapshotCheckpoints
-        })
         
         setCallstackHistory(computedHistory) // 계산된 전체 스택 상태
         setUserSnapshots(initialUserSnapshots) // 사용자가 구성할 체크포인트만
