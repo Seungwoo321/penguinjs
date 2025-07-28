@@ -176,7 +176,7 @@ export const useMemoryManagement = (
         clearInterval(intervalRef.current);
       }
     };
-  }, [enableMonitoring, cleanupInterval, collectMemoryStats, stats.usedJSHeapSize, leakThreshold, maxComponentAge, forceCleanup]);
+  }, [enableMonitoring, cleanupInterval, collectMemoryStats, leakThreshold, maxComponentAge, forceCleanup]);
 
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
