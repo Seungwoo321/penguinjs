@@ -9,10 +9,7 @@ import React, { createContext, useContext, useReducer, useCallback, useMemo, Rea
 import { 
   QueueType, 
   QueueItem, 
-  GameState, 
-  ExecutionStep,
-  ValidationResult,
-  GameConfig
+  ExecutionStep
 } from '../types';
 import { QueueStatesSnapshot, EventLoopStep, QueueValidationResult } from '../types/layout';
 
@@ -66,7 +63,7 @@ export enum ActionType {
 
 // 액션 타입
 type Action = 
-  | { type: ActionType.SET_GAME_STATE; payload: GameState }
+  | { type: ActionType.SET_GAME_STATE; payload: 'idle' | 'playing' | 'paused' | 'completed' | 'loading' }
   | { type: ActionType.SET_CURRENT_STAGE; payload: number }
   | { type: ActionType.SET_LAYOUT_TYPE; payload: string }
   | { type: ActionType.SET_QUEUE_STATES; payload: CallStackLibraryState['queueStates'] }
@@ -79,10 +76,10 @@ type Action =
 // 상태 인터페이스
 export interface CallStackLibraryState {
   // 게임 기본 정보
-  gameState: GameState;
+  gameState: 'idle' | 'playing' | 'paused' | 'completed' | 'loading';
   currentStage: number;
   layoutType: string;
-  config: GameConfig;
+  config: any;
   
   // 큐 상태
   queueStates: {
@@ -90,7 +87,7 @@ export interface CallStackLibraryState {
     microtask: QueueItem[];
     macrotask: QueueItem[];
   };
-  queueSnapshots: Record<number, typeof queueStates>;
+  queueSnapshots: Record<number, any>;
   
   // Layout B 전용 상태
   queueStatesHistory: Record<number, QueueStatesSnapshot>;
@@ -107,7 +104,7 @@ export interface CallStackLibraryState {
   
   // 사용자 답안
   userAnswer: Record<string, any>;
-  validationResults: Record<string, ValidationResult>;
+  validationResults: Record<string, any>;
   
   // 점수 및 진행도
   score: number;
@@ -307,15 +304,15 @@ function callStackLibraryReducer(
       const stageNumber = action.payload;
       return {
         ...state,
-        completedStages: [...new Set([...state.completedStages, stageNumber])],
-        unlockedStages: [...new Set([...state.unlockedStages, stageNumber + 1])],
+        completedStages: Array.from(new Set([...state.completedStages, stageNumber])),
+        unlockedStages: Array.from(new Set([...state.unlockedStages, stageNumber + 1])),
         score: state.score + (100 - state.hintsUsed * 10)
       };
       
     case ActionType.UNLOCK_STAGE:
       return {
         ...state,
-        unlockedStages: [...new Set([...state.unlockedStages, action.payload])]
+        unlockedStages: Array.from(new Set([...state.unlockedStages, action.payload]))
       };
     
     // Layout B 전용 액션
@@ -381,7 +378,7 @@ interface CallStackLibraryContextType {
   
   // 답안 관리 함수들
   updateAnswer: (key: string, value: any) => void;
-  submitAnswer: () => Promise<ValidationResult>;
+  submitAnswer: () => Promise<any>;
   clearAnswer: () => void;
   
   // UI 제어 함수들
@@ -474,9 +471,9 @@ export const CallStackLibraryProvider: React.FC<CallStackLibraryProviderProps> =
     dispatch({ type: ActionType.UPDATE_USER_ANSWER, payload: { key, value } });
   }, []);
 
-  const submitAnswer = useCallback(async (): Promise<ValidationResult> => {
+  const submitAnswer = useCallback(async (): Promise<any> => {
     // 여기서 실제 검증 로직 구현
-    const result: ValidationResult = {
+    const result: any = {
       isValid: true,
       errors: [],
       score: 100 - state.hintsUsed * 10

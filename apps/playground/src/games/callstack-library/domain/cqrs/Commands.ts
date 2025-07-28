@@ -162,9 +162,14 @@ export type GameCommand =
   | SetBreakpointCommand
   | RewindToTickCommand;
 
+// Mutable 버전의 Command 타입 (빌더 패턴용)
+type MutableCommand = {
+  -readonly [K in keyof Command]: Command[K];
+};
+
 // 명령 빌더
 export class CommandBuilder {
-  private command: Partial<Command> = {};
+  private command: Partial<MutableCommand> = {};
 
   static create(): CommandBuilder {
     return new CommandBuilder();

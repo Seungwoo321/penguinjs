@@ -133,7 +133,7 @@ export const GameLayoutPage: React.FC<GameLayoutPageProps> = memo(({
   }, [currentStage, enableNewWidgets]);
 
   return (
-    <div className={cn("container mx-auto px-4 py-6", className)}>
+    <div className={cn("w-full px-4 py-6", className)}>
       {/* 개발 모드: 레이아웃 전환 버튼 */}
       {process.env.NODE_ENV === 'development' && (
         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">

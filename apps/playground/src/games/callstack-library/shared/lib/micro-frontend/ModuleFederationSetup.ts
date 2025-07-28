@@ -5,6 +5,8 @@
  * Module Federation을 위한 설정과 유틸리티
  */
 
+import React from 'react';
+
 // Module Federation 타입 정의
 export interface RemoteModule {
   name: string;
@@ -86,7 +88,9 @@ export class ModuleFederationLoader {
       }
 
       // 컨테이너 초기화
-      await container.init(__webpack_share_scopes__.default);
+      // @ts-ignore
+      const shareScope = typeof __webpack_share_scopes__ !== 'undefined' ? __webpack_share_scopes__.default : {};
+      await container.init(shareScope);
 
       // 모듈 팩토리 가져오기
       const factory = await container.get(module);
@@ -225,7 +229,7 @@ export const EXPOSED_COMPONENTS = {
     path: './EventLoopEngine',
     description: 'Core event loop simulation engine',
     version: '1.0.0',
-    dependencies: ['react']
+    dependencies: ['react'] as string[]
   },
   
   // 서비스
@@ -233,7 +237,7 @@ export const EXPOSED_COMPONENTS = {
     path: './CQRSService',
     description: 'CQRS-based event loop service',
     version: '1.0.0',
-    dependencies: ['react', 'zustand']
+    dependencies: ['react', 'zustand'] as string[]
   },
   
   // 위젯들
@@ -241,14 +245,14 @@ export const EXPOSED_COMPONENTS = {
     path: './EventLoopVisualizer',
     description: 'Event loop visualization widget',
     version: '1.0.0',
-    dependencies: ['react', 'react-dom']
+    dependencies: ['react', 'react-dom'] as string[]
   },
   
   GameProgressTracker: {
     path: './GameProgressTracker',
     description: 'Game progress tracking widget',
     version: '1.0.0',
-    dependencies: ['react', 'react-dom', 'zustand']
+    dependencies: ['react', 'react-dom', 'zustand'] as string[]
   },
   
   // 플러그인 시스템
@@ -256,7 +260,7 @@ export const EXPOSED_COMPONENTS = {
     path: './PluginSystem',
     description: 'Extensible plugin system',
     version: '1.0.0',
-    dependencies: []
+    dependencies: [] as string[]
   }
 } as const;
 
@@ -285,7 +289,7 @@ export const createManifest = (): MicrofrontendManifest => {
   return {
     name: 'callstack-library',
     version: '1.0.0',
-    components: EXPOSED_COMPONENTS,
+    components: EXPOSED_COMPONENTS as Record<string, ComponentMetadata>,
     remoteEntry: 'remoteEntry.js',
     shared: {
       'react': '^18.0.0',
@@ -322,7 +326,7 @@ export const validateRemoteComponent = (component: any, expectedType: string): b
 export const createSafeRemoteComponent = <T extends React.ComponentType<any>>(
   component: T,
   fallback?: React.ComponentType<any>
-): T => {
+): React.LazyExoticComponent<React.ComponentType<any>> => {
   return React.lazy(async () => {
     try {
       // 컴포넌트 유효성 검증
@@ -351,7 +355,7 @@ export const createSafeRemoteComponent = <T extends React.ComponentType<any>>(
         }, 'Failed to load remote component')
       };
     }
-  }) as T;
+  });
 };
 
 // 전역 인스턴스
@@ -359,7 +363,9 @@ export const moduleRegistry = new RemoteModuleRegistry();
 
 // 유틸리티 함수들
 export const isModuleFederationSupported = (): boolean => {
+  // @ts-ignore
   return typeof __webpack_require__ !== 'undefined' && 
+         // @ts-ignore
          typeof __webpack_share_scopes__ !== 'undefined';
 };
 

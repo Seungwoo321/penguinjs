@@ -1,8 +1,8 @@
 // 레이아웃 시스템 관련 타입 정의
 
 import { ReactNode } from 'react'
-import { LayoutType, PlayMode } from '../utils/layoutClassifier'
-import { QueueType, QueueItem } from '../types'
+import { PlayMode } from '../utils/layoutClassifier'
+import { QueueType, QueueItem, LayoutType } from '../types'
 
 // Layout B 전용 타입들
 export interface QueueStatesSnapshot {
@@ -167,6 +167,7 @@ export interface QueueSnapshotBuilderPanelProps extends PanelProps {
   onValidateQueueStep: (step: number) => void
   validationResults: Record<number, QueueValidationResult>
   availableFunctions: string[]
+  queueTypes?: string[] // 타입 C, D에서 사용할 큐 타입 목록
 }
 
 // 오른쪽 패널 Props

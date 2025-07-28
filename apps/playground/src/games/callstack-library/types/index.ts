@@ -4,7 +4,7 @@
  */
 
 // 기본 타입
-export type QueueType = 'callstack' | 'microtask' | 'macrotask';
+export type QueueType = 'callstack' | 'microtask' | 'macrotask' | 'animation' | 'generator' | 'io' | 'worker';
 export type GameState = 'idle' | 'playing' | 'paused' | 'completed' | 'error';
 export type LayoutType = 'A' | 'A+' | 'B' | 'C' | 'D' | 'E';
 export type EvaluationType = 'functionOrder' | 'executionCount' | 'snapshot' | 'queueStates';

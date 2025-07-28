@@ -167,8 +167,8 @@ export const useOptimizedMemo = <T>(
   deps: DependencyList,
   isEqual?: (a: T, b: T) => boolean
 ): T => {
-  const previousValueRef = useRef<T>();
-  const previousDepsRef = useRef<DependencyList>();
+  const previousValueRef = useRef<T | undefined>(undefined);
+  const previousDepsRef = useRef<DependencyList | undefined>(undefined);
 
   return useMemo(() => {
     // 의존성 배열이 변경되었는지 확인
@@ -287,7 +287,7 @@ export const useLazyImage = (src: string, placeholder?: string) => {
  * AbortController를 사용한 안전한 비동기 작업 훅
  */
 export const useSafeAsync = () => {
-  const abortControllerRef = useRef<AbortController>();
+  const abortControllerRef = useRef<AbortController | undefined>(undefined);
 
   const execute = useCallback(async <T>(
     asyncFunction: (signal: AbortSignal) => Promise<T>

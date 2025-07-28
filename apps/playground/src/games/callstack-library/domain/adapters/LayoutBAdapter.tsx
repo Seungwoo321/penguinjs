@@ -66,10 +66,10 @@ export const LayoutBAdapter: React.FC<LayoutBAdapterProps> = ({
   });
 
   // 점수 계산 로직 (도메인 로직)
-  const calculateScore = (state: typeof state) => {
+  const calculateScore = (gameState: any) => {
     const baseScore = 100;
-    const errorPenalty = state.stats.errors * 10;
-    const depthBonus = Math.min(state.stats.callStackMaxDepth * 5, 50);
+    const errorPenalty = gameState.stats.errors * 10;
+    const depthBonus = Math.min(gameState.stats.callStackMaxDepth * 5, 50);
     
     return Math.max(baseScore - errorPenalty + depthBonus, 0);
   };

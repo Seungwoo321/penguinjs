@@ -3,6 +3,8 @@
 import React from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { SnapshotBuilderPanelProps } from '../../../types/layout'
+import { useCallStackLibraryTheme } from '../../../hooks/useCallStackLibraryTheme'
+import { useResponsiveLayout } from '../../../hooks/useResponsiveLayout'
 
 /**
  * 스냅샷 빌더 패널
@@ -14,6 +16,8 @@ export const SnapshotBuilderPanel: React.FC<SnapshotBuilderPanelProps> = ({
   onSnapshotChange,
   className
 }) => {
+  const libraryTheme = useCallStackLibraryTheme()
+  const responsiveLayout = useResponsiveLayout()
   return (
     <GamePanel 
       title="📸 스냅샷 빌더" 

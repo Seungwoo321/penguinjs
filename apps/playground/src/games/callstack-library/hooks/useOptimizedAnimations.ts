@@ -3,7 +3,7 @@
  * 성능을 고려한 애니메이션 시스템
  */
 
-import { useMemo, useCallback, useRef, useEffect } from 'react'
+import React, { useMemo, useCallback, useRef, useEffect } from 'react'
 import { useCallStackLibraryTheme } from './useCallStackLibraryTheme'
 
 export interface OptimizedAnimationConfig {
@@ -13,13 +13,30 @@ export interface OptimizedAnimationConfig {
   maxConcurrentAnimations: number
 }
 
+export interface AnimationVariant {
+  initial?: any;
+  animate?: any;
+  exit?: any;
+  transition?: any;
+  scale?: number;
+  x?: number;
+  y?: number;
+  opacity?: number;
+  rotateX?: number;
+  rotateY?: number;
+  height?: number | string;
+  marginBottom?: number;
+  transformOrigin?: string;
+  [key: string]: any; // 추가 속성 허용
+}
+
 export interface AnimationVariants {
-  bookDrop: object
-  bookHover: object
-  shelfSlide: object
-  queueTransition: object
-  stackCollapse: object
-  stackExpand: object
+  bookDrop: AnimationVariant
+  bookHover: AnimationVariant
+  shelfSlide: AnimationVariant
+  queueTransition: AnimationVariant
+  stackCollapse: AnimationVariant
+  stackExpand: AnimationVariant
 }
 
 /**
@@ -30,8 +47,8 @@ export const useOptimizedAnimations = (
 ): {
   variants: AnimationVariants
   shouldAnimate: (animationType: string) => boolean
-  getOptimizedTransition: (baseTransition: object) => object
-  createStackAnimation: (itemCount: number, index: number) => object
+  getOptimizedTransition: (baseTransition: any) => any
+  createStackAnimation: (itemCount: number, index: number) => AnimationVariant
   getBatchedAnimationDelay: (index: number, maxDelay?: number) => number
   useReducedMotion: boolean
 } => {

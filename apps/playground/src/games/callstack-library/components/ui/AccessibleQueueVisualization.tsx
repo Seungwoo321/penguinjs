@@ -118,9 +118,9 @@ export const AccessibleQueueVisualization: React.FC<AccessibleQueueVisualization
     const lastItem = items[items.length - 1];
     if (lastItem) {
       if (queueType === 'callstack') {
-        announce(currentQueueInfo.ariaLabels.push(lastItem.functionName));
+        announce((currentQueueInfo.ariaLabels as any).push(lastItem.functionName));
       } else {
-        announce(currentQueueInfo.ariaLabels.add(lastItem.functionName, lastItem.delay));
+        announce((currentQueueInfo.ariaLabels as any).add(lastItem.functionName, lastItem.delay));
       }
     }
   }, [items.length]);
@@ -377,9 +377,8 @@ const QueueItemCard: React.FC<QueueItemCardProps> = memo(({
         isFocused && 'ring-2 ring-offset-2'
       )}
       style={{
-        backgroundColor: item.color || libraryTheme.getQueueColor(queueType as CallStackQueueType, 'secondary'),
-        borderColor: libraryTheme.getQueueBorder(queueType as CallStackQueueType),
-        ringColor: isFocused ? libraryTheme.getQueueColor(queueType as CallStackQueueType, 'button') : undefined
+        backgroundColor: item.color || libraryTheme.getQueueColor(queueType as CallStackQueueType, 'light'),
+        borderColor: libraryTheme.getQueueBorder(queueType as CallStackQueueType)
       }}
       onClick={onSelect}
       tabIndex={isFocused ? 0 : -1}

@@ -200,7 +200,7 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
             <AnimatePresence mode="popLayout">
               {currentStack.map((item, index) => (
                 <motion.div
-                  key={`${item.name || item.functionName}-${index}`}
+                  key={`${item.functionName}-${index}`}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
@@ -208,7 +208,7 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
                   className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 border border-gray-200 dark:border-gray-700"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-sm">{item.name || item.functionName}</span>
+                    <span className="font-mono text-sm">{item.functionName}</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">#{currentStack.length - index}</span>
                   </div>
                 </motion.div>

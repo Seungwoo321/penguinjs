@@ -16,9 +16,9 @@ import {
   srOnlyStyles
 } from '../../utils/ariaUtils';
 import { AccessibleButton, AccessibleButtonGroup } from './AccessibleButton';
-import { EvaluationProps, ValidationResult } from '../../types/layout';
+import { EvaluationPanelProps, QueueValidationResult } from '../../types/layout';
 
-interface AccessibleEvaluationPanelProps extends EvaluationProps {
+interface AccessibleEvaluationPanelProps extends EvaluationPanelProps {
   onClose?: () => void;
   trapFocus?: boolean;
 }
@@ -55,9 +55,9 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
     onEscape: onClose
   });
 
-  // 검증 결과 상태
-  const isCorrect = validationResults?.isValid || false;
-  const hasErrors = validationResults?.errors && validationResults.errors.length > 0;
+  // 검증 결과 상태  
+  const isCorrect = validationResults && Object.values(validationResults).some(v => v === true);
+  const hasErrors = validationResults && Object.values(validationResults).some(v => v === false);
   
   // 제출 핸들러
   const handleSubmit = async () => {
@@ -105,21 +105,24 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
   };
 
   // 진행률 계산
-  const progress = evaluation.evaluationType === 'snapshot' && snapshotCheckpoints
+  const progress = evaluation.checkSnapshots && snapshotCheckpoints
     ? (Object.values(snapshotCheckpoints).filter(Boolean).length / Object.keys(snapshotCheckpoints).length) * 100
     : 0;
 
   return (
-    <GamePanel
+    <div 
       ref={containerRef}
-      title="📊 도서관 업무 평가"
-      className={cn('relative', className)}
+      className={cn('relative rounded-lg border', className)}
       style={{
         backgroundColor: libraryTheme.getLibraryBackground(),
         borderColor: libraryTheme.getQueueBorder('callstack')
       }}
       {...(trapFocus && createDialogAttributes('평가 패널', 'evaluation-description'))}
     >
+      <GamePanel
+        title="📊 도서관 업무 평가"
+        className="relative"
+      >
       {/* 평가 설명 */}
       <div 
         id="evaluation-description"
@@ -134,19 +137,19 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
           평가 방법
         </h3>
         <p className="text-sm">
-          {evaluation.evaluationType === 'functionOrder' && 
+          {evaluation.checkOrder && 
             '함수들의 실행 순서를 올바르게 배치하세요.'}
-          {evaluation.evaluationType === 'executionCount' && 
+          {expectedCount && 
             `총 ${expectedCount}번의 실행이 필요합니다.`}
-          {evaluation.evaluationType === 'snapshot' && 
+          {evaluation.checkSnapshots && 
             '각 단계별로 큐의 상태를 정확히 구성하세요.'}
-          {evaluation.evaluationType === 'queueStates' && 
+          {evaluation.checkQueueStates && 
             '이벤트 루프의 각 큐 상태를 올바르게 구성하세요.'}
         </p>
       </div>
 
       {/* 진행률 표시 */}
-      {evaluation.evaluationType === 'snapshot' && (
+      {evaluation.checkSnapshots && (
         <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium">진행률</span>
@@ -190,15 +193,10 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
             <div className="flex items-start gap-2">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-medium text-red-900 mb-1">검증 오류</p>
-                <ul className="text-sm text-red-700 space-y-1">
-                  {validationResults?.errors?.map((error, index) => (
-                    <li key={index} className="flex items-start gap-1">
-                      <span aria-hidden="true">•</span>
-                      <span>{error}</span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="font-medium text-red-900 mb-1">검증 실패</p>
+                <p className="text-sm text-red-700">
+                  일부 단계에서 검증에 실패했습니다. 다시 확인해주세요.
+                </p>
               </div>
             </div>
           </motion.div>
@@ -321,7 +319,8 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
           {trapFocus && <li>Escape: 패널 닫기</li>}
         </ul>
       </div>
-    </GamePanel>
+      </GamePanel>
+    </div>
   );
 };
 
@@ -329,7 +328,7 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
  * 검증 결과 표시 컴포넌트
  */
 interface ValidationResultDisplayProps {
-  result: ValidationResult;
+  result: any;
   queueType?: string;
 }
 

@@ -3,7 +3,7 @@
  * WCAG 2.1 AA 준수, 키보드 네비게이션 및 스크린 리더 지원
  */
 
-import React, { forwardRef, useRef, useEffect, useState } from 'react';
+import React, { forwardRef, useRef, useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@penguinjs/ui';
 import { useCallStackLibraryTheme } from '../../hooks/useCallStackLibraryTheme';
@@ -18,10 +18,9 @@ import { useLiveRegion } from '../../hooks/useKeyboardNavigation';
 import { useDesignTokens } from './DesignSystemProvider';
 
 interface AccessibleButtonProps extends 
-  Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label'>,
-  AriaAttributes {
+  Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label'> {
   // 기본 속성
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'link';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   loading?: boolean;
@@ -113,8 +112,8 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     }
   };
 
-  // 디자인 시스템 기반 크기별 스타일
-  const sizeStyles = {
+  // 디자인 시스템 기반 크기별 스타일 (메모이제이션)
+  const sizeStyles = useMemo(() => ({
     sm: {
       minHeight: 32,
       padding: `${designTokens.getSpacing(2)} ${designTokens.getSpacing(3)}`,
@@ -133,13 +132,13 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
       fontSize: designTokens.getTypography('lg').fontSize,
       iconSize: 'w-6 h-6'
     }
-  };
+  }), [designTokens, size]);
 
   const currentSize = sizeStyles[size];
   const touchStyles = getTouchStyles(currentSize.minHeight);
 
-  // 디자인 시스템 기반 변형별 스타일
-  const getVariantStyles = (): React.CSSProperties => {
+  // 디자인 시스템 기반 변형별 스타일 (메모이제이션)
+  const variantStyles = useMemo((): React.CSSProperties => {
     // 디자인 시스템의 기본 스타일 사용
     const baseStyle = designTokens.getButtonStyle(variant, size);
     
@@ -183,7 +182,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
           border: '2px solid #b91c1c'
         };
 
-      case 'link':
+      case 'outline':
         return {
           backgroundColor: 'transparent',
           color: colors.text,
@@ -196,7 +195,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
       default:
         return {};
     }
-  };
+  }, [variant, size, themeColor, designTokens, libraryTheme]);
 
   // 포커스 스타일
   const focusStyles: React.CSSProperties = hasFocus ? {
@@ -211,10 +210,10 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     pointerEvents: 'none'
   } : {};
 
-  // 최종 스타일
-  const buttonStyles: React.CSSProperties = {
+  // 최종 스타일 (메모이제이션)
+  const buttonStyles: React.CSSProperties = useMemo(() => ({
     ...touchStyles,
-    ...getVariantStyles(),
+    ...variantStyles,
     ...focusStyles,
     ...disabledStyles,
     display: 'inline-flex',
@@ -226,7 +225,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     fontSize: currentSize.fontSize,
     lineHeight: '1.2',
     textAlign: 'center',
-    textDecoration: variant === 'link' ? 'underline' : 'none',
+    textDecoration: variant === 'outline' ? 'underline' : 'none',
     whiteSpace: 'nowrap',
     userSelect: 'none',
     WebkitTapHighlightColor: 'transparent',
@@ -236,7 +235,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     overflow: 'hidden',
     outline: 'none',
     cursor: (disabled || loading) ? 'not-allowed' : 'pointer'
-  };
+  }), [touchStyles, variantStyles, focusStyles, disabledStyles, fullWidth, currentSize, libraryTheme, prefersReducedMotion, disabled, loading]);
 
   // 클릭 핸들러
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -285,12 +284,18 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     }
   };
 
-  // 키보드 단축키 표시
+  // 키보드 단축키 표시 (반복 업데이트 방지)
   useEffect(() => {
     if (!keyboardShortcut || !buttonRef.current) return;
 
+    // 이미 존재하는 툴팁 제거
+    const existingTooltip = buttonRef.current.querySelector('.keyboard-shortcut-tooltip');
+    if (existingTooltip) {
+      existingTooltip.remove();
+    }
+
     const tooltip = document.createElement('span');
-    tooltip.className = 'sr-only';
+    tooltip.className = 'sr-only keyboard-shortcut-tooltip';
     tooltip.textContent = `키보드 단축키: ${keyboardShortcut}`;
     buttonRef.current.appendChild(tooltip);
 
@@ -302,15 +307,15 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
   }, [keyboardShortcut]);
 
   // ARIA 속성 조합
-  const combinedAriaProps: AriaAttributes = {
-    ...createAriaAttributes(role, label, {
-      'aria-pressed': pressed,
-      'aria-expanded': expanded,
-      'aria-selected': selected,
-      'aria-disabled': disabled || loading,
-      'aria-busy': loading,
-      ...ariaProps
-    })
+  const combinedAriaProps: any = {
+    ...(createAriaAttributes(role as any, label, {
+      'aria-pressed': pressed as any,
+      'aria-expanded': expanded as any,
+      'aria-selected': selected as any,
+      'aria-disabled': (disabled || loading) as any,
+      'aria-busy': loading as any,
+      ...(ariaProps as any)
+    }) as any)
   };
 
   if (description) {

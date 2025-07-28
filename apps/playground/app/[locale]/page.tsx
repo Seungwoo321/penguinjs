@@ -22,7 +22,7 @@ export default function HomePage() {
         <ThemeToggle />
       </div>
       
-      <div className="container mx-auto px-4 py-16">
+      <div className="w-full px-4 py-16">
         <div className="text-center mb-20">
           <div className="inline-flex items-center gap-3 mb-8">
             <span className="text-5xl">🐧</span>
@@ -33,7 +33,7 @@ export default function HomePage() {
           <p className="text-2xl font-medium text-[rgb(var(--text-tertiary))] mb-4">
             {t('slogan')}
           </p>
-          <p className="text-lg text-[rgb(var(--text-secondary))] max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-[rgb(var(--text-secondary))] leading-relaxed">
             {t('description')}
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function HomePage() {
         {/* 주요 게임 소개 */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-8 text-[rgb(var(--text-primary))]">난이도별 추천 게임</h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8">
             <GameCard
               title="호이스팅 헬리콥터"
               description="변수 선언과 호이스팅을 헬리콥터 비행으로 체험하세요"
@@ -82,7 +82,7 @@ export default function HomePage() {
         </div>
         
         {/* 게임 통계 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <div className="text-center bg-[rgb(var(--surface-elevated))] rounded-xl p-6 shadow-lg">
             <div className="text-4xl font-bold text-[rgb(var(--primary))] mb-2">18</div>
             <div className="text-[rgb(var(--text-secondary))]">총 게임 수</div>

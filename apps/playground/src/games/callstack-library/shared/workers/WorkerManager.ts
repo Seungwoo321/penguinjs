@@ -26,7 +26,7 @@ export interface WorkerResponse {
 interface PendingRequest {
   resolve: (response: WorkerResponse) => void;
   reject: (error: Error) => void;
-  timeout: number;
+  timeout: ReturnType<typeof setTimeout>;
 }
 
 // Worker 상태
@@ -304,7 +304,7 @@ export class WorkerManager {
   }
 
   // 성능 메트릭
-  getPerformanceMetrics(): {
+  getLocalPerformanceMetrics(): {
     messageCount: number;
     averageResponseTime: number;
     isHealthy: boolean;

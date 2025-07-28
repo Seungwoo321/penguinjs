@@ -24,8 +24,8 @@ import React, {
  * 객체나 배열의 깊은 변경사항만 감지
  */
 export const useDeepMemo = <T,>(factory: () => T, deps: React.DependencyList): T => {
-  const depsRef = useRef<React.DependencyList>();
-  const valueRef = useRef<T>();
+  const depsRef = useRef<React.DependencyList | undefined>(undefined);
+  const valueRef = useRef<T | undefined>(undefined);
 
   // 깊은 비교 함수
   const deepEqual = (a: any, b: any): boolean => {
@@ -184,7 +184,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = memo(({
   threshold = 16, // 1 frame
   onSlowRender
 }) => {
-  const renderStartRef = useRef<number>();
+  const renderStartRef = useRef<number | undefined>(undefined);
   const renderCountRef = useRef(0);
 
   useEffect(() => {
@@ -219,7 +219,7 @@ export const useMemoizedHandlers = <T extends Record<string, (...args: any[]) =>
     const memoizedHandlers = {} as T;
     
     Object.keys(handlers).forEach(key => {
-      memoizedHandlers[key as keyof T] = handlers[key];
+      memoizedHandlers[key as keyof T] = handlers[key as keyof T];
     });
     
     return memoizedHandlers;
@@ -285,7 +285,7 @@ export const useComputed = <T,>(
 ): T => {
   const { lazy = false, debounce = 0 } = options || {};
   const [value, setValue] = useState<T>(() => lazy ? null as any : computeFn());
-  const timeoutRef = useRef<number>();
+  const timeoutRef = useRef<number | undefined>(undefined);
 
   const compute = useCallback(() => {
     if (timeoutRef.current) {
@@ -327,7 +327,7 @@ export const useComputed = <T,>(
 export const useBatchUpdate = () => {
   const [, forceUpdate] = useState({});
   const batchRef = useRef<(() => void)[]>([]);
-  const timeoutRef = useRef<number>();
+  const timeoutRef = useRef<number | undefined>(undefined);
 
   const batchUpdate = useCallback((updateFn: () => void) => {
     batchRef.current.push(updateFn);

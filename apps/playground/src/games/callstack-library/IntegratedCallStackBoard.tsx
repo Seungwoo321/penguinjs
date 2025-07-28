@@ -184,7 +184,13 @@ export function IntegratedCallStackBoard({
                                 }}
                               />
                               
-                              <span className="text-white font-mono text-xs font-bold ml-3 mr-2 drop-shadow-lg relative z-10 break-all flex items-center gap-1">
+                              <span 
+                                className="font-mono text-xs font-bold ml-3 mr-2 relative z-10 break-all flex items-center gap-1"
+                                style={{
+                                  color: '#1a1a1a',
+                                  textShadow: '1px 1px 2px rgba(255,255,255,0.9), -1px -1px 2px rgba(255,255,255,0.9), 1px -1px 2px rgba(255,255,255,0.9), -1px 1px 2px rgba(255,255,255,0.9)'
+                                }}
+                              >
                                 {item.isGlobalContext && <span className="text-xs">📍</span>}
                                 {item.functionName}
                               </span>
@@ -624,7 +630,13 @@ export function IntegratedCallStackBoard({
                             }}
                           />
                           
-                          <span className="text-white font-mono text-xs font-bold ml-3 mr-2 drop-shadow-lg relative z-10 break-all">
+                          <span 
+                            className="font-mono text-xs font-bold ml-3 mr-2 relative z-10 break-all"
+                            style={{
+                              color: '#1a1a1a',
+                              textShadow: '1px 1px 2px rgba(255,255,255,0.9), -1px -1px 2px rgba(255,255,255,0.9), 1px -1px 2px rgba(255,255,255,0.9), -1px 1px 2px rgba(255,255,255,0.9)'
+                            }}
+                          >
                             {item.functionName}
                           </span>
                           
@@ -982,7 +994,13 @@ export function IntegratedCallStackBoard({
                           }}
                         />
                         
-                        <span className="text-white font-mono text-xs font-bold ml-4 mr-2 drop-shadow-lg relative z-10">
+                        <span 
+                          className="font-mono text-xs font-bold ml-4 mr-2 relative z-10"
+                          style={{
+                            color: '#1a1a1a',
+                            textShadow: '1px 1px 2px rgba(255,255,255,0.9), -1px -1px 2px rgba(255,255,255,0.9), 1px -1px 2px rgba(255,255,255,0.9), -1px 1px 2px rgba(255,255,255,0.9)'
+                          }}
+                        >
                           {item.functionName}
                         </span>
                         

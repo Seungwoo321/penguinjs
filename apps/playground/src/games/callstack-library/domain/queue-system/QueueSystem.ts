@@ -24,7 +24,7 @@ abstract class BaseQueue<T extends Task> implements Queue<T> {
     this.maxSize = maxSize;
   }
 
-  get items(): ReadonlyArray<T> {
+  get items(): T[] {
     return [...this._items];
   }
 

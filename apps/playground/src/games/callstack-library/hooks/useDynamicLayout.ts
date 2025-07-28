@@ -79,9 +79,10 @@ export const useDynamicLayout = (options: DynamicLayoutOptions = {}): DynamicLay
   const panelRefs = useRef<Record<string, React.RefObject<HTMLElement>>>({});
 
   // Mobile-first 반응형 시스템에서 브레이크포인트 가져오기
-  const currentBreakpoint = mobileFirst ? mobileFirstSystem.breakpoint : 
-    (windowSize.width < breakpoints.mobile ? 'mobile' :
-     windowSize.width < breakpoints.tablet ? 'tablet' : 'desktop');
+  const currentBreakpoint: 'mobile' | 'tablet' | 'desktop' = mobileFirst 
+    ? (mobileFirstSystem.breakpoint === 'wide' ? 'desktop' : mobileFirstSystem.breakpoint) as 'mobile' | 'tablet' | 'desktop'
+    : (windowSize.width < breakpoints.mobile ? 'mobile' :
+       windowSize.width < breakpoints.tablet ? 'tablet' : 'desktop');
 
   const isCompactMode = mobileFirst ? mobileFirstSystem.isMobile : currentBreakpoint === 'mobile';
 
@@ -115,8 +116,11 @@ export const useDynamicLayout = (options: DynamicLayoutOptions = {}): DynamicLay
     }));
   }, []);
 
-  // Mobile-first 레이아웃 계산
-  const calculateLayout = useCallback((): LayoutConfig => {
+  // 레이아웃 업데이트 (디바운싱 추가)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      // Mobile-first 레이아웃 계산
+      const calculateLayout = (): LayoutConfig => {
     const totalPanels = Object.keys(panelMetrics).length;
     
     // Mobile-first 컬럼 구성
@@ -196,13 +200,14 @@ export const useDynamicLayout = (options: DynamicLayoutOptions = {}): DynamicLay
       gap,
       padding
     };
-  }, [panelMetrics, currentBreakpoint, minPanelHeight, maxPanelHeight, contentBasedHeight, responsiveGaps, mobileFirst, mobileFirstSystem]);
+  };
 
-  // 레이아웃 업데이트
-  useEffect(() => {
-    const newLayout = calculateLayout();
-    setLayoutConfig(newLayout);
-  }, [calculateLayout]);
+      const newLayout = calculateLayout();
+      setLayoutConfig(newLayout);
+    }, 100); // 100ms 디바운싱
+
+    return () => clearTimeout(timeoutId);
+  }, [panelMetrics, currentBreakpoint, minPanelHeight, maxPanelHeight, contentBasedHeight, responsiveGaps, mobileFirst]);
 
   return {
     layoutConfig,
@@ -258,21 +263,27 @@ export const usePanelMetrics = (
 
     setMetrics(newMetrics);
     updateMetrics(panelId, newMetrics);
-  }, [panelId, updateMetrics]);
+  }, [panelId]); // updateMetrics 의존성 제거하여 무한 루프 방지
 
   useEffect(() => {
     if (!ref.current) return;
 
-    const resizeObserver = new ResizeObserver(() => {
-      measureContent();
-    });
+    let timeoutId: NodeJS.Timeout;
+    
+    // 디바운싱된 측정 함수
+    const debouncedMeasure = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        measureContent();
+      }, 100); // 100ms 디바운싱
+    };
 
-    const mutationObserver = new MutationObserver(() => {
-      measureContent();
-    });
+    const resizeObserver = new ResizeObserver(debouncedMeasure);
+    const mutationObserver = new MutationObserver(debouncedMeasure);
 
-    resizeObserver.observe(ref.current);
-    mutationObserver.observe(ref.current, {
+    const element = ref.current;
+    resizeObserver.observe(element);
+    mutationObserver.observe(element, {
       childList: true,
       subtree: true,
       attributes: true
@@ -282,6 +293,7 @@ export const usePanelMetrics = (
     measureContent();
 
     return () => {
+      clearTimeout(timeoutId);
       resizeObserver.disconnect();
       mutationObserver.disconnect();
     };

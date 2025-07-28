@@ -4,7 +4,19 @@
  */
 
 import * as React from 'react';
-import { GameEvent, QueueEvent, QueueType, QueueItem } from '../types';
+import { QueueType, QueueItem } from '../types';
+
+// 게임 이벤트 타입 정의
+export interface GameEvent {
+  type: string;
+  timestamp: number;
+  data?: any;
+}
+
+export interface QueueEvent extends GameEvent {
+  queueType: QueueType;
+  item?: QueueItem;
+}
 
 // 이벤트 타입 매핑
 export interface EventMap {

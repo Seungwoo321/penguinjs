@@ -16,6 +16,7 @@ import { IntegratedCallStackBoard } from './IntegratedCallStackBoard'
 import { EnhancedCallStackBoard } from './EnhancedCallStackBoard'
 import { UniversalQueueBoard } from './UniversalQueueBoard'
 import { GameGuideModal } from './GameGuideModal'
+import { DebugInfoPanel } from './components/DebugInfoPanel'
 import { useLayoutType } from './hooks/useLayoutType'
 import { getDelay, AnimationSpeed } from './constants/animationConfig'
 import { LayoutRenderer } from './components/layout/LayoutRenderer'
@@ -78,6 +79,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
   const [showGuide, setShowGuide] = useState(false)
   const [hasSeenGuide, setHasSeenGuide] = useState(false)
+  const [seenStages, setSeenStages] = useState<Set<number>>(new Set())
   const abortControllerRef = useRef<AbortController | null>(null)
   const [microtaskQueue, setMicrotaskQueue] = useState<QueueItem[]>([])
   const [macrotaskQueue, setMacrotaskQueue] = useState<QueueItem[]>([])
@@ -285,6 +287,20 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       })
     }
   }, [urlDifficulty, urlStage, gameConfig.difficulty])
+  
+  // 난이도 전환 시점에 가이드 표시
+  useEffect(() => {
+    // 이미 본 스테이지인지 확인
+    if (!seenStages.has(currentStage)) {
+      // 처음 보는 스테이지면 추가
+      setSeenStages(prev => new Set(prev).add(currentStage))
+      
+      // 난이도 전환 시점(중급 시작: 9, 고급 시작: 17, 고급 새로운 큐 도입: 22, 고급 7: 23, 고급 8: 24)에 가이드 표시
+      if (currentStage === 9 || currentStage === 17 || currentStage === 22 || currentStage === 23 || currentStage === 24) {
+        setShowGuide(true)
+      }
+    }
+  }, [currentStage, seenStages])
   
   // 현재 레벨 변경 추적
   useEffect(() => {
@@ -649,27 +665,126 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       return
     }
 
-    // 간단한 검증: 각 큐에 적절한 함수들이 배치되었는지 확인
-    const hasValidCallStack = userQueueStates.callstack.length >= 0 // 콜스택은 비어있을 수 있음
-    const hasValidMicrotask = userQueueStates.microtask.length >= 0 // 마이크로태스크도 비어있을 수 있음  
-    const hasValidMacrotask = userQueueStates.macrotask.length >= 0 // 매크로태스크도 비어있을 수 있음
+    // 실제 검증: eventLoopStep의 beforeState 또는 afterState와 비교
+    const expectedStep = eventLoopSteps[step]
+    const expectedState = expectedStep.afterState || expectedStep.beforeState
+    
+    if (!expectedState) {
+      // 예상 상태가 없으면 기본 검증
+      const isValid = true
+      const feedbackMessage = '✅ 정답입니다!'
+      
+      const validationResult: QueueValidationResult = {
+        callstack: true,
+        microtask: true,
+        macrotask: true,
+        isValid,
+        message: feedbackMessage
+      }
+      
+      setQueueValidationResults(prev => ({
+        ...prev,
+        [step]: validationResult
+      }))
+      
+      dispatch({ type: ActionType.ADD_QUEUE_VALIDATION_RESULT, payload: { step, result: validationResult } })
+      
+      setMessage({
+        type: 'success',
+        text: feedbackMessage
+      })
+      
+      setTimeout(() => setMessage(null), 3000)
+      return
+    }
+    
+    // 각 큐별로 검증
+    const validateQueue = (queueName: string, userQueue: any[], expectedQueue: any[]) => {
+      if (userQueue.length !== expectedQueue.length) {
+        return false
+      }
+      
+      return userQueue.every((item, index) => {
+        const expected = expectedQueue[index]
+        // 함수 이름 비교 (functionName 또는 name 필드)
+        return (item.functionName || item.name) === (expected.functionName || expected.name || expected)
+      })
+    }
+    
+    // 사용자가 설정한 큐 상태와 예상 상태 비교
+    const callStackValid = validateQueue('callstack', 
+      userQueueStates.callstack || [], 
+      expectedState.callstack || []
+    )
+    const microtaskValid = validateQueue('microtask',
+      userQueueStates.microtask || [],
+      expectedState.microtask || []
+    )
+    const macrotaskValid = validateQueue('macrotask',
+      userQueueStates.macrotask || [],
+      expectedState.macrotask || []
+    )
+    
+    // 추가 큐 타입 검증 (Layout C, D)
+    let animationValid = true
+    let generatorValid = true
+    let ioValid = true
+    let workerValid = true
+    let priorityValid = true
+    
+    if (expectedState.animation !== undefined) {
+      animationValid = validateQueue('animation',
+        userQueueStates.animation || [],
+        expectedState.animation || []
+      )
+    }
+    
+    if (expectedState.generator !== undefined) {
+      generatorValid = validateQueue('generator',
+        userQueueStates.generator || [],
+        expectedState.generator || []
+      )
+    }
+    
+    if (expectedState.io !== undefined) {
+      ioValid = validateQueue('io',
+        userQueueStates.io || [],
+        expectedState.io || []
+      )
+    }
+    
+    if (expectedState.worker !== undefined) {
+      workerValid = validateQueue('worker',
+        userQueueStates.worker || [],
+        expectedState.worker || []
+      )
+    }
+    
+    if (expectedState.priority !== undefined) {
+      priorityValid = validateQueue('priority',
+        userQueueStates.priority || [],
+        expectedState.priority || []
+      )
+    }
 
-    // 기본적으로 구성되어 있으면 유효한 것으로 간주 (더 정교한 검증은 나중에 추가)
-    const callStackValid = hasValidCallStack
-    const microtaskValid = hasValidMicrotask
-    const macrotaskValid = hasValidMacrotask
-
-    const isValid = callStackValid && microtaskValid && macrotaskValid
+    const isValid = callStackValid && microtaskValid && macrotaskValid && 
+                   animationValid && generatorValid && ioValid && 
+                   workerValid && priorityValid
 
     // 구체적인 피드백 메시지 생성
     const errorMessages: string[] = []
     if (!callStackValid) errorMessages.push('콜스택')
-    if (!microtaskValid) errorMessages.push('마이크로태스크 큐')
-    if (!macrotaskValid) errorMessages.push('매크로태스크 큐')
+    if (!microtaskValid) errorMessages.push('마이크로태스크')
+    if (!macrotaskValid) errorMessages.push('매크로태스크')
+    if (!animationValid) errorMessages.push('애니메이션')
+    if (!generatorValid) errorMessages.push('제너레이터')
+    if (!ioValid) errorMessages.push('I/O')
+    if (!workerValid) errorMessages.push('워커')
+    if (!priorityValid) errorMessages.push('우선순위')
     
     const feedbackMessage = isValid 
-      ? '✅ 정답입니다!' 
-      : `❌ ${errorMessages.join(', ')} 상태를 확인해보세요.`
+      ? '✅ 정답입니다! 모든 큐가 올바르게 구성되었습니다.' 
+      : `❌ ${errorMessages.join(', ')} 큐의 상태를 다시 확인해주세요.`
 
     const validationResult: QueueValidationResult = {
       callstack: callStackValid,
@@ -929,8 +1044,8 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       const allFunctions = Array.from(functionStarts).concat(Array.from(functionEnds))
       
       setAvailableFunctions(allFunctions.map(name => ({ name })))
-    } else if (layoutType === 'B') {
-      // Layout B (고급 21-22): 큐 타입 정보 포함
+    } else if (layoutType === 'B' || layoutType === 'C' || layoutType === 'D') {
+      // Layout B, C, D: 큐 타입 정보 포함
       if (level.functionCalls) {
         const funcsWithQueue: {name: string, queueType?: QueueType}[] = []
         const seen = new Set<string>()
@@ -989,13 +1104,16 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       gameEngine.resetGameState()
       setGameState(gameEngine.getGameState())
       
-      // 타입 E 상태 초기화
+      // 타입 E 상태 완전 초기화
       setUserSnapshots({})
       setCurrentStep(0)
       setValidationResults({})
       setIsTimelinePlaying(false)
+      setCallstackHistory([])
+      setBreakpoints([])
+      setExecutionPath([])
       
-      // Layout B 상태 초기화
+      // Layout B 상태 완전 초기화
       setQueueStates({})
       setCurrentQueueStates(createEmptyQueueSnapshot(0))
       setEventLoopSteps([])
@@ -1708,9 +1826,11 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         isOpen={showGuide}
         onClose={() => setShowGuide(false)}
         onStart={() => setShowGuide(false)}
+        layoutType={currentLayoutType}
+        currentStage={currentStage}
       />
       <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto p-4">
+        <div className="w-full p-4">
           {!mounted || !currentLevel ? (
             <div className="flex items-center justify-center h-96">
               <div className="text-center">
@@ -1851,8 +1971,8 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               </div>
             </div>
             
-            {/* 함수 목록이 로드될 때까지 대기 (타입 B, E는 함수 목록 불필요) */}
-            {(currentLayoutType === 'B' || currentLayoutType === 'E') || availableFunctions.length > 0 ? (
+            {/* 함수 목록이 로드될 때까지 대기 (타입 B, C, D, E는 함수 목록 불필요) */}
+            {(['B', 'C', 'D', 'E'].includes(currentLayoutType)) || availableFunctions.length > 0 ? (
               <LayoutRenderer
                 layoutType={currentLayoutType}
                 gameData={gameData}
@@ -2626,6 +2746,40 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           )}
         </div>
       </div>
+      
+      {/* 디버그 정보 패널 */}
+      <DebugInfoPanel
+        layoutType={currentLayoutType}
+        breakpoint={
+          typeof window !== 'undefined' 
+            ? window.innerWidth >= 1280 ? 'xl' 
+            : window.innerWidth >= 1024 ? 'lg' 
+            : window.innerWidth >= 768 ? 'md' 
+            : window.innerWidth >= 640 ? 'sm' 
+            : 'xs'
+            : 'lg'
+        }
+        queueItems={
+          (currentQueueStates?.callstack?.length || 0) +
+          (currentQueueStates?.microtask?.length || 0) +
+          (currentQueueStates?.macrotask?.length || 0) +
+          (currentQueueStates?.animation?.length || 0) +
+          (currentQueueStates?.generator?.length || 0) +
+          (currentQueueStates?.io?.length || 0) +
+          (currentQueueStates?.worker?.length || 0) +
+          gameState.currentStack.length +
+          microtaskQueue.length +
+          macrotaskQueue.length
+        }
+        currentStep={currentStep}
+        totalSteps={
+          eventLoopSteps?.length || 
+          currentLevel?.executionSteps?.length || 
+          currentLevel?.simulationSteps?.length || 
+          0
+        }
+        memoryPressure={false}
+      />
     </React.Fragment>
   )
 }

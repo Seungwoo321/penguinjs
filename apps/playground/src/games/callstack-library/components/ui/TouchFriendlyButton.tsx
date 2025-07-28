@@ -175,13 +175,7 @@ export const TouchFriendlyButton = forwardRef<HTMLButtonElement, TouchFriendlyBu
     width: fullWidth ? '100%' : 'auto',
     position: 'relative',
     overflow: 'hidden',
-    outline: 'none',
-    
-    // 포커스 스타일 (접근성) - 테마별 색상
-    '&:focus-visible': {
-      outline: `2px solid ${libraryTheme.getQueueBorder(themeColor, 'focus')}`,
-      outlineOffset: '2px'
-    }
+    outline: 'none'
   };
 
   // 터치 이벤트 핸들러
@@ -224,6 +218,21 @@ export const TouchFriendlyButton = forwardRef<HTMLButtonElement, TouchFriendlyBu
     ...motionProps
   };
 
+  // framer motion과 충돌하는 props 분리
+  const { 
+    onAnimationStart, 
+    onAnimationEnd, 
+    onDragStart,
+    onDragEnd,
+    onDrag,
+    onDragEnter,
+    onDragExit,
+    onDragLeave,
+    onDragOver,
+    onDrop,
+    ...safeProps 
+  } = props;
+  
   return (
     <motion.button
       ref={ref}
@@ -236,7 +245,7 @@ export const TouchFriendlyButton = forwardRef<HTMLButtonElement, TouchFriendlyBu
       aria-pressed={isPressed}
       aria-disabled={disabled || loading}
       {...motionConfig}
-      {...props}
+      {...safeProps}
     >
       {/* 로딩 인디케이터 */}
       {loading && (

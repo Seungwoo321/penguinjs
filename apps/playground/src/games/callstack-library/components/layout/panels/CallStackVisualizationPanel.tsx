@@ -78,7 +78,9 @@ const SingleCallStackVisualization: React.FC<{
                   className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 border border-gray-200 dark:border-gray-700"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-sm">{item.name || item.functionName || item}</span>
+                    <span className="font-mono text-sm">{
+                      typeof item === 'string' ? item : (item.name || item.functionName || 'Unknown')
+                    }</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">#{callstack.length - index}</span>
                   </div>
                   {layoutType === 'A+' && item.startEnd && (

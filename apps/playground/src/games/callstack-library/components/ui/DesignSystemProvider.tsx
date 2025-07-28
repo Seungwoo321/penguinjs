@@ -53,34 +53,24 @@ export const DesignSystemProvider: React.FC<DesignSystemProviderProps> = ({
     []
   );
 
-  // 컨텍스트 값
+  // 컨텍스트 값 (얕은 비교로 최적화)
   const contextValue = useMemo(() => ({
     theme,
     updateTheme,
     designTokens,
-  }), [theme, updateTheme, designTokens]);
+  }), [theme.mode, theme.reducedMotion, theme.highContrast, updateTheme, designTokens]);
 
-  // 전역 스타일 주입
-  useEffect(() => {
-    if (!injectGlobalStyles) return;
-
-    const styleId = 'callstack-library-design-system';
-    let styleElement = document.getElementById(styleId) as HTMLStyleElement;
-
-    if (!styleElement) {
-      styleElement = document.createElement('style');
-      styleElement.id = styleId;
-      document.head.appendChild(styleElement);
-    }
-
+  // 전역 스타일 주입 (메모이제이션으로 최적화)
+  const globalStyles = useMemo(() => {
+    if (!injectGlobalStyles) return '';
+    
     // CSS 변수 생성
     const themeVariables = designTokens.getThemeVariables();
     const cssVariables = Object.entries(themeVariables)
       .map(([key, value]) => `${key}: ${value}`)
       .join(';\n  ');
 
-    // 글로벌 스타일 정의
-    const globalStyles = `
+    return `
       :root {
         ${cssVariables};
         
@@ -321,15 +311,31 @@ export const DesignSystemProvider: React.FC<DesignSystemProviderProps> = ({
         .ds-desktop\\:text-lg { font-size: ${designSystem.typography.fontSize.lg.desktop}; }
       }
     `;
+  }, [designTokens, injectGlobalStyles, theme.mode]);
 
-    styleElement.textContent = globalStyles;
+  useEffect(() => {
+    if (!injectGlobalStyles || !globalStyles) return;
+
+    const styleId = 'callstack-library-design-system';
+    let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = styleId;
+      document.head.appendChild(styleElement);
+    }
+
+    // 스타일이 실제로 변경된 경우에만 업데이트
+    if (styleElement.textContent !== globalStyles) {
+      styleElement.textContent = globalStyles;
+    }
 
     return () => {
       if (styleElement && styleElement.parentNode) {
         styleElement.parentNode.removeChild(styleElement);
       }
     };
-  }, [designTokens, injectGlobalStyles]);
+  }, [globalStyles, injectGlobalStyles]);
 
   // HTML 데이터 속성 설정 (테마 변경 시)
   useEffect(() => {

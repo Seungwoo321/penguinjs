@@ -459,7 +459,7 @@ export class PluginRegistry extends EventEmitter {
     const dependencies = this.pluginDependencies.get(pluginId);
     if (!dependencies) return;
 
-    for (const depId of dependencies) {
+    for (const depId of Array.from(dependencies)) {
       const depMetadata = this.plugins.get(depId);
       if (!depMetadata) {
         throw new Error(`Dependency ${depId} not found`);
@@ -477,7 +477,7 @@ export class PluginRegistry extends EventEmitter {
     const dependents = this.pluginDependents.get(pluginId);
     if (!dependents) return;
 
-    for (const depId of dependents) {
+    for (const depId of Array.from(dependents)) {
       await this.deactivatePlugin(depId);
     }
   }

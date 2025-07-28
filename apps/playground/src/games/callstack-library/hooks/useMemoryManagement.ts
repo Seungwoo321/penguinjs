@@ -36,8 +36,8 @@ export const useMemoryManagement = (
 ): UseMemoryManagementResult => {
   const {
     enableMonitoring = process.env.NODE_ENV === 'development',
-    leakThreshold = 50, // 50MB
-    cleanupInterval = 30000, // 30초
+    leakThreshold = 100, // 100MB (더 관대하게)
+    cleanupInterval = 60000, // 60초 (주기 늘림)
     maxComponentAge = 300000 // 5분
   } = options;
 
@@ -47,7 +47,7 @@ export const useMemoryManagement = (
 
   const cleanupFunctionsRef = useRef<Set<() => void>>(new Set());
   const componentTimestampRef = useRef(Date.now());
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const observersRef = useRef<{
     mutation?: MutationObserver;
     intersection?: IntersectionObserver;

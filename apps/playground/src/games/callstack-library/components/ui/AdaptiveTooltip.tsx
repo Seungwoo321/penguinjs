@@ -39,7 +39,7 @@ export const AdaptiveTooltip: React.FC<AdaptiveTooltipProps> = ({
   const [position, setPosition] = useState<TooltipPosition>({ top: 0, left: 0, placement: 'top' });
   const triggerRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 툴팁 위치 계산
   const calculatePosition = (): TooltipPosition => {
@@ -57,7 +57,7 @@ export const AdaptiveTooltip: React.FC<AdaptiveTooltipProps> = ({
     const spacing = 8; // 툴팁과 요소 간 간격
 
     // 자동 배치 로직
-    let finalPlacement = placement;
+    let finalPlacement: 'top' | 'bottom' | 'left' | 'right' = placement === 'auto' ? 'top' : placement;
     if (placement === 'auto') {
       // 공간이 가장 넓은 곳을 선택
       const spaces = {
@@ -68,7 +68,7 @@ export const AdaptiveTooltip: React.FC<AdaptiveTooltipProps> = ({
       };
       
       finalPlacement = Object.entries(spaces).reduce((max, [key, value]) => 
-        value > spaces[max] ? key as any : max, 'top'
+        value > spaces[max] ? key as 'top' | 'bottom' | 'left' | 'right' : max, 'top' as 'top' | 'bottom' | 'left' | 'right'
       );
     }
 
@@ -156,7 +156,7 @@ export const AdaptiveTooltip: React.FC<AdaptiveTooltipProps> = ({
   }, []);
 
   // children에 이벤트 핸들러 추가
-  const childWithHandlers = React.cloneElement(children, {
+  const childWithHandlers = React.cloneElement(children as React.ReactElement<any>, {
     ref: triggerRef,
     onMouseEnter: handleMouseEnter,
     onMouseLeave: handleMouseLeave,

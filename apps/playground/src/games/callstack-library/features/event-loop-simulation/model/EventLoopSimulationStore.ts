@@ -73,6 +73,7 @@ export interface SimulationActions {
   addBreakpoint: (condition: string, value: any) => void;
   removeBreakpoint: (index: number) => void;
   toggleBreakpoint: (index: number) => void;
+  checkBreakpoints: () => boolean;
   
   // 상태 새로고침
   refreshState: () => Promise<void>;
@@ -437,7 +438,7 @@ export const useEventLoopSimulationStore = create<SimulationState & SimulationAc
           
           if (result.success) {
             set((state) => {
-              state.eventLoopState = result.data.eventLoopState;
+              state.eventLoopState = (result.data as any).eventLoopState;
               state.error = null;
             });
           }

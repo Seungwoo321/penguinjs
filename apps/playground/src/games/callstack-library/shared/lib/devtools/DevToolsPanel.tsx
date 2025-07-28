@@ -16,9 +16,12 @@ import React, {
 import { cn } from '@penguinjs/ui';
 
 import { CQRSEventLoopService } from '../cqrs';
-import { WorkerManager } from '../workers';
+// import { WorkerManager } from '../workers'; // TODO: WorkerManager 구현 필요
 import { PluginRegistry } from '../plugin-system';
 import { VirtualizedEventList } from '../virtualization';
+
+// 임시 타입 정의
+type WorkerManager = any;
 
 // DevTools 패널 타입
 export type DevToolsPanel = 
@@ -86,7 +89,7 @@ export const DevToolsPanel: React.FC<{
   });
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const refreshIntervalRef = useRef<number>();
+  const refreshIntervalRef = useRef<number | undefined>(undefined);
 
   // 데이터 새로고침
   const refreshData = useCallback(async () => {
@@ -106,7 +109,7 @@ export const DevToolsPanel: React.FC<{
             cqrsService.getPerformanceMetrics()
           ]);
 
-          newData.events = events.data || [];
+          newData.events = Array.isArray(events.data) ? events.data : [];
           newData.currentState = state.data;
           newData.performanceMetrics = metrics.data;
         } catch (error) {

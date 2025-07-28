@@ -215,7 +215,38 @@ export const useCallStackLibraryTheme = (
     getQueueTheme: (queueType: CallStackQueueType) => {
       const baseTheme = getCallStackQueueTheme(queueType)
       
-      if (enforceAccessibility && accessibleColors.libraryColors[queueType]) {
+      // baseTheme이 null이거나 undefined인 경우 방어 처리
+      if (!baseTheme || !baseTheme.background) {
+        // console.warn(`Invalid theme for queue type: ${queueType}`)
+        return {
+          primary: '#000000',
+          secondary: '#333333',
+          accent: '#666666',
+          background: {
+            light: '#ffffff',
+            main: '#f8f8f8',
+            dark: '#f0f0f0'
+          },
+          text: {
+            primary: '#000000',
+            secondary: '#333333',
+            contrast: '#ffffff'
+          },
+          gradients: {
+            main: 'linear-gradient(to bottom, #000000, #333333)',
+            light: 'linear-gradient(to right, #ffffff, #f8f8f8)',
+            button: 'linear-gradient(to right, #333333, #666666)',
+            hover: 'linear-gradient(to right, #000000, #333333)'
+          },
+          border: {
+            main: '#666666',
+            light: '#999999',
+            focus: '#333333'
+          }
+        }
+      }
+      
+      if (enforceAccessibility && accessibleColors?.libraryColors?.[queueType]) {
         const accessibleTheme = accessibleColors.libraryColors[queueType]
         return {
           ...baseTheme,
@@ -255,21 +286,21 @@ export const useCallStackLibraryTheme = (
       }
     },
     getQueueColor: (queueType: CallStackQueueType, variant?: keyof CallStackQueueTheme['gradients']) => {
-      if (enforceAccessibility && accessibleColors.libraryColors[queueType]) {
+      if (enforceAccessibility && accessibleColors?.libraryColors?.[queueType]) {
         return accessibleColors.libraryColors[queueType].background
       }
       const color = getCallStackQueueColor(queueType, variant)
       return adjustColorForMode(color, variant === 'light' || variant === 'main')
     },
     getQueueBorder: (queueType: CallStackQueueType, variant?: keyof CallStackQueueTheme['border']) => {
-      if (enforceAccessibility && accessibleColors.libraryColors[queueType]) {
+      if (enforceAccessibility && accessibleColors?.libraryColors?.[queueType]) {
         return accessibleColors.libraryColors[queueType].border
       }
       const color = getCallStackQueueBorder(queueType, variant)
       return adjustColorForMode(color)
     },
     getQueueText: (queueType: CallStackQueueType, variant?: keyof CallStackQueueTheme['text']) => {
-      if (enforceAccessibility && accessibleColors.libraryColors[queueType]) {
+      if (enforceAccessibility && accessibleColors?.libraryColors?.[queueType]) {
         return variant === 'secondary' 
           ? accessibleColors.theme.text.secondary
           : accessibleColors.libraryColors[queueType].text

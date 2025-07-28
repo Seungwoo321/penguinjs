@@ -3,7 +3,7 @@ import { cn, CodeEditor, GamePanel } from '@penguinjs/ui'
 import { getLayoutConfig } from '../../utils/layoutClassifier'
 import { HintPanel } from './panels/HintPanel'
 import { EvaluationPanel } from './panels/EvaluationPanel'
-import { MultiQueueVisualizationPanel } from './panels/MultiQueueVisualizationPanel'
+import { EnhancedMultiQueueVisualizationPanel } from './panels/EnhancedMultiQueueVisualizationPanel'
 import { QueueSnapshotBuilderPanel } from './panels/QueueSnapshotBuilderPanel'
 import { useDynamicLayout, usePanelMetrics, createGridStyles, createPanelStyles } from '../../hooks/useDynamicLayout'
 import { useMemoryManagement, useLeakDetection } from '../../hooks/useMemoryManagement'
@@ -12,15 +12,17 @@ import { gameEvents } from '../../utils/eventSystem'
 import { QueueType } from '../../types'
 
 /**
- * Layout B 전용 동적 레이아웃 렌더러
+ * Layout C, D 전용 동적 레이아웃 렌더러
+ * Layout B의 UI 스타일을 참고하여 5-6개 큐를 지원
  */
-interface LayoutBRendererProps {
+interface LayoutCDRendererProps {
+  layoutType: 'C' | 'D';
   gameData: any;
   gameHandlers: any;
   className?: string;
 }
 
-export const LayoutBRenderer: React.FC<LayoutBRendererProps> = memo(({ gameData, gameHandlers, className }) => {
+export const LayoutCDRenderer: React.FC<LayoutCDRendererProps> = memo(({ layoutType, gameData, gameHandlers, className }) => {
   // Context API 사용으로 prop drilling 해결
   const { state, dispatch } = useCallStackLibraryContext();
   
@@ -28,7 +30,7 @@ export const LayoutBRenderer: React.FC<LayoutBRendererProps> = memo(({ gameData,
   const { isMemoryPressure } = useMemoryManagement({
     enableMonitoring: process.env.NODE_ENV === 'development'
   })
-  useLeakDetection('LayoutBRenderer')
+  useLeakDetection('LayoutCDRenderer')
   
   // 동적 레이아웃 설정
   const dynamicLayout = useDynamicLayout({
@@ -50,22 +52,35 @@ export const LayoutBRenderer: React.FC<LayoutBRendererProps> = memo(({ gameData,
     [dynamicLayout.layoutConfig]
   )
   const config = useMemo(
-    () => getLayoutConfig('B'),
-    []
+    () => getLayoutConfig(layoutType),
+    [layoutType]
+  )
+  
+  // 레이아웃별 큐 타입
+  const queueTypes = useMemo(
+    () => layoutType === 'C' 
+      ? ['callstack', 'microtask', 'macrotask', 'animation', 'generator'] as const
+      : ['callstack', 'microtask', 'macrotask', 'animation', 'io', 'worker'] as const,
+    [layoutType]
   )
   
   // 대시보드 데이터 메모이제이션
   const dashboardData = useMemo(
-    () => ({
-      totalItems: (gameData?.currentQueueStates?.callstack?.length || 0) +
-                  (gameData?.currentQueueStates?.microtask?.length || 0) +
-                  (gameData?.currentQueueStates?.macrotask?.length || 0),
-      currentStep: gameData?.currentStep || 0,
-      totalSteps: gameData?.eventLoopSteps?.length || gameData?.executionSteps?.length || 0,
-      isExecuting: gameData?.isExecuting || false,
-      memoryPressure: isMemoryPressure
-    }),
-    [gameData?.currentQueueStates, gameData?.currentStep, gameData?.eventLoopSteps, gameData?.executionSteps, gameData?.isExecuting, isMemoryPressure]
+    () => {
+      const states = gameData?.currentQueueStates || {};
+      const totalItems = queueTypes.reduce((sum, queueType) => 
+        sum + (states[queueType]?.length || 0), 0
+      );
+      
+      return {
+        totalItems,
+        currentStep: gameData?.currentStep || 0,
+        totalSteps: gameData?.eventLoopSteps?.length || gameData?.executionSteps?.length || 0,
+        isExecuting: gameData?.isExecuting || false,
+        memoryPressure: isMemoryPressure
+      }
+    },
+    [gameData?.currentQueueStates, gameData?.currentStep, gameData?.eventLoopSteps, gameData?.executionSteps, gameData?.isExecuting, isMemoryPressure, queueTypes]
   )
 
   return (
@@ -88,20 +103,20 @@ export const LayoutBRenderer: React.FC<LayoutBRendererProps> = memo(({ gameData,
           </GamePanel>
         </div>
         
-        {/* 📚 큐 시각화 패널 */}
+        {/* 📚 다중 큐 시각화 패널 */}
         <div
           ref={queueVisualizationMetrics.ref as any}
           data-panel-id="queue-visualization"
           style={createPanelStyles(dynamicLayout.layoutConfig, queueVisualizationMetrics.metrics.overflowing)}
         >
-          <MultiQueueVisualizationPanel
-            queueStates={state.currentQueueStates || gameData.currentQueueStates || {
-              callstack: [],
-              microtask: [],
-              macrotask: [],
-              step: 0,
-              timestamp: 0
-            }}
+          <EnhancedMultiQueueVisualizationPanel
+            queueTypes={queueTypes}
+            queueStates={state.currentQueueStates || gameData.currentQueueStates || 
+              queueTypes.reduce((acc, type) => ({ ...acc, [type]: [] }), {
+                step: 0,
+                timestamp: 0
+              } as any)
+            }
             isExecuting={state.gameState === 'playing' || gameData.isExecuting || false}
             highlightedQueue={state.highlightedQueue || gameData.highlightedQueue}
             onQueueItemClick={(queueType, item) => {
@@ -139,6 +154,7 @@ export const LayoutBRenderer: React.FC<LayoutBRendererProps> = memo(({ gameData,
             }}
             validationResults={state.queueValidationResults || gameData.queueValidationResults || {}}
             availableFunctions={gameData.availableFunctions}
+            queueTypes={queueTypes as any}
             className="h-full"
           />
         </div>
@@ -154,35 +170,9 @@ export const LayoutBRenderer: React.FC<LayoutBRendererProps> = memo(({ gameData,
         />
       )}
       
-      {/* 성능 대시보드 (개발 모드) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="p-3 rounded-lg text-xs font-mono bg-gray-100 dark:bg-gray-800">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">레이아웃:</span>
-              <span className="ml-2 font-bold">{dynamicLayout.currentBreakpoint}</span>
-            </div>
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">아이템:</span>
-              <span className="ml-2 font-bold">{dashboardData.totalItems}</span>
-            </div>
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">단계:</span>
-              <span className="ml-2 font-bold">{dashboardData.currentStep}/{dashboardData.totalSteps}</span>
-            </div>
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">메모리:</span>
-              <span className={cn("ml-2 font-bold", dashboardData.memoryPressure ? 'text-red-500' : 'text-green-500')}>
-                {dashboardData.memoryPressure ? 'HIGH' : 'OK'}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-      
       {/* 📊 하단 평가 패널 */}
       <EvaluationPanel
-        layoutType="B"
+        layoutType={layoutType}
         evaluation={config.evaluation}
         userAnswer={gameData.userAnswer}
         onSubmit={gameHandlers.onSubmit}
@@ -198,4 +188,4 @@ export const LayoutBRenderer: React.FC<LayoutBRendererProps> = memo(({ gameData,
   );
 });
 
-LayoutBRenderer.displayName = 'LayoutBRenderer'
+LayoutCDRenderer.displayName = 'LayoutCDRenderer'

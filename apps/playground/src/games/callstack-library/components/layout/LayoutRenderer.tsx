@@ -16,6 +16,7 @@ import { QueueSnapshotBuilderPanel } from './panels/QueueSnapshotBuilderPanel'
 import { usePerformanceOptimization } from '../../hooks/usePerformanceOptimization'
 import { useMemoryManagement, useLeakDetection } from '../../hooks/useMemoryManagement'
 import { LayoutBRenderer } from './LayoutBRenderer'
+import { LayoutCDRenderer } from './LayoutCDRenderer'
 
 /**
  * 레이아웃 타입에 따라 동적으로 컴포넌트를 렌더링하는 시스템
@@ -59,6 +60,11 @@ export const LayoutRenderer: React.FC<LayoutRendererProps> = memo(({
   // Layout B는 동적 그리드 구조 사용 (책장 컨셉) - Hook 호출 후 조건부 렌더링
   if (layoutType === 'B') {
     return <LayoutBRenderer gameData={gameData} gameHandlers={gameHandlers} className={className} />;
+  }
+  
+  // Layout C, D는 향상된 다중 큐 시각화 사용 (5-6개 큐 지원)
+  if (layoutType === 'C' || layoutType === 'D') {
+    return <LayoutCDRenderer layoutType={layoutType} gameData={gameData} gameHandlers={gameHandlers} className={className} />;
   }
 
   return (
@@ -215,7 +221,28 @@ const RightPanel: React.FC<RightPanelProps> = ({
       )
     }
     
-    // 기본: 기존 스냅샷 빌더 (C, D)
+    // 타입 C, D: 다중 큐 스냅샷 빌더
+    if (layoutType === 'C' || layoutType === 'D') {
+      const queueTypes = layoutType === 'C' 
+        ? ['callstack', 'microtask', 'macrotask', 'animation', 'generator']
+        : ['callstack', 'microtask', 'macrotask', 'animation', 'io', 'worker']
+      
+      return (
+        <QueueSnapshotBuilderPanel
+          executionSteps={gameData.eventLoopSteps || []}
+          currentStep={gameData.currentStep || 0}
+          queueStates={gameData.queueStates || {}}
+          onQueueStateChange={gameHandlers.onQueueStateChange || (() => {})}
+          onValidateQueueStep={gameHandlers.onValidateQueueStep || (() => {})}
+          validationResults={gameData.queueValidationResults || {}}
+          availableFunctions={gameData.availableFunctions}
+          queueTypes={queueTypes}
+          className={className}
+        />
+      )
+    }
+    
+    // 기본: 기존 스냅샷 빌더
     return (
       <SnapshotBuilderPanel
         executionSteps={gameData.executionSteps || []}

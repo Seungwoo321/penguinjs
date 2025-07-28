@@ -89,7 +89,7 @@ const commandHandlers: Record<string, (message: WorkerMessage) => Promise<void>>
         enableMetrics: true
       });
 
-      await workerState.cqrsService.initialize?.();
+      // await workerState.cqrsService.initialize?.(); // CQRSEventLoopService에 initialize 메서드가 없음
       
       sendResponse(message.id, 'INITIALIZE', true, { initialized: true });
     } catch (error) {
@@ -104,30 +104,30 @@ const commandHandlers: Record<string, (message: WorkerMessage) => Promise<void>>
         throw new Error('Service not initialized');
       }
 
-      const { commandType, args } = message.payload;
+      const { commandType, args = [] } = message.payload;
       let result;
 
       switch (commandType) {
         case 'pushFunction':
-          result = await workerState.cqrsService.pushFunction(...args);
+          result = await workerState.cqrsService.pushFunction(args[0], args[1]);
           break;
         case 'popFunction':
           result = await workerState.cqrsService.popFunction();
           break;
         case 'enqueueMicrotask':
-          result = await workerState.cqrsService.enqueueMicrotask(...args);
+          result = await workerState.cqrsService.enqueueMicrotask(args[0]);
           break;
         case 'enqueueMacrotask':
-          result = await workerState.cqrsService.enqueueMacrotask(...args);
+          result = await workerState.cqrsService.enqueueMacrotask(args[0], args[1]);
           break;
         case 'executeTick':
-          result = await workerState.cqrsService.executeTick(...args);
+          result = await workerState.cqrsService.executeTick();
           break;
         case 'resetEngine':
-          result = await workerState.cqrsService.resetEngine(...args);
+          result = await workerState.cqrsService.resetEngine();
           break;
         case 'rewindToTick':
-          result = await workerState.cqrsService.rewindToTick(...args);
+          result = await workerState.cqrsService.rewindToTick(args[0]);
           break;
         default:
           throw new Error(`Unknown command type: ${commandType}`);

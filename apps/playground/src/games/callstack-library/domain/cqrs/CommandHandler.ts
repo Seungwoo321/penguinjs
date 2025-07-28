@@ -214,16 +214,11 @@ export class EventLoopCommandHandler implements ICommandHandler {
           break;
           
         case 'RewindToTick':
-        case 'REWIND_TO_TICK':
           engineResult = await this.handleRewindToTick(command as RewindToTickCommand, context);
-          break;
-        
-        case 'SET_BREAKPOINT':
-          engineResult = await this.handleSetBreakpoint(command as SetBreakpointCommand, context);
           break;
           
         default:
-          throw new Error(`Unsupported command type: ${command.type}`);
+          throw new Error(`Unsupported command type: ${(command as any).type}`);
       }
 
       const executionTime = performance.now() - startTime;
@@ -328,7 +323,8 @@ export class EventLoopCommandHandler implements ICommandHandler {
       name: taskName,
       source,
       delay,
-      type: 'macrotask'
+      type: 'macrotask',
+      priority: 'normal' as any
     });
   }
 

@@ -539,7 +539,7 @@ dangerousRecursion(3);`,
     explanation: '실제 시스템에서는 다양한 큐들이 협력하여 효율적인 작업 처리를 제공합니다.',
     difficulty: 'advanced',
     stageNumber: 22,
-    layoutType: 'E' as const,
+    layoutType: 'B' as const,
     queueTypes: ['callstack', 'microtask', 'macrotask', 'priority', 'animation'],
     code: `console.log("1: 동기 시작");
 
@@ -629,7 +629,65 @@ console.log("1.5: 동기 끝");`,
       '애니메이션 프레임이 매크로태스크보다 우선순위가 높습니다.',
       '모든 출력의 순서를 주의깊게 관찰하세요.'
     ],
-    concepts: ['큐 우선순위', '이벤트 루프', '복합 시스템', '실행 순서 예측', '브라우저 스케줄링']
+    concepts: ['큐 우선순위', '이벤트 루프', '복합 시스템', '실행 순서 예측', '브라우저 스케줄링'],
+    eventLoopSteps: [
+      {
+        stepNumber: 0,
+        description: "초기 상태 - 프로그램 시작",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: []
+        },
+        afterState: {
+          callstack: ['<global>'],
+          microtask: [],
+          macrotask: []
+        }
+      },
+      {
+        stepNumber: 1,
+        description: "비동기 작업 등록",
+        beforeState: {
+          callstack: ['<global>'],
+          microtask: [],
+          macrotask: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['then-callback'],
+          macrotask: ['timer-callback']
+        }
+      },
+      {
+        stepNumber: 2,
+        description: "마이크로태스크 처리",
+        beforeState: {
+          callstack: [],
+          microtask: ['then-callback'],
+          macrotask: ['timer-callback']
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['microtask-callback'],
+          macrotask: ['timer-callback']
+        }
+      },
+      {
+        stepNumber: 3,
+        description: "매크로태스크 처리",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback']
+        },
+        afterState: {
+          callstack: [],
+          microtask: [],
+          macrotask: []
+        }
+      }
+    ]
   },
   {
     id: 'advanced-7',
@@ -638,7 +696,7 @@ console.log("1.5: 동기 끝");`,
     explanation: '실제 애플리케이션에서 사용되는 고급 비동기 패턴을 이해해보세요.',
     difficulty: 'advanced',
     stageNumber: 23,
-    layoutType: 'E' as const,
+    layoutType: 'C' as const,
     queueTypes: ['callstack', 'microtask', 'macrotask', 'animation'],
     code: `async function fetchData() {
   console.log("1: 비동기 함수 시작");
@@ -685,7 +743,117 @@ console.log("1.5: 동기 코드 완료");`,
       'await는 현재 함수를 일시정지시킵니다.',
       'Promise가 resolve되면 마이크로태스크 큐에 추가됩니다.'
     ],
-    concepts: ['async/await', 'Promise', '이벤트 루프', '함수 일시정지/재개']
+    concepts: ['async/await', 'Promise', '이벤트 루프', '함수 일시정지/재개'],
+    functionCalls: [
+      {
+        name: '<global>',
+        queueType: 'callstack',
+        calls: [
+          { name: 'console.log', params: ['0: 프로그램 시작'], queueType: 'callstack' },
+          { name: 'fetchData', queueType: 'callstack' },
+          { name: 'console.log', params: ['1.5: 동기 코드 완료'], queueType: 'callstack' }
+        ]
+      },
+      {
+        name: 'fetchData',
+        queueType: 'callstack',
+        calls: [
+          { name: 'console.log', params: ['1: 비동기 함수 시작'], queueType: 'callstack' },
+          { name: 'Promise', queueType: 'callstack' },
+          { name: 'console.log', params: ['2: Promise 생성 완료'], queueType: 'callstack' },
+          { name: 'await', queueType: 'callstack' }
+        ]
+      },
+      {
+        name: 'timer-callback',
+        queueType: 'macrotask',
+        calls: [
+          { name: 'console.log', params: ['3: 타이머 콜백'], queueType: 'macrotask' },
+          { name: 'resolve', queueType: 'macrotask' }
+        ]
+      },
+      {
+        name: 'fetchData-resume',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['4: 결과 받음'], queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'then-callback',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['5: 최종 처리'], queueType: 'microtask' }
+        ]
+      }
+    ],
+    expectedOrder: ['<global>', 'console.log', 'fetchData', 'console.log', 'Promise', 'console.log', 'await', 'console.log', 'timer-callback', 'console.log', 'resolve', 'fetchData-resume', 'console.log', 'then-callback', 'console.log'],
+    eventLoopSteps: [
+      {
+        stepNumber: 0,
+        description: "초기 상태 - async/await 시작",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: [],
+          animation: []
+        },
+        afterState: {
+          callstack: ['<global>', 'fetchData'],
+          microtask: [],
+          macrotask: [],
+          animation: []
+        }
+      },
+      {
+        stepNumber: 1,
+        description: "Promise 생성 및 타이머 등록",
+        beforeState: {
+          callstack: ['<global>', 'fetchData'],
+          microtask: [],
+          macrotask: [],
+          animation: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: []
+        }
+      },
+      {
+        stepNumber: 2,
+        description: "타이머 콜백 실행 및 resolve",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['fetchData-resume'],
+          macrotask: [],
+          animation: []
+        }
+      },
+      {
+        stepNumber: 3,
+        description: "async 함수 재개 및 then 처리",
+        beforeState: {
+          callstack: [],
+          microtask: ['fetchData-resume'],
+          macrotask: [],
+          animation: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['then-callback'],
+          macrotask: [],
+          animation: []
+        }
+      }
+    ]
   },
   {
     id: 'advanced-8',
@@ -694,8 +862,8 @@ console.log("1.5: 동기 코드 완료");`,
     explanation: '실제 브라우저 환경에서 일어나는 복잡한 스케줄링을 완벽히 이해해보세요.',
     difficulty: 'advanced',
     stageNumber: 24,
-    layoutType: 'E' as const,
-    queueTypes: ['callstack', 'microtask', 'macrotask', 'animation', 'priority'],
+    layoutType: 'D' as const,
+    queueTypes: ['callstack', 'microtask', 'macrotask', 'animation', 'io', 'worker'],
     code: `console.log("1: 시작");
 
 // 즉시 실행
@@ -749,6 +917,167 @@ console.log("2: 동기 완료");`,
       '매크로태스크 실행 후에도 마이크로태스크 큐를 확인합니다.',
       '모든 실행 순서를 정확히 예측해보세요.'
     ],
-    concepts: ['복합 스케줄링', '큐 우선순위', '중첩 큐', '완전한 이벤트 루프', '마스터 레벨']
+    concepts: ['복합 스케줄링', '큐 우선순위', '중첩 큐', '완전한 이벤트 루프', '마스터 레벨'],
+    functionCalls: [
+      {
+        name: '<global>',
+        queueType: 'callstack',
+        calls: [
+          { name: 'console.log', params: ['1: 시작'], queueType: 'callstack' },
+          { name: 'queueMicrotask', queueType: 'microtask' },
+          { name: 'setTimeout', queueType: 'macrotask' },
+          { name: 'requestAnimationFrame', queueType: 'animation' },
+          { name: 'Promise.resolve().then', queueType: 'microtask' },
+          { name: 'console.log', params: ['2: 동기 완료'], queueType: 'callstack' }
+        ]
+      },
+      {
+        name: 'microtask-1',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['3: 마이크로태스크 1'], queueType: 'microtask' },
+          { name: 'queueMicrotask', queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'microtask-2',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['4: Promise 마이크로태스크'], queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'microtask-3',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['5: 중첩 마이크로태스크'], queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'animation-frame',
+        queueType: 'animation',
+        calls: [
+          { name: 'console.log', params: ['6: 애니메이션 프레임'], queueType: 'animation' }
+        ]
+      },
+      {
+        name: 'macrotask-timer',
+        queueType: 'macrotask',
+        calls: [
+          { name: 'console.log', params: ['7: 매크로태스크'], queueType: 'macrotask' },
+          { name: 'queueMicrotask', queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'microtask-4',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['8: 매크로태스크 내 마이크로태스크'], queueType: 'microtask' }
+        ]
+      }
+    ],
+    expectedOrder: ['<global>', 'console.log', 'queueMicrotask', 'setTimeout', 'requestAnimationFrame', 'Promise.resolve().then', 'console.log', 'microtask-1', 'console.log', 'queueMicrotask', 'microtask-2', 'console.log', 'microtask-3', 'console.log', 'animation-frame', 'console.log', 'macrotask-timer', 'console.log', 'queueMicrotask', 'microtask-4', 'console.log'],
+    eventLoopSteps: [
+      {
+        stepNumber: 0,
+        description: "초기 상태 - 복합 스케줄링 시작",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: [],
+          animation: [],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: ['<global>'],
+          microtask: [],
+          macrotask: [],
+          animation: [],
+          io: [],
+          worker: []
+        }
+      },
+      {
+        stepNumber: 1,
+        description: "모든 비동기 작업 등록",
+        beforeState: {
+          callstack: ['<global>'],
+          microtask: [],
+          macrotask: [],
+          animation: [],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['microtask-1', 'Promise-then'],
+          macrotask: ['timer-callback'],
+          animation: ['animation-frame'],
+          io: [],
+          worker: []
+        }
+      },
+      {
+        stepNumber: 2,
+        description: "마이크로태스크 처리 (중첩 포함)",
+        beforeState: {
+          callstack: [],
+          microtask: ['microtask-1', 'Promise-then'],
+          macrotask: ['timer-callback'],
+          animation: ['animation-frame'],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: ['animation-frame'],
+          io: [],
+          worker: []
+        }
+      },
+      {
+        stepNumber: 3,
+        description: "애니메이션 프레임 처리",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: ['animation-frame'],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: [],
+          io: [],
+          worker: []
+        }
+      },
+      {
+        stepNumber: 4,
+        description: "매크로태스크 처리 및 새 마이크로태스크",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: [],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['macrotask-microtask'],
+          macrotask: [],
+          animation: [],
+          io: [],
+          worker: []
+        }
+      }
+    ]
   }
 ]

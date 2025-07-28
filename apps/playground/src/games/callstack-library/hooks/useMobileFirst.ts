@@ -29,16 +29,19 @@ interface ResponsiveConfig {
     mobile: string;
     tablet: string;
     desktop: string;
+    wide: string;
   };
   typography: {
     mobile: Record<string, string>;
     tablet: Record<string, string>;
     desktop: Record<string, string>;
+    wide: Record<string, string>;
   };
   spacing: {
     mobile: Record<string, string>;
     tablet: Record<string, string>;
     desktop: Record<string, string>;
+    wide: Record<string, string>;
   };
 }
 
@@ -77,7 +80,8 @@ const DEFAULT_CONFIG: ResponsiveConfig = {
   containerPadding: {
     mobile: '16px',
     tablet: '24px',
-    desktop: '32px'
+    desktop: '32px',
+    wide: '40px'
   },
   typography: {
     mobile: {
@@ -100,6 +104,13 @@ const DEFAULT_CONFIG: ResponsiveConfig = {
       h3: 'clamp(24px, 3vw, 30px)',
       body: 'clamp(16px, 2.5vw, 18px)',
       caption: 'clamp(14px, 2vw, 16px)'
+    },
+    wide: {
+      h1: 'clamp(36px, 3.5vw, 48px)',
+      h2: 'clamp(32px, 3vw, 40px)',
+      h3: 'clamp(28px, 2.5vw, 34px)',
+      body: 'clamp(17px, 2vw, 19px)',
+      caption: 'clamp(15px, 1.8vw, 17px)'
     }
   },
   spacing: {
@@ -126,6 +137,14 @@ const DEFAULT_CONFIG: ResponsiveConfig = {
       lg: '32px',
       xl: '40px',
       xxl: '48px'
+    },
+    wide: {
+      xs: '10px',
+      sm: '20px',
+      md: '30px',
+      lg: '40px',
+      xl: '50px',
+      xxl: '60px'
     }
   }
 };

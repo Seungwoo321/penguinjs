@@ -61,6 +61,10 @@ export interface AriaAttributes {
   'aria-required'?: boolean;
   'aria-sort'?: 'none' | 'ascending' | 'descending' | 'other';
   'aria-activedescendant'?: string;
+  'aria-modal'?: boolean;
+  'aria-posinset'?: number;
+  'aria-setsize'?: number;
+  [key: string]: any; // 추가 속성 허용
 }
 
 /**

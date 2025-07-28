@@ -79,6 +79,7 @@ interface StepMapping {
 
 /**
  * simulationSteps를 기반으로 정확한 스택 상태 생성
+ * 성능 최적화: O(n²) → O(n) 복잡도로 개선
  */
 export function simulateExecution(
   level: CallStackLevel,
@@ -97,50 +98,58 @@ export function simulateExecution(
   // 매핑 테이블 생성
   const mappingTable = createMappingTable(level, mappingStrategy, customMapper)
   
-  // 시뮬레이션 실행: 각 실행 단계마다 처음부터 시뮬레이션을 실행
+  // 성능 최적화: 한 번만 전체 시뮬레이션을 실행하고 필요한 지점의 스택 상태를 저장
+  return simulateExecutionOptimized(level, mappingTable, stackItemFactory)
+}
+
+/**
+ * 최적화된 시뮬레이션 실행: O(n) 복잡도
+ */
+function simulateExecutionOptimized(
+  level: CallStackLevel,
+  mappingTable: StepMapping[],
+  stackItemFactory?: (functionName: string, index: number) => Partial<StackItem>
+): StackItem[][] {
   const history: StackItem[][] = []
+  const stack: StackItem[] = []
+  const { simulationSteps } = level
+  
+  // 각 실행 단계에서 필요한 시뮬레이션 인덱스들을 미리 계산
+  const snapshotPoints = new Set<number>()
+  const execStepBySimIndex = new Map<number, number>()
   
   for (const mapping of mappingTable) {
-    // console.log(`🎯 Processing mapping for exec step ${mapping.executionStep}:`, {
-    //   simulationIndices: mapping.simulationIndices
-    // })
-    
-    // 각 실행 단계마다 새로 스택을 계산
-    const stack: StackItem[] = []
     const maxSimIndex = Math.max(...mapping.simulationIndices)
+    snapshotPoints.add(maxSimIndex)
+    execStepBySimIndex.set(maxSimIndex, mapping.executionStep)
+  }
+  
+  // 한 번만 시뮬레이션을 실행하면서 필요한 지점에서 스냅샷 저장
+  for (let simIndex = 0; simIndex < simulationSteps.length; simIndex++) {
+    const simStep = simulationSteps[simIndex]
+    if (!simStep) break
     
-    // 처음부터 해당 실행 단계까지의 모든 시뮬레이션 단계 실행
-    for (let simIndex = 0; simIndex <= maxSimIndex && simIndex < level.simulationSteps.length; simIndex++) {
-      const simStep = level.simulationSteps[simIndex]
-      if (!simStep) break
-      
-      // console.log(`  🔄 Processing sim step ${simIndex}: ${simStep}`)
-      
-      if (simStep.endsWith('-return')) {
-        // 함수 종료: 스택에서 제거
-        handleReturn(stack, simStep)
-        // console.log(`    ➖ Removed from stack, current stack:`, stack.map(s => s.functionName))
-      } else if (simStep === 'console.log') {
-        // console.log는 즉시 실행되므로 스택에 지속적으로 남지 않음
-        // 실제로는 잠깐 스택에 있다가 바로 사라짐
-        continue
-      } else {
-        // 함수 호출: 스택에 추가
-        const stackItem = createStackItem(simStep, simIndex, stackItemFactory)
-        stack.push(stackItem)
-        // console.log(`    ➕ Added to stack: ${stackItem.functionName}, current stack:`, stack.map(s => s.functionName))
-      }
+    if (simStep.endsWith('-return')) {
+      // 함수 종료: 스택에서 제거
+      handleReturn(stack, simStep)
+    } else if (simStep === 'console.log') {
+      // console.log는 즉시 실행되므로 스택에 지속적으로 남지 않음
+      continue
+    } else {
+      // 함수 호출: 스택에 추가
+      const stackItem = createStackItem(simStep, simIndex, stackItemFactory)
+      stack.push(stackItem)
     }
     
-    // 현재 실행 단계의 스택 상태 저장
-    const stackSnapshot = stack.map((item, index) => ({
-      ...item,
-      id: `${item.functionName}-${mapping.executionStep}-${index}`
-    }))
-    
-    // console.log(`  📸 Final snapshot for exec step ${mapping.executionStep}:`, stackSnapshot.map(s => s.functionName))
-    
-    history[mapping.executionStep] = stackSnapshot
+    // 이 지점에서 스냅샷이 필요한 경우 저장
+    if (snapshotPoints.has(simIndex)) {
+      const execStep = execStepBySimIndex.get(simIndex)!
+      const stackSnapshot = stack.map((item, index) => ({
+        ...item,
+        id: `${item.functionName}-${execStep}-${index}`
+      }))
+      history[execStep] = stackSnapshot
+    }
   }
   
   return history

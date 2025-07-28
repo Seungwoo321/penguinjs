@@ -239,9 +239,14 @@ interface EventStoreSnapshot {
   timestamp: number;
 }
 
+// Mutable 버전의 DomainEvent 타입 (빌더 패턴용)
+type MutableDomainEvent = {
+  -readonly [K in keyof DomainEvent]: DomainEvent[K];
+};
+
 // 이벤트 빌더 - 이벤트 생성을 위한 유틸리티
 export class EventBuilder {
-  private event: Partial<DomainEvent> = {};
+  private event: Partial<MutableDomainEvent> = {};
 
   static create(): EventBuilder {
     return new EventBuilder();

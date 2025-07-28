@@ -28,17 +28,19 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   
-  // 성능 최적화 및 메모리 관리
-  const { metrics } = usePerformanceOptimization({
-    enableMetrics: process.env.NODE_ENV === 'development',
-    maxRenderCount: 50
-  })
+  // 경량화된 메모리 관리 (개발 환경에서만)
   const { registerCleanup, isMemoryPressure } = useMemoryManagement({
-    enableMonitoring: process.env.NODE_ENV === 'development'
+    enableMonitoring: process.env.NODE_ENV === 'development',
+    leakThreshold: 150, // 더 관대하게
+    cleanupInterval: 120000 // 2분으로 늘림
   })
-  useLeakDetection('MultiQueueVisualizationPanel')
   
-  // 반응형, 애니메이션 시스템
+  // 개발 환경에서만 메모리 누수 감지
+  if (process.env.NODE_ENV === 'development') {
+    useLeakDetection('MultiQueueVisualizationPanel')
+  }
+  
+  // 반응형 레이아웃 (메모이제이션 강화)
   const responsiveLayout = useContainerResponsive(containerRef)
   const optimizedAnimations = useOptimizedAnimations()
   
@@ -48,14 +50,12 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
   // 최적화된 이벤트 핸들러
   const handleQueueItemClick = useCallback(
     (queueType: 'callstack' | 'microtask' | 'macrotask', item: any) => {
-      // Context API를 통한 상태 업데이트
-      dispatch({ type: 'ui/selectQueueItem', payload: { queueType, item } });
       // 이벤트 시스템을 통한 알림
       gameEvents.queueItemAdded(queueType, item, 0);
       // 기존 핸들러 호출
       onQueueItemClick?.(queueType, item);
     },
-    [dispatch, onQueueItemClick]
+    [onQueueItemClick]
   );
   
   // 간단한 큐 아이템 렌더링
@@ -84,8 +84,8 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
                 "px-3 py-2 rounded-md border transition-all cursor-pointer",
                 "hover:shadow-sm hover:scale-[1.02]",
                 queueType === 'callstack' && "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700",
-                queueType === 'microtask' && "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",
-                queueType === 'macrotask' && "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800",
+                queueType === 'microtask' && "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100",
+                queueType === 'macrotask' && "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-900 dark:text-orange-100",
                 highlightedQueue === queueType && "ring-2 ring-offset-1 ring-blue-400"
               )}
               onClick={() => handleQueueItemClick(queueType, item)}
@@ -102,7 +102,7 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
     [highlightedQueue, handleQueueItemClick]
   );
   
-  // 큐 상태 메모이제이션 (Context 우선)
+  // 큐 상태 메모이제이션 (얕은 비교로 최적화)
   const memoizedQueueStates = useMemo(
     () => {
       const currentStates = state.queueStates || queueStates;
@@ -112,7 +112,8 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
         macrotask: currentStates.macrotask || []
       };
     },
-    [state.queueStates, queueStates.callstack, queueStates.microtask, queueStates.macrotask]
+    [state.queueStates?.callstack?.length, state.queueStates?.microtask?.length, state.queueStates?.macrotask?.length,
+     queueStates.callstack?.length, queueStates.microtask?.length, queueStates.macrotask?.length]
   )
   
   // 총 아이템 수 계산 (메모이제이션)
@@ -210,7 +211,7 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
             animate={{
               scale: highlightedQueue === 'callstack' ? 1.02 : 1,
             }}
-            transition={optimizedAnimations.getOptimizedTransition({ duration: 0.2 })}
+            transition={{ duration: 0.2 }}
           >
             <div className="flex items-center gap-2 p-3 border-b border-gray-200 dark:border-gray-700">
               <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -223,16 +224,22 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
           <motion.div
             className={cn(
               "relative border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",
-              highlightedQueue === 'microtask' && "ring-2 ring-blue-400 ring-opacity-50 shadow-lg"
+              highlightedQueue === 'microtask' && "ring-2 ring-blue-400 ring-opacity-50 shadow-lg bg-blue-200 dark:bg-blue-800/40"
             )}
             animate={{
               scale: highlightedQueue === 'microtask' ? 1.02 : 1,
             }}
-            transition={optimizedAnimations.getOptimizedTransition({ duration: 0.2 })}
+            transition={{ duration: 0.2 }}
           >
-            <div className="flex items-center gap-2 p-3 border-b border-blue-200 dark:border-blue-800">
+            <div className={cn(
+              "flex items-center gap-2 p-3 border-b border-blue-200 dark:border-blue-800",
+              highlightedQueue === 'microtask' && "bg-blue-200 dark:bg-blue-800/40"
+            )}>
               <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="font-semibold text-base text-gray-800 dark:text-gray-200">마이크로태스크</h3>
+              <h3 className={cn(
+                "font-semibold text-base",
+                highlightedQueue === 'microtask' ? "text-blue-900 dark:text-blue-100" : "text-gray-800 dark:text-gray-200"
+              )}>마이크로태스크</h3>
             </div>
             {renderQueue('microtask', memoizedQueueStates.microtask)}
           </motion.div>
@@ -241,16 +248,22 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
           <motion.div
             className={cn(
               "relative border rounded-lg bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800",
-              highlightedQueue === 'macrotask' && "ring-2 ring-orange-400 ring-opacity-50 shadow-lg"
+              highlightedQueue === 'macrotask' && "ring-2 ring-orange-400 ring-opacity-50 shadow-lg bg-orange-200 dark:bg-orange-800/40"
             )}
             animate={{
               scale: highlightedQueue === 'macrotask' ? 1.02 : 1,
             }}
-            transition={optimizedAnimations.getOptimizedTransition({ duration: 0.2 })}
+            transition={{ duration: 0.2 }}
           >
-            <div className="flex items-center gap-2 p-3 border-b border-orange-200 dark:border-orange-800">
+            <div className={cn(
+              "flex items-center gap-2 p-3 border-b border-orange-200 dark:border-orange-800",
+              highlightedQueue === 'macrotask' && "bg-orange-200 dark:bg-orange-800/40"
+            )}>
               <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-              <h3 className="font-semibold text-base text-gray-800 dark:text-gray-200">매크로태스크</h3>
+              <h3 className={cn(
+                "font-semibold text-base",
+                highlightedQueue === 'macrotask' ? "text-orange-900 dark:text-orange-100" : "text-gray-800 dark:text-gray-200"
+              )}>매크로태스크</h3>
             </div>
             {renderQueue('macrotask', memoizedQueueStates.macrotask)}
           </motion.div>
@@ -268,17 +281,6 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
         >
           실행 중...
         </motion.div>
-      )}
-
-      {/* 성능 디버그 정보 (개발용) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute top-2 left-2 text-xs bg-black/20 text-white p-2 rounded max-w-xs">
-          <div>Performance Mode: {optimizedAnimations.useReducedMotion ? 'Reduced Motion' : 'Normal'}</div>
-          <div>Queue Items: CS:{memoizedQueueStates.callstack.length} MT:{memoizedQueueStates.microtask.length} MaT:{memoizedQueueStates.macrotask.length}</div>
-          <div>Layout: {responsiveLayout.breakpoint} ({responsiveLayout.screenWidth}x{responsiveLayout.screenHeight})</div>
-          <div>Renders: {metrics.renderCount} | Avg: {metrics.averageRenderTime.toFixed(1)}ms</div>
-          <div>Memory: {isMemoryPressure ? '⚠️ High' : '✅ Normal'} | Items: {totalItems}</div>
-        </div>
       )}
     </GamePanel>
   )

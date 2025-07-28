@@ -427,7 +427,7 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
       queueType,
       priority: funcCall.priority,
       timestamp: Date.now(),
-      data: funcCall.params,
+      data: { params: funcCall.params },
       position: funcCall.position
     }
   }

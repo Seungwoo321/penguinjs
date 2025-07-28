@@ -3,7 +3,7 @@
  * CallStack Library Game에서만 사용되는 도서관 테마
  */
 
-export type CallStackQueueType = 'callstack' | 'microtask' | 'macrotask'
+export type CallStackQueueType = 'callstack' | 'microtask' | 'macrotask' | 'animation' | 'generator' | 'io' | 'worker'
 
 export interface CallStackQueueTheme {
   primary: string
@@ -152,9 +152,9 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
       secondary: 'rgb(97, 97, 97)',     // 밝은 그레이
       accent: 'rgb(137, 116, 92)',      // 따뜻한 회갈색 (나무색)
       background: {
-        light: 'rgb(252, 251, 250)',    // 매우 연한 회백색
-        main: 'rgb(247, 245, 242)',     // 연한 회베이지
-        dark: 'rgb(237, 233, 228)'      // 회베이지
+        light: 'rgb(210, 180, 140)',    // 더 어두운 탄 색상 (텍스트 대비 개선)
+        main: 'rgb(205, 175, 130)',     // 중간 브라운
+        dark: 'rgb(190, 160, 115)'      // 진한 브라운
       },
       text: {
         primary: 'rgb(74, 74, 74)',     // 중립 그레이 (충분한 대비)
@@ -163,7 +163,7 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
       },
       gradients: {
         main: 'linear-gradient(to bottom, rgb(74, 74, 74), rgb(97, 97, 97))',
-        light: 'linear-gradient(to right, rgb(252, 251, 250), rgb(247, 245, 242))',
+        light: 'linear-gradient(to right, rgb(210, 180, 140), rgb(205, 175, 130))',
         button: 'linear-gradient(to right, rgb(97, 97, 97), rgb(137, 116, 92))',
         hover: 'linear-gradient(to right, rgb(74, 74, 74), rgb(97, 97, 97))'
       },
@@ -223,6 +223,110 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
         main: 'rgb(229, 127, 116)',       
         light: 'rgb(244, 182, 174)',     
         focus: 'rgb(136, 52, 54)'      
+      }
+    },
+    animation: {
+      primary: 'rgb(139, 92, 246)',      // 보라색
+      secondary: 'rgb(167, 139, 250)',   
+      accent: 'rgb(196, 181, 253)',      
+      background: {
+        light: 'rgb(245, 243, 255)',    
+        main: 'rgb(237, 233, 254)',     
+        dark: 'rgb(221, 214, 254)'      
+      },
+      text: {
+        primary: 'rgb(139, 92, 246)',    
+        secondary: 'rgb(167, 139, 250)', 
+        contrast: 'rgb(255, 255, 255)'  
+      },
+      gradients: {
+        main: 'linear-gradient(to bottom, rgb(139, 92, 246), rgb(167, 139, 250))',
+        light: 'linear-gradient(to right, rgb(245, 243, 255), rgb(237, 233, 254))',
+        button: 'linear-gradient(to right, rgb(167, 139, 250), rgb(196, 181, 253))',
+        hover: 'linear-gradient(to right, rgb(139, 92, 246), rgb(167, 139, 250))'
+      },
+      border: {
+        main: 'rgb(196, 181, 253)',       
+        light: 'rgb(221, 214, 254)',     
+        focus: 'rgb(109, 40, 217)'      
+      }
+    },
+    generator: {
+      primary: 'rgb(20, 184, 166)',      // 청록색
+      secondary: 'rgb(45, 212, 191)',   
+      accent: 'rgb(94, 234, 212)',      
+      background: {
+        light: 'rgb(240, 253, 250)',    
+        main: 'rgb(204, 251, 241)',     
+        dark: 'rgb(153, 246, 228)'      
+      },
+      text: {
+        primary: 'rgb(20, 184, 166)',    
+        secondary: 'rgb(45, 212, 191)', 
+        contrast: 'rgb(255, 255, 255)'  
+      },
+      gradients: {
+        main: 'linear-gradient(to bottom, rgb(20, 184, 166), rgb(45, 212, 191))',
+        light: 'linear-gradient(to right, rgb(240, 253, 250), rgb(204, 251, 241))',
+        button: 'linear-gradient(to right, rgb(45, 212, 191), rgb(94, 234, 212))',
+        hover: 'linear-gradient(to right, rgb(20, 184, 166), rgb(45, 212, 191))'
+      },
+      border: {
+        main: 'rgb(94, 234, 212)',       
+        light: 'rgb(153, 246, 228)',     
+        focus: 'rgb(13, 148, 136)'      
+      }
+    },
+    io: {
+      primary: 'rgb(79, 70, 229)',       // 인디고
+      secondary: 'rgb(99, 102, 241)',   
+      accent: 'rgb(129, 140, 248)',      
+      background: {
+        light: 'rgb(238, 242, 255)',    
+        main: 'rgb(224, 231, 255)',     
+        dark: 'rgb(199, 210, 254)'      
+      },
+      text: {
+        primary: 'rgb(79, 70, 229)',    
+        secondary: 'rgb(99, 102, 241)', 
+        contrast: 'rgb(255, 255, 255)'  
+      },
+      gradients: {
+        main: 'linear-gradient(to bottom, rgb(79, 70, 229), rgb(99, 102, 241))',
+        light: 'linear-gradient(to right, rgb(238, 242, 255), rgb(224, 231, 255))',
+        button: 'linear-gradient(to right, rgb(99, 102, 241), rgb(129, 140, 248))',
+        hover: 'linear-gradient(to right, rgb(79, 70, 229), rgb(99, 102, 241))'
+      },
+      border: {
+        main: 'rgb(129, 140, 248)',       
+        light: 'rgb(199, 210, 254)',     
+        focus: 'rgb(55, 48, 163)'      
+      }
+    },
+    worker: {
+      primary: 'rgb(217, 119, 6)',       // 앰버
+      secondary: 'rgb(245, 158, 11)',   
+      accent: 'rgb(251, 191, 36)',      
+      background: {
+        light: 'rgb(255, 251, 235)',    
+        main: 'rgb(254, 243, 199)',     
+        dark: 'rgb(253, 230, 138)'      
+      },
+      text: {
+        primary: 'rgb(217, 119, 6)',    
+        secondary: 'rgb(245, 158, 11)', 
+        contrast: 'rgb(255, 255, 255)'  
+      },
+      gradients: {
+        main: 'linear-gradient(to bottom, rgb(217, 119, 6), rgb(245, 158, 11))',
+        light: 'linear-gradient(to right, rgb(255, 251, 235), rgb(254, 243, 199))',
+        button: 'linear-gradient(to right, rgb(245, 158, 11), rgb(251, 191, 36))',
+        hover: 'linear-gradient(to right, rgb(217, 119, 6), rgb(245, 158, 11))'
+      },
+      border: {
+        main: 'rgb(251, 191, 36)',       
+        light: 'rgb(253, 230, 138)',     
+        focus: 'rgb(180, 83, 9)'      
       }
     }
   },
@@ -284,7 +388,7 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
       },
       shelfDepth: '20px',
       shelfThickness: '8px',
-      libraryBackground: 'linear-gradient(to bottom, rgb(252, 251, 250), rgb(247, 245, 242))'
+      libraryBackground: 'linear-gradient(to bottom, rgb(210, 180, 140), rgb(205, 175, 130))'
     }
   },
   spacing: {
@@ -365,7 +469,7 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
   },
   backgrounds: {
     level1: 'rgb(255, 255, 255)',    // 기본 흰색 배경
-    level2: 'rgb(252, 251, 250)',    // 연한 회백색 배경
+    level2: 'rgb(210, 180, 140)',    // 어두운 탄 색상 배경
     level3: 'rgb(247, 245, 242)',    // 회베이지 배경
     level4: 'rgb(237, 233, 228)'     // 진한 회베이지 배경
   }

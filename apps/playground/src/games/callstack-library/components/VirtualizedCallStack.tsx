@@ -88,7 +88,7 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = memo(({
         className="rounded transition-all"
         aria-label={`이전 페이지로 스크롤 ${scrollState.canScrollUp ? '' : '(첫 번째 페이지)'}`}
         style={{
-          backgroundColor: scrollState.canScrollUp ? libraryTheme.getQueueColor('callstack', 'secondary') : 'rgba(0,0,0,0.2)',
+          backgroundColor: scrollState.canScrollUp ? libraryTheme.getQueueColor('callstack', 'light') : 'rgba(0,0,0,0.2)',
           opacity: scrollState.canScrollUp ? 1 : 0.5,
           minWidth: responsiveLayout.config.buttonSize.minWidth,
           minHeight: responsiveLayout.config.buttonSize.minHeight,
@@ -133,7 +133,7 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = memo(({
         className="rounded transition-all"
         aria-label={`다음 페이지로 스크롤 ${scrollState.canScrollDown ? '' : '(마지막 페이지)'}`}
         style={{
-          backgroundColor: scrollState.canScrollDown ? libraryTheme.getQueueColor('callstack', 'secondary') : 'rgba(0,0,0,0.2)',
+          backgroundColor: scrollState.canScrollDown ? libraryTheme.getQueueColor('callstack', 'light') : 'rgba(0,0,0,0.2)',
           opacity: scrollState.canScrollDown ? 1 : 0.5,
           minWidth: responsiveLayout.config.buttonSize.minWidth,
           minHeight: responsiveLayout.config.buttonSize.minHeight,
@@ -250,7 +250,7 @@ const StackBook: React.FC<StackBookProps> = memo(({
       aria-label={`${item.functionName} 함수, 스택 위치 ${total - index}번째, ${isFocused ? '현재 선택됨' : '선택 가능'}`}
       tabIndex={-1}
       onClick={() => onClick?.(item, index)}
-      whileHover={optimizedAnimations.shouldAnimate('bookHover') ? optimizedAnimations.variants.bookHover : undefined}
+      whileHover={optimizedAnimations.shouldAnimate('bookHover') ? optimizedAnimations.variants.bookHover as any : undefined}
     >
       <div 
         className="h-full rounded-lg shadow-xl flex items-center px-4 relative overflow-hidden transform transition-all duration-300 hover:scale-105"

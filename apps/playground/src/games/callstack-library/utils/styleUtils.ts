@@ -278,12 +278,9 @@ export const layoutUtils = {
   // 종횡비 유지
   aspectRatio: (ratio: string): CSSProperties => ({
     aspectRatio: ratio,
-    // 구형 브라우저 지원
-    '&::before': {
-      content: '""',
-      display: 'block',
-      paddingTop: `${(1 / parseFloat(ratio)) * 100}%`,
-    },
+    // 구형 브라우저는 padding-top hack 사용
+    position: 'relative',
+    paddingTop: `${(1 / parseFloat(ratio)) * 100}%`,
   }),
 };
 
@@ -346,21 +343,15 @@ export const a11yUtils = {
   
   // 포커스 표시기
   focusRing: (color: string = designSystem.colors.primary[500]): CSSProperties => ({
-    '&:focus-visible': {
-      outline: `2px solid ${color}`,
-      outlineOffset: '2px',
-    },
+    outline: `2px solid ${color}`,
+    outlineOffset: '2px',
   }),
   
   // 고대비 모드 지원
-  highContrast: (styles: CSSProperties): CSSProperties => ({
-    '@media (prefers-contrast: high)': styles,
-  }),
+  highContrast: (styles: CSSProperties): CSSProperties => styles,
   
   // 모션 감소 지원
-  reducedMotion: (styles: CSSProperties): CSSProperties => ({
-    '@media (prefers-reduced-motion: reduce)': styles,
-  }),
+  reducedMotion: (styles: CSSProperties): CSSProperties => styles,
 };
 
 // 성능 최적화 유틸리티

@@ -253,7 +253,7 @@ export const useConcurrentSimulation = (
   
   // 액션들
   const actions: ConcurrentSimulationActions = useMemo(() => ({
-    initialize: createAction(async (config = initialConfig) => {
+    initialize: async (config = initialConfig) => {
       if (!WorkerManager.isSupported()) {
         throw new Error('Web Workers not supported');
       }
@@ -263,37 +263,37 @@ export const useConcurrentSimulation = (
       setWorkerManager(manager);
       
       setState(prev => ({ ...prev, isInitialized: true, error: null }));
-    }, 'high'),
+    },
     
-    start: createAction(async (priority = 'normal') => {
+    start: async (priority = 'normal') => {
       if (!workerManager) throw new Error('Not initialized');
       
       await workerManager.startSimulation();
       setState(prev => ({ ...prev, isRunning: true, isPaused: false }));
-    }),
+    },
     
-    pause: createAction(async () => {
+    pause: async () => {
       if (!workerManager) throw new Error('Not initialized');
       
       await workerManager.stopSimulation();
       setState(prev => ({ ...prev, isPaused: true }));
-    }, 'high'),
+    },
     
-    resume: createAction(async () => {
+    resume: async () => {
       if (!workerManager) throw new Error('Not initialized');
       
       await workerManager.startSimulation();
       setState(prev => ({ ...prev, isPaused: false }));
-    }, 'high'),
+    },
     
-    stop: createAction(async () => {
+    stop: async () => {
       if (!workerManager) throw new Error('Not initialized');
       
       await workerManager.stopSimulation();
       setState(prev => ({ ...prev, isRunning: false, isPaused: false }));
-    }, 'high'),
+    },
     
-    reset: createAction(async () => {
+    reset: async () => {
       if (!workerManager) throw new Error('Not initialized');
       
       await workerManager.resetEngine();
@@ -304,45 +304,45 @@ export const useConcurrentSimulation = (
         isPaused: false,
         error: null 
       }));
-    }, 'high'),
+    },
     
-    pushFunction: createAction(async (name: string, priority = 'normal') => {
+    pushFunction: async (name: string, priority = 'normal') => {
       if (!workerManager) throw new Error('Not initialized');
       
       return await workerManager.pushFunction(name, priority);
-    }),
+    },
     
-    popFunction: createAction(async (priority = 'normal') => {
+    popFunction: async (priority = 'normal') => {
       if (!workerManager) throw new Error('Not initialized');
       
       return await workerManager.popFunction();
-    }),
+    },
     
-    enqueueMicrotask: createAction(async (name: string, priority = 'normal') => {
+    enqueueMicrotask: async (name: string, priority = 'normal') => {
       if (!workerManager) throw new Error('Not initialized');
       
       return await workerManager.enqueueMicrotask(name, 'promise');
-    }),
+    },
     
-    enqueueMacrotask: createAction(async (name: string, delay = 0, priority = 'normal') => {
+    enqueueMacrotask: async (name: string, delay = 0, priority = 'normal') => {
       if (!workerManager) throw new Error('Not initialized');
       
       return await workerManager.enqueueMacrotask(name, 'setTimeout', delay);
-    }),
+    },
     
-    executeTick: createAction(async (priority = 'normal') => {
+    executeTick: async (priority = 'normal') => {
       if (!workerManager) throw new Error('Not initialized');
       
       return await workerManager.executeTick();
-    }),
+    },
     
-    rewindToTick: createAction(async (tick: number) => {
+    rewindToTick: async (tick: number) => {
       if (!workerManager) throw new Error('Not initialized');
       
       return await workerManager.rewindToTick(tick);
-    }, 'high'),
+    },
     
-    retry: createAction(async () => {
+    retry: async () => {
       if (!workerManager || !state.error) return;
       
       // 에러 클리어 후 재시도
@@ -355,12 +355,12 @@ export const useConcurrentSimulation = (
         currentTick: currentState.eventLoopState?.currentTick || 0,
         isRunning: currentState.eventLoopState?.isRunning || false
       }));
-    }, 'high'),
+    },
     
     clearError: () => {
       setState(prev => ({ ...prev, error: null }));
     }
-  }), [workerManager, state.error, createAction, initialConfig]);
+  }), [workerManager, state.error, initialConfig]);
   
   // 정리
   useEffect(() => {

@@ -5,7 +5,7 @@ import React, { useState, useCallback, useMemo, memo } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { X, Check, AlertCircle, Plus, ChevronLeft, ChevronRight, BookOpen, Users, Sparkles, Calendar } from 'lucide-react'
-import { QueueSnapshotBuilderPanelProps } from '../../../types/layout'
+import { QueueSnapshotBuilderPanelProps, QueueStatesSnapshot } from '../../../types/layout'
 import { QueueType, QueueItem } from '../../../types'
 import { useCallStackLibraryTheme, useCallStackLibraryCSSVariables } from '../../../hooks/useCallStackLibraryTheme'
 import { useOptimizedAnimations } from '../../../hooks/useOptimizedAnimations'
@@ -34,6 +34,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
   onValidateQueueStep,
   validationResults,
   availableFunctions,
+  queueTypes = ['callstack', 'microtask', 'macrotask'], // 기본값은 타입 B
   className
 }) => {
   // Context API 사용으로 중앙 상태 관리
@@ -63,11 +64,10 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
   
   const handleQueueStateUpdate = useCallback(
     (step: number, newState: any) => {
-      dispatch({ type: 'execution/updateQueueState', payload: { step, state: newState } });
       gameEvents.evaluationSubmit(newState);
       onQueueStateChange?.(step, newState);
     },
-    [dispatch, onQueueStateChange]
+    [onQueueStateChange]
   );
   
   // 콜스택 도서관 테마 및 성능 최적화 사용
@@ -116,16 +116,8 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
     (): QueueItem[] => {
       if (!currentQueueStates) return []
       
-      switch (selectedQueue) {
-        case 'callstack':
-          return currentQueueStates.callstack
-        case 'microtask':
-          return currentQueueStates.microtask
-        case 'macrotask':
-          return currentQueueStates.macrotask
-        default:
-          return []
-      }
+      // 동적으로 큐 타입 지원
+      return currentQueueStates[selectedQueue] || []
     },
     [currentQueueStates, selectedQueue]
   )
@@ -141,7 +133,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
         macrotask: [],
         step: currentStep,
         timestamp: Date.now()
-      }
+      } as QueueStatesSnapshot
       
       const newItem: QueueItem = {
         id: `${selectedQueue}-${funcName}-${currentStep}-${Date.now()}`,
@@ -155,8 +147,10 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
 
       const newQueueStates = {
         ...defaultQueueStates,
-        [selectedQueue]: [newItem]
-      }
+        [selectedQueue]: [newItem],
+        step: currentStep,
+        timestamp: Date.now()
+      } as QueueStatesSnapshot
 
       onQueueStateChange(currentStep, newQueueStates)
       return
@@ -215,14 +209,17 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
   }
 
   return (
-    <GamePanel 
-      title="📸 큐 스냅샷 빌더" 
-      className={cn("flex flex-col overflow-hidden", className)}
+    <div 
+      className={cn("rounded-lg border bg-white dark:bg-gray-800", className)}
       style={{
         ...cssVariables,
         background: libraryTheme.getLibraryBackground()
       }}
     >
+      <GamePanel 
+        title="📸 큐 스냅샷 빌더" 
+        className="flex flex-col overflow-hidden"
+      >
       {/* 도서관 나무 질감 배경 */}
       <div 
         className="absolute inset-0 opacity-5 pointer-events-none"
@@ -247,6 +244,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
         selectedQueue={selectedQueue}
         onQueueSelect={setSelectedQueue}
         queueStates={currentQueueStates}
+        queueTypes={queueTypes}
       />
 
       {/* 현재 단계 정보 */}
@@ -353,7 +351,8 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
           단계 {currentStep + 1} 업무 확인
         </button>
       </div>
-    </GamePanel>
+      </GamePanel>
+    </div>
   )
 })
 
@@ -460,20 +459,29 @@ interface QueueSelectorProps {
   selectedQueue: QueueType
   onQueueSelect: (queue: QueueType) => void
   queueStates?: any
+  queueTypes?: string[]
 }
 
 const QueueSelector: React.FC<QueueSelectorProps> = ({
   selectedQueue,
   onQueueSelect,
-  queueStates
+  queueStates,
+  queueTypes = ['callstack', 'microtask', 'macrotask']
 }) => {
   const libraryTheme = useCallStackLibraryTheme()
   
-  const queueTabs = [
-    { type: 'callstack' as QueueType, label: '📚 메인 서가', icon: BookOpen },
-    { type: 'microtask' as QueueType, label: '⚡ 긴급 처리대', icon: Sparkles },
-    { type: 'macrotask' as QueueType, label: '📅 예약 처리대', icon: Calendar }
-  ]
+  // queueTypes에 따라 동적으로 탭 생성
+  const queueTabsMap = {
+    callstack: { type: 'callstack' as QueueType, label: '📚 메인 서가', icon: BookOpen },
+    microtask: { type: 'microtask' as QueueType, label: '⚡ 긴급 처리대', icon: Sparkles },
+    macrotask: { type: 'macrotask' as QueueType, label: '📅 예약 처리대', icon: Calendar },
+    animation: { type: 'animation' as QueueType, label: '🎬 애니메이션', icon: Users },
+    generator: { type: 'generator' as QueueType, label: '🔄 제너레이터', icon: Calendar },
+    io: { type: 'io' as QueueType, label: '💾 I/O 처리', icon: BookOpen },
+    worker: { type: 'worker' as QueueType, label: '👷 워커', icon: Users }
+  }
+  
+  const queueTabs = queueTypes.map(type => queueTabsMap[type]).filter(Boolean)
 
   return (
     <div className="flex border-b border-editor-border">
@@ -644,7 +652,7 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                     exit: { opacity: 0 }
                   })}
                   whileHover={optimizedAnimations.shouldAnimate('bookHover') ? { scale: 1.02 } : undefined}
-                  transition={optimizedAnimations.getOptimizedTransition({ duration: 0.2 })}
+                  transition={{ duration: 0.2 }}
                 >
                   <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"

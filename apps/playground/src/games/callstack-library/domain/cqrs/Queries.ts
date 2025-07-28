@@ -267,9 +267,14 @@ export interface PerformanceMetricsReadModel {
   };
 }
 
+// Mutable 버전의 Query 타입 (빌더 패턴용)
+type MutableQuery = {
+  -readonly [K in keyof Query]: Query[K];
+};
+
 // 쿼리 빌더
 export class QueryBuilder {
-  private query: Partial<Query> = {};
+  private query: Partial<MutableQuery> = {};
 
   static create(): QueryBuilder {
     return new QueryBuilder();

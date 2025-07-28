@@ -217,7 +217,7 @@ export default function GamesPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="w-full px-4 py-12">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-6">
             <span className="text-5xl">🐧</span>
@@ -230,7 +230,7 @@ export default function GamesPage() {
           </p>
           
           {/* 진행 현황 통계 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
             <div className="bg-[rgb(var(--surface-elevated))] rounded-xl p-4 shadow-lg">
               <div className="text-2xl font-bold text-[rgb(var(--primary))]">1/18</div>
               <div className="text-sm text-[rgb(var(--text-tertiary))]">구현 완료</div>
