@@ -1,17 +1,24 @@
 // 다중 큐 시각화 패널 (Layout B용)
 // 콜스택, 마이크로태스크, 매크로태스크 큐를 동시에 표시
 
-import React from 'react'
+import React, { useRef, useMemo, useCallback, memo } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { MultiQueueVisualizationPanelProps } from '../../../types/layout'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Clock, Zap } from 'lucide-react'
+import { Clock, Zap, BookOpen, Book, ArrowRight, Calendar, Users } from 'lucide-react'
+import { useContainerResponsive } from '../../../hooks/useResponsiveLayout'
+import { useOptimizedAnimations } from '../../../hooks/useOptimizedAnimations'
+import { typography, createTextOverflowStyles } from '../../../utils/textUtils'
+import { usePerformanceOptimization } from '../../../hooks/usePerformanceOptimization'
+import { useMemoryManagement, useLeakDetection } from '../../../hooks/useMemoryManagement'
+import { useCallStackLibraryContext } from '../../../contexts/CallStackLibraryContext'
+import { gameEvents } from '../../../utils/eventSystem'
 
 /**
  * 다중 큐 시각화 패널
- * Layout B에서 이벤트 루프의 3개 큐를 동시에 표시하는 Stage 7 스타일
+ * Layout B에서 이벤트 루프의 3개 큐를 동시에 표시
  */
-export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanelProps> = ({
+export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanelProps> = memo(({
   queueStates,
   isExecuting,
   highlightedQueue,
@@ -19,448 +26,264 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
   maxSize = 8,
   className
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
   
-  const handleQueueItemClick = (queueType: 'callstack' | 'microtask' | 'macrotask') => {
-    return (item: any) => {
-      onQueueItemClick?.(queueType, item)
-    }
+  // 경량화된 메모리 관리 (개발 환경에서만)
+  const { registerCleanup, isMemoryPressure } = useMemoryManagement({
+    enableMonitoring: process.env.NODE_ENV === 'development',
+    leakThreshold: 150, // 더 관대하게
+    cleanupInterval: 120000 // 2분으로 늘림
+  })
+  
+  // 개발 환경에서만 메모리 누수 감지
+  if (process.env.NODE_ENV === 'development') {
+    useLeakDetection('MultiQueueVisualizationPanel')
   }
+  
+  // 반응형 레이아웃 (메모이제이션 강화)
+  const responsiveLayout = useContainerResponsive(containerRef)
+  const optimizedAnimations = useOptimizedAnimations()
+  
+  // Context API 사용으로 중앙 상태 관리
+  const { state, dispatch } = useCallStackLibraryContext();
+  
+  // 최적화된 이벤트 핸들러
+  const handleQueueItemClick = useCallback(
+    (queueType: 'callstack' | 'microtask' | 'macrotask', item: any) => {
+      // 이벤트 시스템을 통한 알림
+      gameEvents.queueItemAdded(queueType, item, 0);
+      // 기존 핸들러 호출
+      onQueueItemClick?.(queueType, item);
+    },
+    [onQueueItemClick]
+  );
+  
+  // 간단한 큐 아이템 렌더링
+  const renderQueue = useCallback(
+    (queueType: 'callstack' | 'microtask' | 'macrotask', items: any[]) => {
+      if (!items || items.length === 0) {
+        const emptyMessages = {
+          callstack: '콜스택이 비어있습니다',
+          microtask: '마이크로태스크가 없습니다',
+          macrotask: '매크로태스크가 없습니다'
+        };
+        
+        return (
+          <div className="flex items-center justify-center py-8 text-gray-400">
+            <p className="text-sm">{emptyMessages[queueType]}</p>
+          </div>
+        );
+      }
+      
+      return (
+        <div className="space-y-2 p-4">
+          {items.map((item, index) => (
+            <div
+              key={item.id || index}
+              className={cn(
+                "px-3 py-2 rounded-md border transition-all cursor-pointer",
+                "hover:shadow-sm hover:scale-[1.02]",
+                queueType === 'callstack' && "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+                queueType === 'microtask' && "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100",
+                queueType === 'macrotask' && "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-900 dark:text-orange-100",
+                highlightedQueue === queueType && "ring-2 ring-offset-1 ring-blue-400"
+              )}
+              onClick={() => handleQueueItemClick(queueType, item)}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-sm">{item.functionName || item.name}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">#{index + 1}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    },
+    [highlightedQueue, handleQueueItemClick]
+  );
+  
+  // 큐 상태 메모이제이션 (얕은 비교로 최적화)
+  const memoizedQueueStates = useMemo(
+    () => {
+      const currentStates = state.queueStates || queueStates;
+      return {
+        callstack: currentStates.callstack || [],
+        microtask: currentStates.microtask || [],
+        macrotask: currentStates.macrotask || []
+      };
+    },
+    [state.queueStates?.callstack?.length, state.queueStates?.microtask?.length, state.queueStates?.macrotask?.length,
+     queueStates.callstack?.length, queueStates.microtask?.length, queueStates.macrotask?.length]
+  )
+  
+  // 총 아이템 수 계산 (메모이제이션)
+  const totalItems = useMemo(
+    () => {
+      return memoizedQueueStates.callstack.length + 
+             memoizedQueueStates.microtask.length + 
+             memoizedQueueStates.macrotask.length
+    },
+    [memoizedQueueStates]
+  )
 
   return (
     <GamePanel 
-      title="🔄 JavaScript 이벤트 루프" 
+      ref={containerRef}
+      title="📚 큐 시각화" 
       className={cn("flex flex-col overflow-hidden", className)}
     >
-      {/* 이벤트 루프 헤더 - Stage 7 스타일 */}
-      <div className="px-4 py-3 border-b border-editor-border flex-shrink-0 bg-slate-50 dark:bg-slate-900">
+      {/* 큐 헤더 */}
+      <div 
+        className="flex-shrink-0 shadow-sm bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+        style={{
+          padding: responsiveLayout.getResponsiveSpacing(16)
+        }}
+      >
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-              🔄 JavaScript 이벤트 루프
+            <h3 
+              className="font-bold flex items-center gap-2 text-gray-800 dark:text-gray-200"
+              style={{ 
+                fontSize: typography.heading.h3,
+                ...createTextOverflowStyles({ maxLines: 1, breakWord: false })
+              }}
+            >
+              <BookOpen className="w-5 h-5 flex-shrink-0" />
+              <span className="min-w-0">이벤트 루프 큐 시스템</span>
             </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-              처리 순서: 콜스택 → 마이크로태스크 → 매크로태스크
-            </p>
+            {!responsiveLayout.isCompact && (
+              <p 
+                className="mt-1 flex items-center gap-2 min-w-0 text-gray-600 dark:text-gray-400"
+                style={{ 
+                  fontSize: typography.caption.large,
+                  ...createTextOverflowStyles({ maxLines: 2, breakWord: true })
+                }}
+              >
+                <Users className="w-3 h-3 flex-shrink-0" />
+                <span className="min-w-0">처리 순서: 콜스택 → 마이크로태스크 → 매크로태스크</span>
+              </p>
+            )}
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2">
             {isExecuting && (
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                실행 중
+              <span 
+                className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300"
+                style={{
+                  fontSize: responsiveLayout.config.fontSize.caption
+                }}
+              >
+                <div className="w-2 h-2 rounded-full animate-pulse bg-green-500"></div>
+                {responsiveLayout.isMobile ? '실행중' : '실행 중'}
               </span>
             )}
           </div>
         </div>
       </div>
       
-      {/* 메인 이벤트 루프 시각화 영역 - Stage 7 스타일 */}
-      <div className="flex-1 p-4 overflow-hidden bg-slate-50 dark:bg-slate-900">
-        <div className="grid grid-rows-3 gap-4 h-full">
+      {/* 메인 큐 시각화 영역 */}
+      <div 
+        className="flex-1 overflow-hidden relative bg-gray-50 dark:bg-gray-900"
+        style={{
+          padding: responsiveLayout.getResponsiveSpacing(16)
+        }}
+      >
+        
+        {/* 반응형 그리드 시스템 */}
+        <div 
+          className={cn(
+            "h-full relative z-10",
+            responsiveLayout.config.layoutDirection === 'vertical' ? "flex flex-col" : "grid"
+          )}
+          style={{
+            gap: responsiveLayout.config.queueGap,
+            ...(responsiveLayout.config.layoutDirection === 'horizontal' && {
+              gridTemplateRows: 'repeat(3, minmax(0, 1fr))'
+            })
+          }}
+        >
           
-          {/* 콜스택 영역 - 가장 상단 */}
+          {/* 콜스택 영역 */}
           <motion.div
             className={cn(
-              "relative",
-              highlightedQueue === 'callstack' && "ring-2 ring-blue-400 ring-opacity-50 rounded-lg"
+              "relative border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+              highlightedQueue === 'callstack' && "ring-2 ring-blue-400 ring-opacity-50 shadow-lg"
             )}
             animate={{
               scale: highlightedQueue === 'callstack' ? 1.02 : 1,
             }}
             transition={{ duration: 0.2 }}
           >
-            <QueueSection
-              title="📚 콜스택 (LIFO)"
-              subtitle="현재 실행 중인 함수들"
-              queueType="callstack"
-              items={queueStates.callstack}
-              isExecuting={isExecuting}
-              isHighlighted={highlightedQueue === 'callstack'}
-              onItemClick={handleQueueItemClick('callstack')}
-              maxSize={maxSize}
-              emptyMessage="콜스택이 비어있습니다"
-            />
+            <div className="flex items-center gap-2 p-3 border-b border-gray-200 dark:border-gray-700">
+              <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <h3 className="font-semibold text-base text-gray-800 dark:text-gray-200">콜스택</h3>
+            </div>
+            {renderQueue('callstack', memoizedQueueStates.callstack)}
           </motion.div>
 
-          {/* 마이크로태스크 큐 - 중간 */}
+          {/* 마이크로태스크 큐 */}
           <motion.div
             className={cn(
-              "relative",
-              highlightedQueue === 'microtask' && "ring-2 ring-green-400 ring-opacity-50 rounded-lg"
+              "relative border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",
+              highlightedQueue === 'microtask' && "ring-2 ring-blue-400 ring-opacity-50 shadow-lg bg-blue-200 dark:bg-blue-800/40"
             )}
             animate={{
               scale: highlightedQueue === 'microtask' ? 1.02 : 1,
             }}
             transition={{ duration: 0.2 }}
           >
-            <QueueSection
-              title="⚡ 마이크로태스크 큐"
-              subtitle="Promise.then(), queueMicrotask()"
-              queueType="microtask"
-              items={queueStates.microtask}
-              isExecuting={isExecuting}
-              isHighlighted={highlightedQueue === 'microtask'}
-              onItemClick={handleQueueItemClick('microtask')}
-              maxSize={maxSize}
-              emptyMessage="마이크로태스크 큐가 비어있습니다"
-            />
+            <div className={cn(
+              "flex items-center gap-2 p-3 border-b border-blue-200 dark:border-blue-800",
+              highlightedQueue === 'microtask' && "bg-blue-200 dark:bg-blue-800/40"
+            )}>
+              <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <h3 className={cn(
+                "font-semibold text-base",
+                highlightedQueue === 'microtask' ? "text-blue-900 dark:text-blue-100" : "text-gray-800 dark:text-gray-200"
+              )}>마이크로태스크</h3>
+            </div>
+            {renderQueue('microtask', memoizedQueueStates.microtask)}
           </motion.div>
 
-          {/* 매크로태스크 큐 - 하단 */}
+          {/* 매크로태스크 큐 */}
           <motion.div
             className={cn(
-              "relative",
-              highlightedQueue === 'macrotask' && "ring-2 ring-yellow-400 ring-opacity-50 rounded-lg"
+              "relative border rounded-lg bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800",
+              highlightedQueue === 'macrotask' && "ring-2 ring-orange-400 ring-opacity-50 shadow-lg bg-orange-200 dark:bg-orange-800/40"
             )}
             animate={{
               scale: highlightedQueue === 'macrotask' ? 1.02 : 1,
             }}
             transition={{ duration: 0.2 }}
           >
-            <QueueSection
-              title="🕐 매크로태스크 큐"
-              subtitle="setTimeout(), setInterval()"
-              queueType="macrotask"
-              items={queueStates.macrotask}
-              isExecuting={isExecuting}
-              isHighlighted={highlightedQueue === 'macrotask'}
-              onItemClick={handleQueueItemClick('macrotask')}
-              maxSize={maxSize}
-              emptyMessage="매크로태스크 큐가 비어있습니다"
-            />
+            <div className={cn(
+              "flex items-center gap-2 p-3 border-b border-orange-200 dark:border-orange-800",
+              highlightedQueue === 'macrotask' && "bg-orange-200 dark:bg-orange-800/40"
+            )}>
+              <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              <h3 className={cn(
+                "font-semibold text-base",
+                highlightedQueue === 'macrotask' ? "text-orange-900 dark:text-orange-100" : "text-gray-800 dark:text-gray-200"
+              )}>매크로태스크</h3>
+            </div>
+            {renderQueue('macrotask', memoizedQueueStates.macrotask)}
           </motion.div>
 
         </div>
       </div>
 
-      {/* 도서관 처리 순서 가이드 */}
-      <LibraryProcessingGuide 
-        queueStates={queueStates}
-        isExecuting={isExecuting}
-      />
+      {/* 실행 상태 표시 */}
+      {(state.gameState === 'playing' || isExecuting) && (
+        <motion.div
+          className="absolute top-2 right-2 px-3 py-1 bg-blue-500 text-white text-sm rounded-full"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+        >
+          실행 중...
+        </motion.div>
+      )}
     </GamePanel>
   )
-}
+})
 
-// 함수별 색상 매핑
-function getFunctionColor(functionName: string): string {
-  const colors: Record<string, string> = {
-    '<global>': 'rgb(107, 114, 128)',
-    'main': 'rgb(59, 130, 246)',
-    'setTimeout': 'rgb(239, 68, 68)',
-    'queueMicrotask': 'rgb(34, 197, 94)',
-    'Promise': 'rgb(168, 85, 247)',
-    'console.log': 'rgb(251, 146, 60)',
-  }
-  return colors[functionName] || 'rgb(59, 130, 246)'
-}
-
-/**
- * 개별 큐 섹션 컴포넌트 - Stage 7 스타일
- */
-interface QueueSectionProps {
-  title: string
-  subtitle: string
-  queueType: 'callstack' | 'microtask' | 'macrotask'
-  items: any[]
-  isExecuting: boolean
-  isHighlighted: boolean
-  onItemClick: (item: any) => void
-  maxSize: number
-  emptyMessage: string
-}
-
-const QueueSection: React.FC<QueueSectionProps> = ({
-  title,
-  subtitle,
-  queueType,
-  items,
-  isExecuting,
-  isHighlighted,
-  onItemClick,
-  maxSize,
-  emptyMessage
-}) => {
-  
-  return (
-    <div className="h-full relative group">
-      {/* 큐 헤더 - Stage 7 스타일 */}
-      <div className={cn(
-        "mb-3 p-3 rounded-xl",
-        queueType === 'callstack' ? "bg-amber-100 dark:bg-amber-900/20" :
-        queueType === 'microtask' ? "bg-blue-100 dark:bg-blue-900/20" :
-        "bg-gray-100 dark:bg-gray-800/20"
-      )}>
-        <h3 className={cn(
-          "text-lg font-bold text-center",
-          queueType === 'callstack' ? "text-amber-800 dark:text-amber-200" :
-          queueType === 'microtask' ? "text-blue-800 dark:text-blue-200" :
-          "text-gray-700 dark:text-gray-300"
-        )}>
-          {title}
-        </h3>
-        <p className={cn(
-          "text-xs text-center",
-          queueType === 'callstack' ? "text-amber-700 dark:text-amber-300" :
-          queueType === 'microtask' ? "text-blue-700 dark:text-blue-300" :
-          "text-gray-600 dark:text-gray-400"
-        )}>
-          {subtitle}
-        </p>
-      </div>
-
-      {/* 큐 내용 - Stage 7 스타일 */}
-      {queueType === 'callstack' ? (
-        /* 콜스택: 검은 배경 */
-        <div className="relative bg-black rounded-xl p-6 shadow-xl h-full">
-          <div className="relative h-full flex flex-col justify-end">
-            
-            {/* 책들 (스택 아이템) - Stage 7 스타일 */}
-            <AnimatePresence>
-              {items.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ x: -100, opacity: 0, rotateY: -15 }}
-                  animate={{ 
-                    x: 0, 
-                    opacity: 1,
-                    rotateY: 0,
-                    y: 0
-                  }}
-                  exit={{ x: 100, opacity: 0, rotateY: 15 }}
-                  transition={{ 
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 20,
-                    delay: index * 0.03
-                  }}
-                  className="absolute left-4 right-4"
-                  style={{
-                    bottom: `${16 + index * 60}px`,
-                    height: `60px`,
-                    zIndex: items.length - index + 10,
-                    perspective: '1000px'
-                  }}
-                >
-                  <div 
-                    className="h-full rounded-lg shadow-xl flex items-center px-4 relative overflow-hidden transform transition-all duration-300 cursor-pointer"
-                    onClick={() => onItemClick(item)}
-                    style={{ 
-                      backgroundColor: getFunctionColor(item.functionName),
-                      backgroundImage: `
-                        linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%, rgba(0,0,0,0.1) 100%),
-                        linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)
-                      `,
-                      boxShadow: `
-                        0 8px 16px rgba(0, 0, 0, 0.2),
-                        inset 2px 0 4px rgba(255, 255, 255, 0.3),
-                        inset -2px 0 4px rgba(0, 0, 0, 0.2)
-                      `
-                    }}
-                  >
-                    {/* 책 제본 효과 */}
-                    <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/40 to-black/10" />
-                    <div className="absolute left-1 top-0 bottom-0 w-1 bg-white/50" />
-                    <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-white/30" />
-                    
-                    {/* 책 표지 텍스처 */}
-                    <div 
-                      className="absolute inset-0 opacity-20"
-                      style={{
-                        backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)`
-                      }}
-                    />
-                    
-                    <span className="text-white font-mono text-xs font-bold ml-3 mr-2 drop-shadow-lg relative z-10 break-all flex items-center gap-1">
-                      {item.functionName}
-                    </span>
-                    
-                    {/* 책 페이지 효과 */}
-                    <div className="absolute right-1 top-1 bottom-1 w-1 bg-white/80 rounded-r-sm shadow-sm" />
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            
-            {/* 빈 스택 메시지 */}
-            {items.length === 0 && (
-              <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 100 }}>
-                <div className="text-center p-6 bg-white/10 dark:bg-white/5 rounded-xl shadow-lg backdrop-blur-sm">
-                  <div className="text-4xl mb-2">📚</div>
-                  <p className="text-gray-200 text-sm font-medium">
-                    {emptyMessage}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        /* 마이크로태스크/매크로태스크: Stage 7 스타일 카드 */
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden h-full">
-          <div className={cn(
-            "p-3 border-b",
-            queueType === 'microtask' 
-              ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700" 
-              : "bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700"
-          )}>
-            <div className="flex items-center justify-between">
-              <h4 className={cn(
-                "font-medium text-sm",
-                queueType === 'microtask' 
-                  ? "text-blue-900 dark:text-blue-100" 
-                  : "text-gray-900 dark:text-gray-100"
-              )}>
-                {queueType === 'microtask' ? '마이크로태스크 큐' : '매크로태스크 큐'}
-              </h4>
-              <span className={cn(
-                "text-xs",
-                queueType === 'microtask' 
-                  ? "text-blue-600 dark:text-blue-400" 
-                  : "text-gray-600 dark:text-gray-400"
-              )}>
-                {items.length} / 10
-              </span>
-            </div>
-          </div>
-          <div className="p-4 min-h-[200px]">
-            {items.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-gray-400">
-                <div className="text-center">
-                  {queueType === 'microtask' ? (
-                    <Zap className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  ) : (
-                    <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  )}
-                  <p className="text-sm">{emptyMessage}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <AnimatePresence>
-                  {items.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ x: -50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: 50, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      onClick={() => onItemClick(item)}
-                    >
-                      <div className={cn(
-                        "rounded-md p-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
-                        queueType === 'microtask' 
-                          ? "bg-blue-500 text-white" 
-                          : "bg-gray-500 text-white"
-                      )}>
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-xs">{item.functionName}</span>
-                          <span className="text-xs opacity-75">#{index + 1}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-/**
- * 도서관 처리 순서 가이드
- */
-interface LibraryProcessingGuideProps {
-  queueStates: any
-  isExecuting: boolean
-}
-
-const LibraryProcessingGuide: React.FC<LibraryProcessingGuideProps> = ({
-  queueStates,
-  isExecuting
-}) => {
-  const getNextExecutionQueue = () => {
-    if (queueStates.callstack.length > 0) return 'callstack'
-    if (queueStates.microtask.length > 0) return 'microtask'
-    if (queueStates.macrotask.length > 0) return 'macrotask'
-    return null
-  }
-
-  const nextQueue = getNextExecutionQueue()
-
-  return (
-    <div className="px-4 py-3 border-t border-editor-border bg-surface-secondary flex-shrink-0">
-      <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-4">
-          <span className="font-medium text-game-text">처리 순서:</span>
-          <div className="flex items-center gap-2">
-            <StepIndicator 
-              label="1. 콜스택" 
-              isActive={nextQueue === 'callstack'}
-              isCompleted={false}
-              isEmpty={queueStates.callstack.length === 0}
-            />
-            <span className="text-game-text-secondary">→</span>
-            <StepIndicator 
-              label="2. 마이크로태스크" 
-              isActive={nextQueue === 'microtask'}
-              isCompleted={false}
-              isEmpty={queueStates.microtask.length === 0}
-            />
-            <span className="text-game-text-secondary">→</span>
-            <StepIndicator 
-              label="3. 매크로태스크" 
-              isActive={nextQueue === 'macrotask'}
-              isCompleted={false}
-              isEmpty={queueStates.macrotask.length === 0}
-            />
-          </div>
-        </div>
-        <div className="text-game-text-secondary">
-          {isExecuting ? (
-            <span className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              처리 중
-            </span>
-          ) : (
-            <span>
-              다음: {nextQueue ? 
-                nextQueue === 'callstack' ? '콜스택' :
-                nextQueue === 'microtask' ? '마이크로태스크' : '매크로태스크'
-                : '완료'
-              }
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/**
- * 실행 단계 표시기
- */
-interface StepIndicatorProps {
-  label: string
-  isActive: boolean
-  isCompleted: boolean
-  isEmpty?: boolean
-}
-
-const StepIndicator: React.FC<StepIndicatorProps> = ({ label, isActive, isCompleted, isEmpty = false }) => {
-  return (
-    <span className={cn(
-      "px-2 py-1 rounded text-xs font-medium transition-all",
-      isActive && "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
-      isEmpty && !isActive && "bg-gray-100 text-gray-600 dark:bg-gray-800/50 dark:text-gray-400 opacity-75",
-      !isActive && !isEmpty && "text-game-text-secondary"
-    )}>
-      {label}
-      {isEmpty && !isActive && (
-        <span className="ml-1 text-xs opacity-60">(빈 큐)</span>
-      )}
-    </span>
-  )
-}
+MultiQueueVisualizationPanel.displayName = 'MultiQueueVisualizationPanel'

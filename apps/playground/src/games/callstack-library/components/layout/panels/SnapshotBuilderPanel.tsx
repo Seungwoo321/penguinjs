@@ -3,6 +3,8 @@
 import React from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { SnapshotBuilderPanelProps } from '../../../types/layout'
+import { useCallStackLibraryTheme } from '../../../hooks/useCallStackLibraryTheme'
+import { useResponsiveLayout } from '../../../hooks/useResponsiveLayout'
 
 /**
  * 스냅샷 빌더 패널
@@ -14,13 +16,31 @@ export const SnapshotBuilderPanel: React.FC<SnapshotBuilderPanelProps> = ({
   onSnapshotChange,
   className
 }) => {
-  
+  const libraryTheme = useCallStackLibraryTheme()
+  const responsiveLayout = useResponsiveLayout()
   return (
-    <GamePanel title="📸 스냅샷 빌더" className={cn("flex flex-col", className)}>
-      {/* 설명 텍스트 */}
-      <div className="px-4 py-2 border-b border-editor-border">
-        <p className="text-xs text-game-text-secondary">
-          각 실행 시점의 큐 상태를 구성하세요
+    <GamePanel 
+      title="📸 스냅샷 빌더" 
+      className={cn("flex flex-col", className)}
+    >
+      {/* 도서관 헤더 */}
+      <div 
+        className="px-4 py-2 border-b"
+        style={{
+          background: libraryTheme.getQueueColor('callstack', 'light'),
+          backgroundImage: libraryTheme.theme.library.textures.wood,
+          backgroundBlendMode: 'overlay',
+          borderColor: libraryTheme.getQueueBorder('callstack', 'light')
+        }}
+      >
+        <p 
+          className="flex items-center gap-2"
+          style={{
+            fontSize: responsiveLayout.config.fontSize.caption,
+            color: libraryTheme.getQueueText('callstack', 'secondary')
+          }}
+        >
+          📋 각 단계별 도서관 상태를 기록하세요
         </p>
       </div>
       

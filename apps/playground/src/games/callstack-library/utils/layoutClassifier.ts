@@ -1,7 +1,7 @@
 import { GameDifficulty } from '../../shared/types'
+import { LayoutType } from '../types'
 
-// 정확한 레이아웃 타입 정의 (A, A+, B, C, D, E)
-export type LayoutType = 'A' | 'A+' | 'B' | 'C' | 'D' | 'E'
+// LayoutType은 ../types에서 import됨
 
 // 게임플레이 방식
 export type PlayMode = 'order-prediction' | 'start-end-tracking' | 'snapshot-building' | 'queue-states' | 'timeline-snapshot'
@@ -84,7 +84,7 @@ export const LAYOUT_CONFIGS: Record<LayoutType, LayoutConfig> = {
     type: 'B',
     name: '이벤트 루프',
     description: '비동기 + 스택 상태',
-    stages: [21, 22],
+    stages: [22],
     difficulty: ['advanced'],
     gridTemplate: 'grid-cols-[350px_1fr_350px]',
     components: {
@@ -153,7 +153,7 @@ export const LAYOUT_CONFIGS: Record<LayoutType, LayoutConfig> = {
     type: 'E',
     name: '스택 스냅샷',
     description: '실행 단계별 스택 상태 예측',
-    stages: [17, 18, 19, 20],
+    stages: [17, 18, 19, 20, 21],
     difficulty: ['advanced'],
     gridTemplate: 'grid-cols-[300px_1fr_400px]',
     components: {
@@ -184,13 +184,13 @@ export function getLayoutType(difficulty: GameDifficulty, stage: number): Layout
     return 'A+'
   }
   
-  // 고급 17-20: 타입 E
-  if (difficulty === 'advanced' && stage >= 17 && stage <= 20) {
+  // 고급 17-21: 타입 E
+  if (difficulty === 'advanced' && stage >= 17 && stage <= 21) {
     return 'E'
   }
   
-  // 고급 21-22: 타입 B
-  if (difficulty === 'advanced' && (stage === 21 || stage === 22)) {
+  // 고급 22: 타입 B
+  if (difficulty === 'advanced' && stage === 22) {
     return 'B'
   }
   

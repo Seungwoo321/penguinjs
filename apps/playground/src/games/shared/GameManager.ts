@@ -123,8 +123,15 @@ export class GameManager {
       
       // 다음 스테이지로 진행
       const config = this.gameConfigs.get(gameId)
-      if (config && stage < config.totalStagesPerDifficulty) {
-        progress.currentStage = stage + 1
+      if (config) {
+        // 절대 스테이지를 상대 스테이지로 변환
+        const startStage = difficulty === 'beginner' ? 1 : 
+                          difficulty === 'intermediate' ? 9 : 17
+        const relativeStage = stage - startStage + 1
+        
+        if (relativeStage < config.totalStagesPerDifficulty) {
+          progress.currentStage = stage + 1
+        }
       }
 
       // 난이도 완료 시 다음 난이도 잠금 해제

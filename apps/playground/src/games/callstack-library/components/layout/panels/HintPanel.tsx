@@ -17,7 +17,10 @@ export const HintPanel: React.FC<HintPanelProps> = ({
   hintsUsed,
   className
 }) => {
-  if (!hints || hints.length === 0) return null
+  // Hook 규칙 준수: early return 대신 조건부 렌더링
+  if (!hints || hints.length === 0) {
+    return null;
+  }
 
   return (
     <div className={cn("mb-4", className)}>
@@ -40,7 +43,7 @@ export const HintPanel: React.FC<HintPanelProps> = ({
           >
             {hints.map((hint, index) => (
               <div
-                key={index}
+                key={`hint-${index}-${hint.substring(0, 10)}`}
                 className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3"
               >
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">

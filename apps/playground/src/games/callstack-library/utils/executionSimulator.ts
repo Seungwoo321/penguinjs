@@ -1,33 +1,33 @@
 import { CallStackLevel, StackItem } from '../types'
 
-// 함수별 색상 매핑
+// 함수별 색상 매핑 (개선된 대비비 색상)
 const FUNCTION_COLORS: Record<string, string> = {
-  '<global>': 'rgb(107, 114, 128)',
-  'main': 'rgb(107, 114, 128)',
-  'processUser': 'rgb(59, 130, 246)',
-  'greet': 'rgb(34, 197, 94)',
-  'calculate': 'rgb(59, 130, 246)',
-  'multiply': 'rgb(34, 197, 94)',
-  'add': 'rgb(168, 85, 247)',
-  'factorial': 'rgb(59, 130, 246)',
-  'checkNumbers': 'rgb(59, 130, 246)',
-  'isEven': 'rgb(34, 197, 94)',
-  'processEven': 'rgb(168, 85, 247)',
-  'console.log': 'rgb(251, 146, 60)',
-  'setTimeout': 'rgb(239, 68, 68)',
-  'Promise': 'rgb(236, 72, 153)',
-  'queueMicrotask': 'rgb(14, 165, 233)',
-  'requestAnimationFrame': 'rgb(34, 197, 94)'
+  '<global>': 'rgb(92, 51, 23)',      // 진한 브라운 (WCAG AA)
+  'main': 'rgb(92, 51, 23)',          // 진한 브라운
+  'processUser': 'rgb(21, 94, 173)',  // 진한 파랑
+  'greet': 'rgb(21, 128, 61)',        // 진한 초록
+  'calculate': 'rgb(21, 94, 173)',    // 진한 파랑
+  'multiply': 'rgb(21, 128, 61)',     // 진한 초록
+  'add': 'rgb(126, 34, 206)',         // 진한 보라
+  'factorial': 'rgb(21, 94, 173)',    // 진한 파랑
+  'checkNumbers': 'rgb(21, 94, 173)', // 진한 파랑
+  'isEven': 'rgb(21, 128, 61)',       // 진한 초록
+  'processEven': 'rgb(126, 34, 206)', // 진한 보라
+  'console.log': 'rgb(194, 94, 14)',  // 진한 주황
+  'setTimeout': 'rgb(185, 28, 28)',   // 진한 빨강
+  'Promise': 'rgb(190, 24, 93)',      // 진한 핑크
+  'queueMicrotask': 'rgb(2, 132, 199)', // 진한 하늘색
+  'requestAnimationFrame': 'rgb(21, 128, 61)' // 진한 초록
 }
 
-// 색상 순환 배열 (동적 함수용)
+// 색상 순환 배열 (동적 함수용 - WCAG AA 충족)
 const COLOR_PALETTE = [
-  'rgb(59, 130, 246)',   // blue-500
-  'rgb(34, 197, 94)',    // emerald-500
-  'rgb(168, 85, 247)',   // purple-500
-  'rgb(251, 146, 60)',   // orange-400
-  'rgb(236, 72, 153)',   // pink-500
-  'rgb(14, 165, 233)'    // sky-500
+  'rgb(21, 94, 173)',    // 진한 파랑
+  'rgb(21, 128, 61)',    // 진한 초록
+  'rgb(126, 34, 206)',   // 진한 보라
+  'rgb(194, 94, 14)',    // 진한 주황
+  'rgb(190, 24, 93)',    // 진한 핑크
+  'rgb(2, 132, 199)'     // 진한 하늘색
 ]
 
 /**
@@ -42,7 +42,9 @@ export function getFunctionColor(functionName: string): string {
   // factorial(n) 형태 처리
   if (functionName.startsWith('factorial(')) {
     const n = parseInt(functionName.match(/\d+/)?.[0] || '0')
-    return COLOR_PALETTE[(n - 1) % COLOR_PALETTE.length]
+    const index = (n - 1) % COLOR_PALETTE.length
+    // JavaScript의 음수 모듈로 처리
+    return COLOR_PALETTE[index < 0 ? index + COLOR_PALETTE.length : index]
   }
   
   // 기타 함수는 해시 기반 색상 할당
@@ -77,6 +79,7 @@ interface StepMapping {
 
 /**
  * simulationSteps를 기반으로 정확한 스택 상태 생성
+ * 성능 최적화: O(n²) → O(n) 복잡도로 개선
  */
 export function simulateExecution(
   level: CallStackLevel,
@@ -95,50 +98,58 @@ export function simulateExecution(
   // 매핑 테이블 생성
   const mappingTable = createMappingTable(level, mappingStrategy, customMapper)
   
-  // 시뮬레이션 실행: 각 실행 단계마다 처음부터 시뮬레이션을 실행
+  // 성능 최적화: 한 번만 전체 시뮬레이션을 실행하고 필요한 지점의 스택 상태를 저장
+  return simulateExecutionOptimized(level, mappingTable, stackItemFactory)
+}
+
+/**
+ * 최적화된 시뮬레이션 실행: O(n) 복잡도
+ */
+function simulateExecutionOptimized(
+  level: CallStackLevel,
+  mappingTable: StepMapping[],
+  stackItemFactory?: (functionName: string, index: number) => Partial<StackItem>
+): StackItem[][] {
   const history: StackItem[][] = []
+  const stack: StackItem[] = []
+  const { simulationSteps } = level
+  
+  // 각 실행 단계에서 필요한 시뮬레이션 인덱스들을 미리 계산
+  const snapshotPoints = new Set<number>()
+  const execStepBySimIndex = new Map<number, number>()
   
   for (const mapping of mappingTable) {
-    // console.log(`🎯 Processing mapping for exec step ${mapping.executionStep}:`, {
-    //   simulationIndices: mapping.simulationIndices
-    // })
-    
-    // 각 실행 단계마다 새로 스택을 계산
-    const stack: StackItem[] = []
     const maxSimIndex = Math.max(...mapping.simulationIndices)
+    snapshotPoints.add(maxSimIndex)
+    execStepBySimIndex.set(maxSimIndex, mapping.executionStep)
+  }
+  
+  // 한 번만 시뮬레이션을 실행하면서 필요한 지점에서 스냅샷 저장
+  for (let simIndex = 0; simIndex < simulationSteps.length; simIndex++) {
+    const simStep = simulationSteps[simIndex]
+    if (!simStep) break
     
-    // 처음부터 해당 실행 단계까지의 모든 시뮬레이션 단계 실행
-    for (let simIndex = 0; simIndex <= maxSimIndex && simIndex < level.simulationSteps.length; simIndex++) {
-      const simStep = level.simulationSteps[simIndex]
-      if (!simStep) break
-      
-      // console.log(`  🔄 Processing sim step ${simIndex}: ${simStep}`)
-      
-      if (simStep.endsWith('-return')) {
-        // 함수 종료: 스택에서 제거
-        handleReturn(stack, simStep)
-        // console.log(`    ➖ Removed from stack, current stack:`, stack.map(s => s.functionName))
-      } else if (simStep === 'console.log') {
-        // console.log는 즉시 실행되므로 스택에 지속적으로 남지 않음
-        // 실제로는 잠깐 스택에 있다가 바로 사라짐
-        continue
-      } else {
-        // 함수 호출: 스택에 추가
-        const stackItem = createStackItem(simStep, simIndex, stackItemFactory)
-        stack.push(stackItem)
-        // console.log(`    ➕ Added to stack: ${stackItem.functionName}, current stack:`, stack.map(s => s.functionName))
-      }
+    if (simStep.endsWith('-return')) {
+      // 함수 종료: 스택에서 제거
+      handleReturn(stack, simStep)
+    } else if (simStep === 'console.log') {
+      // console.log는 즉시 실행되므로 스택에 지속적으로 남지 않음
+      continue
+    } else {
+      // 함수 호출: 스택에 추가
+      const stackItem = createStackItem(simStep, simIndex, stackItemFactory)
+      stack.push(stackItem)
     }
     
-    // 현재 실행 단계의 스택 상태 저장
-    const stackSnapshot = stack.map((item, index) => ({
-      ...item,
-      id: `${item.functionName}-${mapping.executionStep}-${index}`
-    }))
-    
-    // console.log(`  📸 Final snapshot for exec step ${mapping.executionStep}:`, stackSnapshot.map(s => s.functionName))
-    
-    history[mapping.executionStep] = stackSnapshot
+    // 이 지점에서 스냅샷이 필요한 경우 저장
+    if (snapshotPoints.has(simIndex)) {
+      const execStep = execStepBySimIndex.get(simIndex)!
+      const stackSnapshot = stack.map((item, index) => ({
+        ...item,
+        id: `${item.functionName}-${execStep}-${index}`
+      }))
+      history[execStep] = stackSnapshot
+    }
   }
   
   return history
@@ -360,47 +371,6 @@ function findConsoleLogIndex(startIndex: number, simulationSteps: string[], exec
   return startIndex
 }
 
-/**
- * 매핑 중단 조건 확인
- */
-function shouldStopMapping(
-  description: string,
-  currentSimStep: string,
-  simulationSteps: string[],
-  simIndex: number
-): boolean {
-  const nextSimStep = simulationSteps[simIndex + 1]
-  
-  // 함수 호출 완료
-  if (description.includes('호출') && 
-      !currentSimStep.includes('-return') &&
-      !nextSimStep?.includes('-return')) {
-    return true
-  }
-  
-  // console.log 실행 완료
-  if (description.includes('console.log') && 
-      currentSimStep.includes('console.log')) {
-    return true
-  }
-  
-  // 함수 반환 완료
-  if ((description.includes('return') || description.includes('반환')) &&
-      currentSimStep.includes('-return')) {
-    return true
-  }
-  
-  // 프로그램 시작/종료
-  if (description.includes('시작') && currentSimStep === '<global>') {
-    return true
-  }
-  
-  if (description.includes('종료') && currentSimStep === '<global>-return') {
-    return true
-  }
-  
-  return false
-}
 
 /**
  * 스택에서 함수 제거 처리

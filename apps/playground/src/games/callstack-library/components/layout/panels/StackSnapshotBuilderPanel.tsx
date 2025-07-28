@@ -62,7 +62,7 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
   
   return (
     <GamePanel 
-      title="📸 특정 시점 책장 구성" 
+      title="📸 스택 스냅샷" 
       className={cn("flex flex-col", className)}
     >
       {/* 헤더 */}
@@ -154,9 +154,9 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
         
         <StackConstructor
           snapshot={userSnapshot}
-          onRemove={handleRemoveFunction}
-          onReorder={onReorderSnapshot}
-          disabled={false}
+          onRemove={isCheckpoint ? handleRemoveFunction : undefined}
+          onReorder={isCheckpoint ? onReorderSnapshot : undefined}
+          disabled={!isCheckpoint}
         />
       </div>
       
@@ -239,13 +239,13 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
       {/* 진행률 표시 */}
       <div className="px-4 py-2 bg-surface-secondary border-t border-editor-border">
         <div className="flex items-center justify-between text-xs text-game-text-secondary">
-          <span>완성도: {Object.keys(validationResults).length} / {snapshotCheckpoints.length}</span>
-          <span>{Math.round((Object.keys(validationResults).length / snapshotCheckpoints.length) * 100)}%</span>
+          <span>완성도: {Object.values(validationResults).filter(v => v === true).length} / {snapshotCheckpoints.length}</span>
+          <span>{Math.round((Object.values(validationResults).filter(v => v === true).length / snapshotCheckpoints.length) * 100)}%</span>
         </div>
         <div className="mt-1 w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-pink-400 to-pink-600 transition-all duration-300"
-            style={{ width: `${(Object.keys(validationResults).length / snapshotCheckpoints.length) * 100}%` }}
+            style={{ width: `${(Object.values(validationResults).filter(v => v === true).length / snapshotCheckpoints.length) * 100}%` }}
           />
         </div>
       </div>

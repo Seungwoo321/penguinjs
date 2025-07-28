@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타입 B - 콜스택 도서관 시스템 (디자인 참고용)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .wireframe-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #333;
+        }
+        
+        .section {
+            border: 1px solid #666;
+            position: relative;
+        }
+        
+        .section-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: white;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .box {
+            border: 1px dashed #999;
+            background: #fafafa;
+            margin: 10px;
+            padding: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .button {
+            border: 1px solid #999;
+            background: white;
+            padding: 8px 16px;
+            margin: 5px;
+            display: inline-block;
+            font-size: 12px;
+        }
+        
+        /* 헤더 */
+        .header {
+            height: 80px;
+            padding: 20px;
+            border-bottom: 1px solid #666;
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 메인 레이아웃 - 1열 3영역 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            min-height: 700px;
+            padding: 20px;
+        }
+        
+        .panel {
+            padding: 20px;
+            border: 1px solid #666;
+            position: relative;
+        }
+        
+        /* 코드 에디터 */
+        .code-editor {
+            height: 250px;
+            border: 1px solid #999;
+            background: #f9f9f9;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .code-line {
+            padding: 2px 0;
+        }
+        
+        .code-line.highlight {
+            background: #e6f3ff;
+            border-left: 3px solid #0066cc;
+            padding-left: 5px;
+        }
+        
+        /* 3개 큐 시스템 */
+        .queue-system {
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 15px;
+            height: 500px;
+        }
+        
+        .queue-container {
+            border: 2px solid #333;
+            position: relative;
+            background: #f9f9f9;
+            padding: 10px;
+        }
+        
+        .queue-container.callstack {
+            border-color: #0066cc;
+        }
+        
+        .queue-container.microtask {
+            border-color: #10b981;
+        }
+        
+        .queue-container.macrotask {
+            border-color: #f59e0b;
+        }
+        
+        .queue-title {
+            position: absolute;
+            top: -12px;
+            left: 10px;
+            background: white;
+            padding: 4px 12px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .queue-title.callstack { color: #0066cc; }
+        .queue-title.microtask { color: #10b981; }
+        .queue-title.macrotask { color: #f59e0b; }
+        
+        .queue-items {
+            display: flex;
+            gap: 8px;
+            height: 100%;
+            align-items: center;
+            overflow-x: auto;
+        }
+        
+        .queue-item {
+            min-width: 120px;
+            height: 35px;
+            border: 1px solid #666;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-family: monospace;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        
+        .queue-item.callstack { border-left: 4px solid #0066cc; }
+        .queue-item.microtask { border-left: 4px solid #10b981; }
+        .queue-item.macrotask { border-left: 4px solid #f59e0b; }
+        
+        .item-icon {
+            margin-right: 6px;
+        }
+        
+        /* 함수 선택 패널 */
+        .function-groups {
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 15px;
+            height: 500px;
+        }
+        
+        .function-group {
+            border: 1px solid #999;
+            padding: 10px;
+            background: #fafafa;
+        }
+        
+        .group-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: white;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .group-title.callstack { background: #e6f3ff; color: #0066cc; }
+        .group-title.microtask { background: #ecfdf5; color: #10b981; }
+        .group-title.macrotask { background: #fffbeb; color: #f59e0b; }
+        
+        .function-card {
+            height: 30px;
+            border: 1px solid #999;
+            margin: 3px 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+        
+        .function-card.callstack { border-left: 4px solid #0066cc; }
+        .function-card.microtask { border-left: 4px solid #10b981; }
+        .function-card.macrotask { border-left: 4px solid #f59e0b; }
+        
+        .function-icon {
+            margin-right: 6px;
+        }
+        
+        /* 스냅샷 빌더 영역 */
+        .snapshot-builder-panel {
+            border-top: 1px solid #666;
+            padding: 20px;
+            min-height: 200px;
+        }
+        
+        /* 예상 결과 영역 */
+        .evaluation-panel {
+            border-top: 1px solid #666;
+            padding: 20px;
+            display: grid;
+            grid-template-rows: 1fr 80px;
+            gap: 15px;
+            min-height: 150px;
+        }
+        
+        .snapshot-area {
+            border: 1px dashed #999;
+            background: #fafafa;
+            padding: 15px;
+        }
+        
+        .snapshot-timeline {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+        }
+        
+        .timeline-step {
+            min-width: 60px;
+            height: 30px;
+            border: 1px solid #999;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-family: monospace;
+        }
+        
+        .timeline-step.active {
+            background: #e6f3ff;
+            border-color: #0066cc;
+        }
+        
+        .snapshot-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            height: 80px;
+        }
+        
+        .mini-queue {
+            border: 1px solid #ccc;
+            background: white;
+            padding: 5px;
+            font-size: 10px;
+        }
+        
+        .mini-queue.callstack { border-left: 3px solid #0066cc; }
+        .mini-queue.microtask { border-left: 3px solid #10b981; }
+        .mini-queue.macrotask { border-left: 3px solid #f59e0b; }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        <!-- 헤더 -->
+        <div class="header section">
+            <div class="section-label">HEADER</div>
+            <div class="title">[GAME TITLE] 콜스택 도서관 - 타입 B</div>
+            <div class="subtitle">[STAGE INFO] 고급 21-22단계 | 도서관 반납 시스템</div>
+        </div>
+        
+        <!-- 메인 콘텐츠 - 1열 3영역 -->
+        <div class="main-content">
+            <!-- 첫 번째 패널 - 코드 -->
+            <div class="panel section">
+                <div class="section-label">CODE PANEL</div>
+                <div class="box">[PANEL TITLE] 📝 코드</div>
+                <div class="code-editor">
+                    <div class="code-line">console.log('1');</div>
+                    <div class="code-line highlight">setTimeout(() => {</div>
+                    <div class="code-line">  console.log('2');</div>
+                    <div class="code-line">}, 0);</div>
+                    <div class="code-line">Promise.resolve().then(() => {</div>
+                    <div class="code-line">  console.log('3');</div>
+                    <div class="code-line">});</div>
+                    <div class="code-line">console.log('4');</div>
+                </div>
+                
+                <div class="box">[EXECUTION CONTEXT] 현재: line 2</div>
+                <div class="box">[EVENT LOOP STATUS] 활성</div>
+            </div>
+            
+            <!-- 두 번째 패널 - 3개 큐 시스템 -->
+            <div class="panel section">
+                <div class="section-label">QUEUE SYSTEM</div>
+                <div class="box">[PANEL TITLE] 📚 도서관 반납 처리 시스템</div>
+                
+                <div class="queue-system">
+                    <!-- 콜스택 -->
+                    <div class="queue-container callstack">
+                        <div class="queue-title callstack">[CALLSTACK] 📚 현재 대출함 (LIFO)</div>
+                        <div class="queue-items">
+                            <div class="queue-item callstack">
+                                <span class="item-icon">[📚]</span>
+                                console.log('4')
+                            </div>
+                            <div class="queue-item callstack">
+                                <span class="item-icon">[📚]</span>
+                                main()
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 마이크로태스크 큐 -->
+                    <div class="queue-container microtask">
+                        <div class="queue-title microtask">[MICROTASK] ⚡ 긴급 반납대 (FIFO)</div>
+                        <div class="queue-items">
+                            <div class="queue-item microtask">
+                                <span class="item-icon">[⚡]</span>
+                                Promise.resolve().then
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 매크로태스크 큐 -->
+                    <div class="queue-container macrotask">
+                        <div class="queue-title macrotask">[MACROTASK] ⏰ 일반 반납대 (FIFO)</div>
+                        <div class="queue-items">
+                            <div class="queue-item macrotask">
+                                <span class="item-icon">[⏰]</span>
+                                setTimeout callback
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box">[QUEUE INFO] 대출함:2 | 긴급:1 | 일반:1</div>
+            </div>
+            
+            <!-- 세 번째 패널 - 반납 계획서 -->
+            <div class="panel section">
+                <div class="section-label">MANAGEMENT PANEL</div>
+                <div class="box">[PANEL TITLE] 📋 반납 처리 계획서</div>
+                
+                <div class="function-groups">
+                    <div class="function-group">
+                        <div class="group-title callstack">📚 대출함용 함수</div>
+                        <div class="function-card callstack">
+                            <span class="function-icon">[📚]</span>
+                            console.log
+                        </div>
+                        <div class="function-card callstack">
+                            <span class="function-icon">[📚]</span>
+                            main
+                        </div>
+                    </div>
+                    
+                    <div class="function-group">
+                        <div class="group-title microtask">⚡ 긴급 반납 함수</div>
+                        <div class="function-card microtask">
+                            <span class="function-icon">[⚡]</span>
+                            Promise.resolve().then
+                        </div>
+                        <div class="function-card microtask">
+                            <span class="function-icon">[⚡]</span>
+                            queueMicrotask
+                        </div>
+                    </div>
+                    
+                    <div class="function-group">
+                        <div class="group-title macrotask">⏰ 일반 반납 함수</div>
+                        <div class="function-card macrotask">
+                            <span class="function-icon">[⏰]</span>
+                            setTimeout
+                        </div>
+                        <div class="function-card macrotask">
+                            <span class="function-icon">[⏰]</span>
+                            setInterval
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box">[INSTRUCTIONS] 드래그하여 각 단계별 책장 상태 구성</div>
+            </div>
+        </div>
+        
+        <!-- 하단 - 예상 결과 (100% 너비) -->
+        <div class="evaluation-panel section">
+            <div class="section-label">EVALUATION RESULT</div>
+            <div class="box">[PANEL TITLE] 📊 도서관 업무 평가</div>
+            
+            <div class="box" style="background: #f0f8ff; border-color: #0066cc;">
+                [RESULT] 반납 처리 검증 결과: 처리 순서 정확도 100% | 큐 상태 완료
+            </div>
+            
+            <div class="controls">
+                <div class="button">[◀ 이전 단계]</div>
+                <div class="button">[다음 단계 ▶]</div>
+                <div class="button">[처음부터]</div>
+                <div class="button">[제출하기]</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 와이어프레임 설명 -->
+    <div style="margin-top: 20px; padding: 15px; background: #ffffcc; border: 1px solid #999;">
+        <h3>타입 B 레이아웃 설명</h3>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+            <li><strong>대상:</strong> 고급 21-22단계</li>
+            <li><strong>목표:</strong> 도서관 반납 처리 순서와 우선순위 시스템 이해</li>
+            <li><strong>특징:</strong> 3개 큐 시스템 (현재 대출함, 긴급 반납대, 일반 반납대)</li>
+            <li><strong>레이아웃:</strong> 1열 3영역 배치 (코드 | 반납 시스템 | 반납 계획서)</li>
+            <li><strong>평가:</strong> 각 처리 단계별 큐 상태의 정확성</li>
+            <li><strong>컨셉:</strong> 도서관 반납 처리 시스템</li>
+        </ul>
+    </div>
+</body>
+</html>

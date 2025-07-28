@@ -3,6 +3,8 @@
 import React from 'react'
 import { cn } from '@penguinjs/ui'
 import { EvaluationPanelProps } from '../../../types/layout'
+import { useCallStackLibraryTheme, useCallStackLibraryCSSVariables } from '../../../hooks/useCallStackLibraryTheme'
+import { useResponsiveLayout } from '../../../hooks/useResponsiveLayout'
 
 /**
  * 평가 패널
@@ -21,24 +23,45 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
   validationResults,
   className
 }) => {
+  // 도서관 테마 적용
+  const libraryTheme = useCallStackLibraryTheme()
+  const cssVariables = useCallStackLibraryCSSVariables()
+  const responsiveLayout = useResponsiveLayout()
+  
   // Layout E의 경우 스냅샷 검증 결과로 제출 가능 여부 판단
   const isLayoutE = layoutType === 'E'
   const hasValidationResults = validationResults && Object.keys(validationResults).length > 0
   const canSubmit = isLayoutE ? hasValidationResults : userAnswer.length > 0
   
   return (
-    <div className={cn(
-      "bg-game-panel rounded-lg border border-editor-border",
-      "p-4",
-      className
-    )}>
+    <div 
+      className={cn("rounded-lg border p-4", className)}
+      style={{
+        ...cssVariables,
+        background: libraryTheme.getQueueColor('callstack', 'light'),
+        backgroundImage: libraryTheme.theme.library.textures.wood,
+        backgroundBlendMode: 'overlay',
+        borderColor: libraryTheme.getQueueBorder('callstack', 'light')
+      }}
+    >
       
-      {/* 상단 레이블 */}
+      {/* 도서관 평가 헤더 */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-game-text">
-          📊 예상 결과
+        <h3 
+          className="font-semibold flex items-center gap-2"
+          style={{
+            fontSize: responsiveLayout.config.fontSize.subtitle,
+            color: libraryTheme.getQueueText('callstack', 'primary')
+          }}
+        >
+          📋 도서관 기록 평가
         </h3>
-        <div className="text-xs text-game-text-secondary">
+        <div 
+          style={{
+            fontSize: responsiveLayout.config.fontSize.caption,
+            color: libraryTheme.getQueueText('callstack', 'secondary')
+          }}
+        >
           {getEvaluationTypeDescription(evaluation)}
         </div>
       </div>

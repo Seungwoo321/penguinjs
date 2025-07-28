@@ -2,7 +2,7 @@
 export interface StackItem {
   id: string
   functionName: string
-  returnValue?: any
+  returnValue?: string | number | boolean | null | any[]
   color: string
   height: number
   queueType?: QueueType
@@ -27,13 +27,13 @@ export type QueueType =
 export interface QueueItem {
   id: string
   functionName: string
-  returnValue?: any
+  returnValue?: string | number | boolean | null | any[]
   color: string
   height: number
   queueType: QueueType
   priority?: number
   timestamp?: number
-  data?: any
+  data?: Record<string, unknown>
   position?: number
 }
 
@@ -59,8 +59,8 @@ export interface AsyncTask {
 // 함수 호출 정보
 export interface FunctionCall {
   name: string
-  params?: any[]
-  returns?: any
+  params?: Array<string | number | boolean | null | any[]>
+  returns?: string | number | boolean | null | any[]
   calls?: FunctionCall[]
   queueType?: QueueType
   priority?: number
@@ -106,6 +106,9 @@ export interface CallStackLevel {
   breakpoints?: number[]
   snapshotCheckpoints?: number[]
   expectedSnapshots?: Record<number, StackItem[]>
+  
+  // 타입 B, C, D 전용 필드들
+  eventLoopSteps?: any[] // EventLoopStep 타입이 별도로 정의되어 있을 수 있음
 }
 
 // 확장된 게임 상태

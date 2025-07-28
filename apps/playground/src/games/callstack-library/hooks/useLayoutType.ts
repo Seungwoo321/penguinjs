@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { GameDifficulty } from '../../shared/types'
-import { LayoutType, getLayoutType, getStageQueues, getLayoutDescription } from '../utils/layoutClassifier'
+import { getLayoutType, getStageQueues, getLayoutDescription } from '../utils/layoutClassifier'
+import { LayoutType } from '../types'
 
 export interface UseLayoutTypeResult {
   layoutType: LayoutType
