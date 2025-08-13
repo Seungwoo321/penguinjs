@@ -1,0 +1,538 @@
+{
+  "HomePage": {
+    "slogan": "クールなコード、温かい学習",
+    "description": "JavaScriptのコア概念を楽しいゲームで学びましょう。ペンギンと一緒にインタラクティブなコーディング冒険を始めましょう！",
+    "viewAllGames": "すべてのゲームを見る",
+    "subtitle": "JavaScriptをゲームで学ぶ新しい方法",
+    "detailedDescription": "複雑なJavaScript概念をインタラクティブなゲームにして直感的に学習できる教育プラットフォーム",
+    "availableGames": "体験可能なゲーム",
+    "gameProgress": "個完成（18個中約11%進行）",
+    "portfolioHighlights": {
+      "completedGames": "完成ゲーム",
+      "aiCollaboration": "AI協業",
+      "dualInput": "デュアル",
+      "touchMouse": "タッチ/マウス",
+      "realtimeFeedback": "リアルタイム",
+      "codeFeedback": "コードフィードバック"
+    },
+    "tryNow": "今すぐ体験してみてください",
+    "tryNowSubtitle": "JavaScript学習の新しい体験を直接確認してみてください",
+    "navigation": {
+      "projectStory": "プロジェクトストーリー",
+      "techStack": "技術スタック",
+      "allGames": "全ゲーム"
+    },
+    "cta": {
+      "playGame": "🎮 ゲーム体験",
+      "learnMore": "📝 詳しく見る"
+    },
+    "games": {
+      "closureCave": {
+        "title": "クロージャ洞窟",
+        "description": "クロージャの神秘的な世界を探検してスコープと環境を理解してみてください",
+        "concepts": "クロージャ,スコープ,レキシカル環境",
+        "difficulty": "中級"
+      },
+      "callstackLibrary": {
+        "title": "コールスタック図書館",
+        "description": "関数呼び出しスタックと実行順序を視覚的に理解してください",
+        "concepts": "コールスタック,実行コンテキスト,関数呼び出し",
+        "difficulty": "上級"
+      }
+    },
+    "gameCard": {
+      "stages": "ステージ",
+      "difficulties": "初級・中級・上級",
+      "startGame": "ゲーム開始",
+      "new": "NEW",
+      "locked": "🔒 ロック中",
+      "recommended": "おすすめ"
+    }
+  },
+  "GamesPage": {
+    "title": "すべてのJavaScript学習ゲーム",
+    "description": "合計18個のインタラクティブゲームでJavaScriptコア概念をマスターしてください",
+    "gameCollection": "ゲームコレクション",
+    "masterJavaScript": "18個のインタラクティブゲームでJavaScriptをマスター",
+    "homeTitle": "ホームへ",
+    "progress": {
+      "overallProgress": "全体進行状況",
+      "completed": "完成",
+      "completionEstimate": "現在のペースで約{months}ヶ月後に完成予定",
+      "startFirstGame": "最初のゲームを始めましょう！",
+      "completedGames": "完成したゲーム",
+      "completedStages": "完成したステージ",
+      "studyTime": "学習時間",
+      "studyTimeHours": "約{hours}時間",
+      "remainingGames": "残りのゲーム",
+      "awaitingChallenge": "挑戦待ち"
+    },
+    "categories": {
+      "title": "カテゴリ別探索",
+      "viewAll": "すべて表示",
+      "completed": "完成",
+      "basicConcepts": {
+        "name": "基本概念",
+        "description": "JavaScriptの核心基礎概念"
+      },
+      "functionsExecution": {
+        "name": "関数と実行",
+        "description": "関数呼び出しと実行メカニズム"
+      },
+      "asyncProcessing": {
+        "name": "非同期処理",
+        "description": "非同期プログラミングとPromise"
+      },
+      "advancedFeatures": {
+        "name": "高度な機能",
+        "description": "メタプログラミングと高度な技法"
+      },
+      "practicalSkills": {
+        "name": "実用スキル",
+        "description": "実務でよく使用する技術"
+      },
+      "domEvents": {
+        "name": "DOM & イベント",
+        "description": "DOM操作とイベント処理"
+      }
+    },
+    "gameCard": {
+      "completed": "完成",
+      "inProgress": "進行中",
+      "recommended": "おすすめ",
+      "comingSoon": "開発予定",
+      "stages": "ステージ",
+      "difficulties": "初級・中級・上級",
+      "minutes": "分",
+      "prerequisiteRequired": "前提条件を先に完成",
+      "nextRecommended": "前のゲームを完成したのでこのゲームをおすすめします！",
+      "playAgain": "もう一度プレイ",
+      "continueGame": "続きをプレイ",
+      "startGame": "ゲーム開始",
+      "difficulty": {
+        "beginner": "入門",
+        "basic": "初級",
+        "intermediate": "中級",
+        "advanced": "上級",
+        "expert": "専門家"
+      }
+    },
+    "games": {
+      "closureCave": {
+        "title": "クロージャ洞窟",
+        "description": "クロージャの神秘的な世界を探検してスコープと環境を理解してみてください",
+        "concepts": "クロージャ, スコープ, レキシカル環境",
+        "type": "Flexbox Froggyスタイル"
+      },
+      "callstackLibrary": {
+        "title": "コールスタック図書館",
+        "description": "関数呼び出しスタックと実行順序を視覚的に理解してください",
+        "concepts": "コールスタック, 実行コンテキスト, 関数呼び出し",
+        "type": "ドラッグ&ドロップ"
+      },
+      "promiseBattle": {
+        "title": "Promiseバトル",
+        "description": "ターン制カードゲームでPromise状態と非同期処理を学習",
+        "concepts": "Promise, then/catch, 非同期処理",
+        "type": "ターン制カードゲーム"
+      },
+      "asyncAirways": {
+        "title": "非同期航空",
+        "description": "航空スケジュール管理でasync/awaitと非同期プログラミングを学習",
+        "concepts": "async/await, 並行性, エラー処理",
+        "type": "リアルタイムスケジュール管理"
+      },
+      "proxyLaboratory": {
+        "title": "プロキシ実験室",
+        "description": "実験を通してProxyオブジェクトとメタプログラミングを探究",
+        "concepts": "Proxy, Reflect, メタプログラミング",
+        "type": "パズル/実験"
+      },
+      "eventTarget": {
+        "title": "イベントターゲット",
+        "description": "ターゲットゲームでイベント処理とバブリングをマスター",
+        "concepts": "イベント, バブリング, キャプチャ",
+        "type": "Flexbox Froggyスタイル"
+      },
+      "prototypeChain": {
+        "title": "プロトタイプチェーン",
+        "description": "接続パズルでプロトタイプ継承とチェーンを理解",
+        "concepts": "プロトタイプ, 継承, __proto__",
+        "type": "接続パズル"
+      },
+      "eventloopCinema": {
+        "title": "イベントループ映画館",
+        "description": "映画のようにイベントループと非同期実行順序を鑑賞",
+        "concepts": "イベントループ, タスクキュー, マイクロタスク",
+        "type": "タイミングベース"
+      },
+      "memoryMuseum": {
+        "title": "メモリ管理博物館",
+        "description": "博物館でガベージコレクションとメモリ最適化を学習",
+        "concepts": "ガベージコレクション, メモリリーク, 最適化",
+        "type": "管理シミュレーション"
+      },
+      "scopeForest": {
+        "title": "スコープ森",
+        "description": "森の探検でスコープチェーンと変数アクセスを理解",
+        "concepts": "スコープ, レキシカルスコープ, ブロックスコープ",
+        "type": "探検/パズル"
+      },
+      "hoistingHelicopter": {
+        "title": "ホイスティングヘリコプター",
+        "description": "ヘリコプター飛行でホイスティングと変数宣言を体験",
+        "concepts": "ホイスティング, var/let/const, TDZ",
+        "type": "物理シミュレーション"
+      },
+      "thisBinding": {
+        "title": "thisバインディングターゲット",
+        "description": "ターゲット射撃でthisキーワードとバインディングをマスター",
+        "concepts": "this, bind/call/apply, アロー関数",
+        "type": "ターゲット射撃"
+      },
+      "destructuringCircus": {
+        "title": "分割代入サーカス",
+        "description": "サーカス公演で分割代入を習得",
+        "concepts": "分割代入, スプレッド演算子, デフォルト値",
+        "type": "パズル/パターンマッチング"
+      },
+      "arrayMethodsRacing": {
+        "title": "配列メソッドレーシング",
+        "description": "レーシングで配列メソッドと関数型プログラミングを学習",
+        "concepts": "map/filter/reduce, チェーン, 不変性",
+        "type": "レーシング/競技"
+      },
+      "modulesMarketplace": {
+        "title": "モジュールマーケットプレイス",
+        "description": "マーケットプレイスでモジュールシステムとimport/exportを運営",
+        "concepts": "ES6モジュール, import/export, 循環依存",
+        "type": "経営シミュレーション"
+      },
+      "templateLiteralArt": {
+        "title": "テンプレートリテラルアート",
+        "description": "芸術創作でテンプレートリテラルと文字列処理を習得",
+        "concepts": "テンプレートリテラル, タグ付きテンプレート, 文字列補間",
+        "type": "創作/アート"
+      },
+      "errorHandlingHospital": {
+        "title": "エラー処理病院",
+        "description": "病院の救急室でエラー処理とデバッグを学習",
+        "concepts": "try/catch, カスタムエラー, デバッグ",
+        "type": "医療シミュレーション"
+      },
+      "weakmapVault": {
+        "title": "弱参照金庫",
+        "description": "セキュリティ金庫でWeakMap/WeakSetとメモリ管理を学習",
+        "concepts": "WeakMap, WeakSet, ガベージコレクション",
+        "type": "セキュリティ/スパイ"
+      }
+    },
+    "footer": {
+      "title": "🎯 JavaScript マスターへの道",
+      "description": "18個のゲームでJavaScriptのすべてのコア概念を完璧にマスターできます。",
+      "encouragement": "ペンギンと一緒に一つずつ制覇していきましょう！"
+    }
+  },
+  "AboutPage": {
+    "title": "プロジェクトストーリー",
+    "backToHome": "ホームへ",
+    "subtitle": "FlexboxFroggyから着想を得て始まったJavaScript学習ゲームプラットフォームの開発物語",
+    "inspiration": {
+      "title": "インスピレーションの始まり",
+      "content1": "FlexboxFroggyでCSS Flexを学習した経験が印象的でした。単にドキュメントを読むのではなく、コードを書いてカエルを動かす過程でFlexboxの概念が自然に身につきました。",
+      "content2": "これまで管理画面とダッシュボード開発に集中してきた私には、全く新しい挑戦が必要でした。",
+      "content3": "「JavaScriptの複雑な概念もこのようにゲーム化できないだろうか？」この考えからPenguinJSプロジェクトが始まりました。",
+      "flexboxInspiration": "FlexboxFroggyインスピレーション",
+      "flexboxExample": "「justify-content: centerでカエルを睡蓮の葉の上に移動させてください」",
+      "penguinExample": "「クロージャ洞窟で道を見つけてペンギンを救出してください」"
+    },
+    "vibreCoding": {
+      "title": "Claude Codeとのバイブコーディング",
+      "ideation": {
+        "title": "アイデア構想",
+        "content": "「コールスタックを視覚化するにはどうすればいいか？」頭の中のアイデアをClaudeと対話しながら具体化"
+      },
+      "wireframe": {
+        "title": "ワイヤーフレーム",
+        "content": "HTMLでレイアウトをスケッチし、Claudeに実装を依頼。様々なレイアウトを素早く実験"
+      },
+      "iteration": {
+        "title": "試行錯誤",
+        "content": "レイアウトシステムだけで6回以上リファクタリング。直接コーディングしなくても設計の重要性を実感"
+      },
+      "insights": "得られた洞察",
+      "aiAdvantages": {
+        "title": "AI協業の利点",
+        "item1": "高速プロトタイピング",
+        "item2": "多様なアプローチの試行",
+        "item3": "リアルタイムフィードバックと改善"
+      },
+      "stillImportant": {
+        "title": "依然として重要なこと",
+        "item1": "明確な要件定義",
+        "item2": "ユーザー体験設計",
+        "item3": "アーキテクチャ理解"
+      }
+    },
+    "currentAndFuture": {
+      "title": "現在と未来",
+      "currentStatus": {
+        "title": "現在の進行状況",
+        "completedGames": "完成したゲーム",
+        "implementedStages": "実装済みステージ",
+        "overallProgress": "全体進行率"
+      },
+      "futurePlans": {
+        "title": "今後の計画",
+        "item1": "残り16個のゲームを順次開発",
+        "item2": "ユーザーフィードバックの収集と改善",
+        "item3": "学習効果の測定と最適化",
+        "item4": "他の言語への拡張（Python、Goなど）"
+      }
+    },
+    "personalReflection": {
+      "title": "開発を通じて感じたこと",
+      "content1": "「想像したものを実際に作り出せる」という確信を得ました。技術的実装よりも、何を作るか、どのようにユーザーが学習するかを考える時間がより重要だと気づきました。",
+      "content2": "AIツールの発展により開発者の役割は変化していますが、問題を定義し解決方向を提示する能力は依然として核心だと思います。",
+      "quote": "「コーディングをしなくても、開発者は依然として必要だ」🚀"
+    },
+    "cta": {
+      "playGames": "ゲームを体験",
+      "viewTechStack": "技術スタックを見る"
+    }
+  },
+  "TechPage": {
+    "title": "技術スタック",
+    "homeLink": "ホームへ",
+    "hero": {
+      "title": "技術スタック & アーキテクチャ",
+      "description": "最新の技術スタックで構築されたインタラクティブ学習プラットフォームの技術構成と設計決定をご紹介します"
+    },
+    "coreStack": {
+      "title": "🚀 コア技術スタック",
+      "frontend": {
+        "title": "フロントエンド",
+        "react": {
+          "name": "React 19",
+          "description": "最新のHooks & 並行機能"
+        },
+        "nextjs": {
+          "name": "Next.js 15",
+          "description": "App Router & サーバーコンポーネント"
+        },
+        "typescript": {
+          "name": "TypeScript",
+          "description": "厳密な型安全性"
+        },
+        "framerMotion": {
+          "name": "Framer Motion",
+          "description": "滑らかなアニメーション"
+        },
+        "tailwind": {
+          "name": "Tailwind CSS",
+          "description": "ユーティリティーファーストスタイリング"
+        }
+      },
+      "architecture": {
+        "title": "アーキテクチャ",
+        "monorepo": {
+          "name": "モノレポ構造",
+          "description": "効率的なコード共有"
+        },
+        "singleton": {
+          "name": "シングルトンパターン",
+          "description": "メモリ監視最適化"
+        },
+        "stateManagement": {
+          "name": "状態管理最適化",
+          "description": "React ref ベースのパフォーマンス向上"
+        },
+        "componentSeparation": {
+          "name": "コンポーネント分離",
+          "description": "再利用可能なUIコンポーネント"
+        },
+        "customHooks": {
+          "name": "カスタムフック",
+          "description": "ロジック抽象化と再利用"
+        }
+      },
+      "features": {
+        "title": "機能",
+        "interactiveGames": {
+          "name": "インタラクティブゲーム",
+          "description": "ドラッグ&ドロップ、コードエディター"
+        },
+        "realtimeVisualization": {
+          "name": "リアルタイム可視化",
+          "description": "コールスタック、クロージャ動作の可視化"
+        },
+        "multiLanguage": {
+          "name": "多言語サポート",
+          "description": "日本語/英語/韓国語/中国語 next-intl"
+        },
+        "responsiveDesign": {
+          "name": "レスポンシブデザイン",
+          "description": "モバイル/デスクトップ最適化"
+        },
+        "darkMode": {
+          "name": "ダークモード",
+          "description": "システム設定連動"
+        }
+      }
+    },
+    "architecture": {
+      "title": "🏛️ システムアーキテクチャ",
+      "presentationLayer": {
+        "title": "🎨 プレゼンテーション層",
+        "description": "UI/UX & アニメーション",
+        "components": {
+          "reactComponents": "Reactコンポーネント",
+          "framerMotion": "Framer Motion",
+          "tailwindCSS": "Tailwind CSS"
+        }
+      },
+      "businessLogic": {
+        "title": "🧠 ビジネスロジック",
+        "description": "ゲームロジック & 状態管理",
+        "components": {
+          "gameEngine": "ゲームエンジン",
+          "stateManagement": "状態管理",
+          "memoryMonitor": "メモリ監視"
+        }
+      },
+      "dataLayer": {
+        "title": "💾 データ層",
+        "description": "データ保存 & 国際化",
+        "components": {
+          "levelConfigurations": "レベル構成",
+          "userProgress": "ユーザー進行状況",
+          "i18nResources": "i18nリソース"
+        }
+      },
+      "dataFlow": {
+        "title": "データフロー",
+        "userInput": "ユーザー入力",
+        "gameLogic": "ゲームロジック処理",
+        "stateUpdate": "状態更新",
+        "uiRendering": "UIレンダリング",
+        "arrow": "→"
+      }
+    },
+    "devTools": {
+      "title": "🛠️ 開発環境 & ツール",
+      "devTools": {
+        "title": "開発ツール",
+        "tools": {
+          "claudeCode": {
+            "name": "Claude Code",
+            "description": "AI協働開発"
+          },
+          "git": {
+            "name": "Git",
+            "description": "バージョン管理"
+          },
+          "pnpm": {
+            "name": "pnpm",
+            "description": "パッケージ管理"
+          },
+          "vsCode": {
+            "name": "VS Code",
+            "description": "コードレビュー"
+          }
+        }
+      },
+      "performance": {
+        "title": "パフォーマンス最適化",
+        "memoryMonitoring": {
+          "name": "メモリ監視",
+          "description": "Chrome DevTools API統合"
+        },
+        "bundleOptimization": {
+          "name": "バンドル最適化",
+          "description": "Next.js自動コード分割"
+        },
+        "imageOptimization": {
+          "name": "画像最適化",
+          "description": "Next.js Imageコンポーネント"
+        },
+        "animationOptimization": {
+          "name": "アニメーション最適化",
+          "description": "GPU加速活用"
+        }
+      }
+    },
+    "challenges": {
+      "title": "🎯 技術的挑戦と解決策",
+      "challenges": {
+        "title": "🚨 主要な挑戦",
+        "memoryLeak": {
+          "title": "メモリリーク問題",
+          "description": "ゲーム状態管理で発生したメモリリークにより234MBまで増加"
+        },
+        "complexAnimation": {
+          "title": "複雑なアニメーション",
+          "description": "ドラッグ&ドロップと可視化を同時に処理するパフォーマンス問題"
+        },
+        "layoutSystem": {
+          "title": "レイアウトシステム",
+          "description": "様々なゲーム画面に適用可能な柔軟なレイアウト設計"
+        }
+      },
+      "solutions": {
+        "title": "✅ 解決策",
+        "singletonPattern": {
+          "title": "シングルトンパターン適用",
+          "description": "メモリ監視をシングルトンとして実装し156MBに最適化"
+        },
+        "reactRef": {
+          "title": "React Ref活用",
+          "description": "stateの代わりにrefを使用して不要な再レンダリングを防止"
+        },
+        "componentAbstraction": {
+          "title": "コンポーネント抽象化",
+          "description": "再利用可能なレイアウトコンポーネントで一貫性を確保"
+        }
+      }
+    },
+    "performance": {
+      "title": "📊 実装済みパフォーマンス監視",
+      "memoryMonitoring": {
+        "title": "🧠 リアルタイムメモリ監視",
+        "chromeApi": {
+          "title": "Chrome Memory API統合",
+          "description": "performance.memoryによるリアルタイムヒープメモリ追跡"
+        },
+        "singletonImplementation": {
+          "title": "シングルトンパターン実装",
+          "description": "グローバル単一インスタンスでメモリ効率を最大化"
+        },
+        "autoCleanup": {
+          "title": "自動クリーンアップシステム",
+          "description": "30秒ごとに古いコンポーネントを自動クリーンアップ（5分閾値）"
+        },
+        "thresholdAlerts": {
+          "title": "閾値アラート",
+          "description": "80MB超過時に警告、120MB超過時にcriticalアラート"
+        }
+      },
+      "metrics": {
+        "optimizedMemory": {
+          "value": "156MB",
+          "label": "最適化後メモリ",
+          "change": "234MB → 156MB (-33%)"
+        },
+        "realtimeMonitoring": {
+          "value": "リアルタイム",
+          "label": "監視サイクル",
+          "description": "コンポーネントライフサイクル追跡"
+        }
+      },
+      "note": "* MemoryMonitorサービスによるリアルタイム監視（開発環境でのみ有効）"
+    },
+    "cta": {
+      "tryTech": "🎮 技術を体験",
+      "projectStory": "📖 プロジェクトストーリー",
+      "arrow": "→"
+    }
+  }
+}

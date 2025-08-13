@@ -15,7 +15,7 @@ import {
   useCurrentStage,
   useUnlockedStages,
   useSessionStats
-} from '../../../features/game-progression';
+} from '@/games/callstack-library/features/game-progression';
 
 // 위젯 Props
 export interface GameProgressTrackerWidgetProps {

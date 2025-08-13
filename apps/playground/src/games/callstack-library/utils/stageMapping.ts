@@ -1,5 +1,5 @@
-import { GameDifficulty } from '../../shared/types'
-import { CALLSTACK_STAGE_RANGES } from '../game-config'
+import { GameDifficulty } from '@/games/shared/types'
+import { CALLSTACK_STAGE_RANGES } from '@/games/callstack-library/game-config'
 
 /**
  * Converts an absolute stage number (1-22) to a relative stage number (1-8) within its difficulty

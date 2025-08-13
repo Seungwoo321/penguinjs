@@ -5,15 +5,15 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { EventLoopQueryHandler } from '../QueryHandler';
+import { EventLoopQueryHandler } from '@/games/callstack-library/QueryHandler';
 import { 
   Query,
   QueryContext
-} from '../Queries';
-import { EventSourcedEventLoopEngine } from '../../event-sourcing/EventSourcedEventLoopEngine';
-import { InMemoryEventStore } from '../../event-sourcing/EventStore';
-import { EventLoopConfig } from '../../event-loop/types';
-import { EventLoopEventTypes } from '../../event-sourcing/EventSourcedEventLoopEngine';
+} from '@/games/callstack-library/Queries';
+import { EventSourcedEventLoopEngine } from '@/games/callstack-library/domain/event-sourcing/EventSourcedEventLoopEngine';
+import { InMemoryEventStore } from '@/games/callstack-library/domain/event-sourcing/EventStore';
+import { EventLoopConfig } from '@/games/callstack-library/domain/event-loop/types';
+import { EventLoopEventTypes } from '@/games/callstack-library/domain/event-sourcing/EventSourcedEventLoopEngine';
 
 describe('QueryHandler 커버리지 개선', () => {
   let engine: EventSourcedEventLoopEngine;

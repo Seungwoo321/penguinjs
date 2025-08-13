@@ -16,9 +16,9 @@ import {
   LAYOUT_CONFIGS,
   type LayoutConfig,
   type PlayMode
-} from '../layoutClassifier';
-import { LayoutType } from '../../types';
-import { GameDifficulty } from '../../../shared/types';
+} from '@/games/callstack-library/layoutClassifier';
+import { LayoutType } from '@/games/callstack-library/types';
+import { GameDifficulty } from '@/games/shared/types';
 
 describe('layoutClassifier', () => {
   describe('LAYOUT_CONFIGS', () => {

@@ -20,7 +20,7 @@ import {
   performanceUtils,
   createStyles,
   tokens
-} from '../styleUtils';
+} from '@/games/callstack-library/styleUtils';
 
 // Mock designSystem
 vi.mock('../../theme/designSystem', () => ({

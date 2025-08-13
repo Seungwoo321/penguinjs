@@ -5,9 +5,9 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { CallStackEngine } from '../game-engine';
-import { CallStackLevel, FunctionCall, QueueType } from '../types';
-import { GameValidationResult, GameDifficulty } from '../../shared/types';
+import { CallStackEngine } from '@/games/callstack-library/game-engine';
+import { CallStackLevel, FunctionCall, QueueType } from '@/games/callstack-library/types';
+import { GameValidationResult, GameDifficulty } from '@/games/shared/types';
 
 describe('CallStackEngine', () => {
   let engine: CallStackEngine;

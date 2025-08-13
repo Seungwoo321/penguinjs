@@ -5,5 +5,5 @@
  * 재사용 가능한 Event Sourcing 인프라스트럭처
  */
 
-export * from '../../../domain/event-sourcing/EventStore';
-export * from '../../../domain/event-sourcing/EventSourcedEventLoopEngine';
+export * from '@/games/callstack-library/domain/event-sourcing/EventStore';
+export * from '@/games/callstack-library/domain/event-sourcing/EventSourcedEventLoopEngine';

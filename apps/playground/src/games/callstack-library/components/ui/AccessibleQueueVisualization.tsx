@@ -7,17 +7,17 @@ import React, { useRef, useEffect, useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Book, Zap, Calendar, ChevronUp, ChevronDown, Info } from 'lucide-react';
 import { cn } from '@penguinjs/ui';
-import { useCallStackLibraryTheme } from '../../hooks/useCallStackLibraryTheme';
-import { useKeyboardNavigation, useLiveRegion } from '../../hooks/useKeyboardNavigation';
+import { useDarkModeDetection } from '@/games/callstack-library/hooks/useCSSThemeSync';
+import { useKeyboardNavigation, useLiveRegion } from '@/games/callstack-library/hooks/useKeyboardNavigation';
 import { 
   CALLSTACK_LIBRARY_ARIA_LABELS,
   createListAttributes,
   createListItemAttributes,
   createProgressAttributes,
   srOnlyStyles
-} from '../../utils/ariaUtils';
+} from '@/games/callstack-library/utils/ariaUtils';
 import { AccessibleButton } from './AccessibleButton';
-import type { CallStackQueueType } from '../../theme/callstackLibraryTheme';
+import type { CallStackQueueType } from '@/games/callstack-library/theme/callstackLibraryTheme';
 
 interface QueueItem {
   id: string;
@@ -52,7 +52,7 @@ export const AccessibleQueueVisualization: React.FC<AccessibleQueueVisualization
   className
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const libraryTheme = useCallStackLibraryTheme();
+  const isDarkMode = useDarkModeDetection();
   const announce = useLiveRegion('polite');
   
   // 키보드 네비게이션
@@ -154,16 +154,16 @@ export const AccessibleQueueVisualization: React.FC<AccessibleQueueVisualization
         className
       )}
       style={{
-        backgroundColor: libraryTheme.getQueueColor(queueType as CallStackQueueType, 'light'),
-        border: `2px solid ${libraryTheme.getQueueBorder(queueType as CallStackQueueType)}`
+        backgroundColor: `rgb(var(--game-callstack-${queueType}-light))`,
+        border: `2px solid rgb(var(--game-callstack-${queueType}-border))`
       }}
     >
       {/* 헤더 */}
       <div 
         className="p-4 border-b"
         style={{
-          backgroundColor: libraryTheme.getQueueColor(queueType as CallStackQueueType, 'main'),
-          borderColor: libraryTheme.getQueueBorder(queueType as CallStackQueueType)
+          backgroundColor: `rgb(var(--game-callstack-${queueType}-main))`,
+          borderColor: `rgb(var(--game-callstack-${queueType}-border))`
         }}
       >
         <div className="flex items-center justify-between">
@@ -174,7 +174,7 @@ export const AccessibleQueueVisualization: React.FC<AccessibleQueueVisualization
             />
             <h3 
               className="font-bold text-lg"
-              style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'primary') }}
+              style={{ color: `rgb(var(--game-callstack-${queueType}-text-primary))` }}
             >
               {currentQueueInfo.title}
             </h3>
@@ -191,7 +191,7 @@ export const AccessibleQueueVisualization: React.FC<AccessibleQueueVisualization
           >
             <span 
               className="text-sm font-medium"
-              style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'secondary') }}
+              style={{ color: `rgb(var(--game-callstack-${queueType}-text-secondary))` }}
             >
               {items.length} / {maxSize}
             </span>
@@ -205,7 +205,7 @@ export const AccessibleQueueVisualization: React.FC<AccessibleQueueVisualization
         
         <p 
           className="text-sm mt-1"
-          style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'secondary') }}
+          style={{ color: `rgb(var(--game-callstack-${queueType}-text-secondary))` }}
         >
           {currentQueueInfo.subtitle}
         </p>
@@ -216,8 +216,8 @@ export const AccessibleQueueVisualization: React.FC<AccessibleQueueVisualization
         <div 
           className="px-4 py-2 flex items-center gap-2"
           style={{
-            backgroundColor: libraryTheme.getQueueColor(queueType as CallStackQueueType, 'hover'),
-            color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'primary')
+            backgroundColor: `rgb(var(--game-callstack-${queueType}-hover))`,
+            color: `rgb(var(--game-callstack-${queueType}-text-primary))`
           }}
           role="status"
           aria-live="polite"
@@ -244,7 +244,7 @@ export const AccessibleQueueVisualization: React.FC<AccessibleQueueVisualization
             <Icon className="w-12 h-12 mb-3 opacity-30" aria-hidden="true" />
             <p 
               className="text-center"
-              style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'secondary') }}
+              style={{ color: `rgb(var(--game-callstack-${queueType}-text-secondary))` }}
             >
               {currentQueueInfo.emptyMessage}
             </p>
@@ -315,7 +315,7 @@ export const AccessibleQueueVisualization: React.FC<AccessibleQueueVisualization
           
           <div 
             className="text-xs text-center py-1"
-            style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'secondary') }}
+            style={{ color: `rgb(var(--game-callstack-${queueType}-text-secondary))` }}
           >
             {visibleRange.start + 1}-{Math.min(visibleRange.end, items.length)}
           </div>
@@ -367,7 +367,7 @@ const QueueItemCard: React.FC<QueueItemCardProps> = memo(({
   onSelect,
   onRemove
 }) => {
-  const libraryTheme = useCallStackLibraryTheme();
+  const isDarkMode = useDarkModeDetection();
   
   return (
     <button
@@ -377,8 +377,8 @@ const QueueItemCard: React.FC<QueueItemCardProps> = memo(({
         isFocused && 'ring-2 ring-offset-2'
       )}
       style={{
-        backgroundColor: item.color || libraryTheme.getQueueColor(queueType as CallStackQueueType, 'light'),
-        borderColor: libraryTheme.getQueueBorder(queueType as CallStackQueueType)
+        backgroundColor: item.color || `rgb(var(--game-callstack-${queueType}-light))`,
+        borderColor: `rgb(var(--game-callstack-${queueType}-border))`
       }}
       onClick={onSelect}
       tabIndex={isFocused ? 0 : -1}

@@ -25,7 +25,7 @@ import {
   focusRingStyles,
   type AriaRole,
   type AriaAttributes
-} from '../ariaUtils';
+} from '@/games/callstack-library/ariaUtils';
 
 // Mock DOM API
 const mockMatchMedia = vi.fn();

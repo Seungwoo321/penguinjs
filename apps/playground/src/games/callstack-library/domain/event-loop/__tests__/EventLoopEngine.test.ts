@@ -5,8 +5,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { EventLoopEngine } from '../EventLoopEngine';
-import { EventLoopConfig, CallStackFrame, MicrotaskItem, MacrotaskItem } from '../types';
+import { EventLoopEngine } from '@/games/callstack-library/EventLoopEngine';
+import { EventLoopConfig, CallStackFrame, MicrotaskItem, MacrotaskItem } from '@/games/callstack-library/types';
 
 describe('EventLoopEngine', () => {
   let engine: EventLoopEngine;

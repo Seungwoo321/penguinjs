@@ -5,7 +5,7 @@
  * 각 명령은 검증, 실행, 결과 반환의 책임을 가짐
  */
 
-import { CallStackFrame, MicrotaskItem, MacrotaskItem } from '../event-loop/types';
+import { CallStackFrame, MicrotaskItem, MacrotaskItem } from '@/games/callstack-library/domain/event-loop/types';
 
 // 기본 명령 인터페이스
 export interface Command {

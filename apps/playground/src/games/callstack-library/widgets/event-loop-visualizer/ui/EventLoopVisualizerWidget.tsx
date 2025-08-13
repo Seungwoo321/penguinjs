@@ -14,7 +14,7 @@ import {
   useEventLoopSimulationStore, 
   useSimulationState, 
   useSimulationControls 
-} from '../../../features/event-loop-simulation';
+} from '@/games/callstack-library/features/event-loop-simulation';
 
 // 위젯 Props
 export interface EventLoopVisualizerWidgetProps {

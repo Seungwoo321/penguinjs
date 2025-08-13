@@ -103,7 +103,7 @@ export function EnhancedCallStackBoard({
   return (
     <div className={`w-full space-y-3 ${className}`}>
       {/* 컨트롤 패널 */}
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3">
+      <div className="bg-[rgb(var(--surface-elevated))] rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Layers className="h-4 w-4 text-slate-600 dark:text-slate-400" />
@@ -180,7 +180,7 @@ export function EnhancedCallStackBoard({
 
         {/* 실행 우선순위 표시 */}
         {executionFlowVisible && (
-          <div className="bg-slate-50 dark:bg-slate-900 rounded p-2">
+          <div className="bg-[rgb(var(--surface-secondary))] rounded p-2">
             <div className="flex items-center gap-1 mb-1">
               <Settings className="h-3 w-3 text-slate-500" />
               <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
@@ -335,7 +335,7 @@ export function EnhancedCallStackBoard({
 
       {/* 디버그 정보 (개발 중에만 표시) */}
       {process.env.NODE_ENV === 'development' && (
-        <details className="bg-slate-100 dark:bg-slate-800 rounded p-2">
+        <details className="bg-[rgb(var(--surface-secondary))] rounded p-2">
           <summary className="cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-300">
             디버그 정보
           </summary>

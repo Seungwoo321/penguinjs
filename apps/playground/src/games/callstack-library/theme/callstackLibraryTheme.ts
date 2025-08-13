@@ -2,6 +2,7 @@
  * 콜스택 도서관 게임 전용 테마 시스템
  * CallStack Library Game에서만 사용되는 도서관 테마
  */
+import { QueueType } from '@/games/callstack-library/types'
 
 export type CallStackQueueType = 'callstack' | 'microtask' | 'macrotask' | 'animation' | 'generator' | 'io' | 'worker'
 
@@ -34,11 +35,7 @@ export interface CallStackQueueTheme {
 
 export interface CallStackLibraryTheme {
   name: 'callstack-library'
-  colors: {
-    callstack: CallStackQueueTheme
-    microtask: CallStackQueueTheme
-    macrotask: CallStackQueueTheme
-  }
+  colors: Record<QueueType, CallStackQueueTheme>
   semantic: {
     success: string      // 성공적인 대출/반납
     error: string        // 연체/분실
@@ -223,6 +220,58 @@ export const CALLSTACK_LIBRARY_THEME: CallStackLibraryTheme = {
         main: 'rgb(229, 127, 116)',       
         light: 'rgb(244, 182, 174)',     
         focus: 'rgb(136, 52, 54)'      
+      }
+    },
+    priority: {
+      primary: 'rgb(239, 68, 68)',      // 빨간색 - 우선순위
+      secondary: 'rgb(248, 113, 113)',   
+      accent: 'rgb(252, 165, 165)',      
+      background: {
+        light: 'rgb(254, 242, 242)',    
+        main: 'rgb(254, 226, 226)',     
+        dark: 'rgb(252, 165, 165)'      
+      },
+      text: {
+        primary: 'rgb(239, 68, 68)',    
+        secondary: 'rgb(248, 113, 113)', 
+        contrast: 'rgb(255, 255, 255)'  
+      },
+      gradients: {
+        main: 'linear-gradient(to bottom, rgb(239, 68, 68), rgb(248, 113, 113))',
+        light: 'linear-gradient(to right, rgb(254, 242, 242), rgb(254, 226, 226))',
+        button: 'linear-gradient(to right, rgb(248, 113, 113), rgb(252, 165, 165))',
+        hover: 'linear-gradient(to right, rgb(239, 68, 68), rgb(248, 113, 113))'
+      },
+      border: {
+        main: 'rgb(252, 165, 165)',       
+        light: 'rgb(254, 202, 202)',     
+        focus: 'rgb(185, 28, 28)'      
+      }
+    },
+    circular: {
+      primary: 'rgb(139, 92, 246)',      // 보라색 - 순환
+      secondary: 'rgb(167, 139, 250)',   
+      accent: 'rgb(196, 181, 253)',      
+      background: {
+        light: 'rgb(245, 243, 255)',    
+        main: 'rgb(237, 233, 254)',     
+        dark: 'rgb(221, 214, 254)'      
+      },
+      text: {
+        primary: 'rgb(139, 92, 246)',    
+        secondary: 'rgb(167, 139, 250)', 
+        contrast: 'rgb(255, 255, 255)'  
+      },
+      gradients: {
+        main: 'linear-gradient(to bottom, rgb(139, 92, 246), rgb(167, 139, 250))',
+        light: 'linear-gradient(to right, rgb(245, 243, 255), rgb(237, 233, 254))',
+        button: 'linear-gradient(to right, rgb(167, 139, 250), rgb(196, 181, 253))',
+        hover: 'linear-gradient(to right, rgb(139, 92, 246), rgb(167, 139, 250))'
+      },
+      border: {
+        main: 'rgb(196, 181, 253)',       
+        light: 'rgb(221, 214, 254)',     
+        focus: 'rgb(109, 40, 217)'      
       }
     },
     animation: {

@@ -1,6 +1,6 @@
-import { BaseGameEngine } from '../shared/BaseGameEngine'
+import { BaseGameEngine } from '@/games/shared/BaseGameEngine'
 import { CallStackLevel, StackItem, FunctionCall, CallStackGameState, QueueItem, QueueType } from './types'
-import { GameValidationResult, GameDifficulty } from '../shared/types'
+import { GameValidationResult, GameDifficulty } from '@/games/shared/types'
 import { callstackLibraryConfig } from './game-config'
 import { beginnerLevels } from './levels/beginner-levels'
 import { intermediateLevels } from './levels/intermediate-levels' 
@@ -20,10 +20,10 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
       macrotask: [],
       priority: [],
       circular: [],
-      deque: [],
       animation: [],
-      immediate: [],
-      idle: []
+      generator: [],
+      io: [],
+      worker: []
     },
     queueVisualConfigs
   }
@@ -385,10 +385,6 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
     const config = this.gameState.queueVisualConfigs[queueType]
     
     switch (queueType) {
-      case 'deque':
-        // 덱의 경우 앞에서 제거 (기본값)
-        return queue.shift() || null
-        
       default:
         // 일반적인 큐 동작
         if (config.fifo) {
@@ -399,20 +395,20 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
     }
   }
 
-  // 덱에서 뒤쪽 제거 (덱 전용)
-  removeFromDequeRear(): QueueItem | null {
-    const queue = this.gameState.queues['deque']
+  // 원형 큐에서 뒤쪽 제거 (원형 큐 전용)
+  removeFromCircularRear(): QueueItem | null {
+    const queue = this.gameState.queues['circular']
     if (!queue || queue.length === 0) return null
     return queue.pop() || null
   }
 
-  // 덱 앞쪽에 추가 (덱 전용)
-  addToDequeFont(item: QueueItem): void {
-    this.gameState.queues['deque'].unshift(item)
+  // 원형 큐 앞쪽에 추가 (원형 큐 전용)
+  addToCircularFront(item: QueueItem): void {
+    this.gameState.queues['circular'].unshift(item)
     
-    const config = this.gameState.queueVisualConfigs['deque']
-    if (this.gameState.queues['deque'].length > config.maxSize) {
-      this.gameState.queues['deque'].pop() // 뒤에서 제거
+    const config = this.gameState.queueVisualConfigs['circular']
+    if (this.gameState.queues['circular'].length > config.maxSize) {
+      this.gameState.queues['circular'].pop() // 뒤에서 제거
     }
   }
 
@@ -492,10 +488,10 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
         macrotask: [],
         priority: [],
         circular: [],
-        deque: [],
         animation: [],
-        immediate: [],
-        idle: []
+        generator: [],
+        io: [],
+        worker: []
       },
       queueVisualConfigs
     }

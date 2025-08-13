@@ -123,14 +123,15 @@
         /* 콜스택 영역 */
         .callstack-area {
             height: 300px;
-            border: 2px solid #333;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
             position: relative;
             margin: 10px 0;
         }
         
         .stack-item {
             height: 40px;
-            border: 1px solid #999;
+            border: 1px solid #ccc;
             margin: 2px 20px;
             background: white;
             display: flex;
@@ -142,33 +143,44 @@
         /* 함수 선택 영역 */
         .function-selector {
             min-height: 200px;
-            border: 1px solid #999;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
             padding: 10px;
         }
         
         .function-item {
             height: 30px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             margin: 5px 0;
-            background: white;
+            background: #ffffff;
             display: flex;
             align-items: center;
             padding: 0 10px;
             font-family: monospace;
             font-size: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .function-item:hover {
+            background: #f0f7ff;
+            border-color: #b3d9ff;
+            transform: translateX(2px);
         }
         
         /* 예상 순서 영역 */
         .prediction-area {
             min-height: 140px;
-            border-top: 1px solid #666;
+            border-top: 1px solid #ccc;
+            background: #f9f9f9;
             padding: 20px;
         }
         
         .prediction-slots {
-            border: 1px dashed #999;
+            border: 1px dashed #ccc;
             min-height: 50px;
-            background: #fafafa;
+            background: white;
             padding: 10px;
             display: flex;
             gap: 10px;

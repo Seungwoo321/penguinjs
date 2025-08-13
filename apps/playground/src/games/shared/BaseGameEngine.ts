@@ -19,22 +19,13 @@ export abstract class BaseGameEngine<TLevel> {
 
   // 레벨 가져오기
   getLevelByStage(difficulty: GameDifficulty, stage: number): TLevel | null {
-    console.log('🔍 BaseGameEngine.getLevelByStage called:', { difficulty, stage })
-    
     const difficultyLevels = this.levels.get(difficulty)
-    console.log('📋 Difficulty levels found:', difficultyLevels ? difficultyLevels.length : 0, 'levels')
     
     if (!difficultyLevels) {
-      console.log('❌ No levels found for difficulty:', difficulty)
       return null
     }
     
     const level = difficultyLevels.find((l: any) => l.stageNumber === stage)
-    console.log('🎯 Level search result:', { 
-      searchingFor: stage, 
-      found: level ? (level as any).stageNumber : 'none',
-      levelId: level ? (level as any).id : 'none'
-    })
     
     if (!level) {
       console.error(`❌ No level found for ${difficulty} stage ${stage}. Available stages:`, 
@@ -48,7 +39,6 @@ export abstract class BaseGameEngine<TLevel> {
       return null
     }
     
-    console.log('✅ Level validation passed')
     return level
   }
 

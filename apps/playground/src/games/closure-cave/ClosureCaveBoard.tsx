@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { GameLevel, GameStagePosition } from '../shared/types'
+import { GameLevel, GameStagePosition } from '@/games/shared/types'
+import { useClosureCaveTheme } from '@/games/closure-cave/hooks/useClosureCaveTheme'
 
 interface ClosureCaveBoardProps {
   level: GameLevel
@@ -17,6 +18,9 @@ export function ClosureCaveBoard({
   isAnimating,
   onAnimationComplete 
 }: ClosureCaveBoardProps) {
+  // 테마 훅 사용
+  const theme = useClosureCaveTheme()
+  
   const [currentPenguinPosition, setCurrentPenguinPosition] = useState(
     level.gameBoard.character.startPosition
   )
@@ -92,26 +96,39 @@ export function ClosureCaveBoard({
           o => o.position.row === row && o.position.col === col
         )
         
+        // 셀 타입 결정
+        let cellType: 'empty' | 'start' | 'target' | 'obstacle' | 'treasure' = 'empty'
+        if (isStart) cellType = 'start'
+        else if (isTarget) cellType = 'target'
+        else if (obstacle) cellType = 'obstacle'
+        else if (treasure && !collectedTreasures.includes(treasure.id)) cellType = 'treasure'
+        
+        const cellStyle = theme.getCellStyle(cellType)
+        
         grid.push(
           <div
             key={`${row}-${col}`}
-            className={`
-              relative w-16 h-16 border-2 flex items-center justify-center
-              ${isStart ? 'bg-green-100 dark:bg-green-900/30 border-green-400' : ''}
-              ${isTarget ? 'bg-yellow-100 dark:bg-yellow-900/30 border-yellow-400' : ''}
-              ${!isStart && !isTarget ? 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700' : ''}
-            `}
+            className="relative w-16 h-16 flex items-center justify-center transition-all duration-200 hover:scale-105"
+            style={cellStyle}
           >
             {/* 시작 지점 표시 */}
             {isStart && (
-              <div className="absolute inset-0 flex items-center justify-center text-xs text-green-800 dark:text-green-200 font-bold">
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-bold" 
+                style={{ 
+                  color: `rgba(${theme.getSpecialColor('position-text')}, ${theme.isDarkMode ? 0.95 : 0.9})`,
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                }}>
                 START
               </div>
             )}
             
             {/* 목표 지점 표시 */}
             {isTarget && (
-              <div className="absolute inset-0 flex items-center justify-center text-xs text-yellow-800 dark:text-yellow-200 font-bold">
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-bold" 
+                style={{ 
+                  color: `rgba(${theme.getSpecialColor('position-text')}, ${theme.isDarkMode ? 0.95 : 0.9})`,
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                }}>
                 GOAL
               </div>
             )}
@@ -120,17 +137,35 @@ export function ClosureCaveBoard({
             {obstacle && (
               <div className="absolute inset-0 flex items-center justify-center">
                 {obstacle.type === 'rock' && (
-                  <div className="w-12 h-12 bg-gray-600 rounded-lg border-2 border-gray-700 shadow-md flex items-center justify-center">
+                  <div 
+                    className="w-12 h-12 rounded-lg border-2 shadow-md flex items-center justify-center"
+                    style={{
+                      backgroundColor: theme.getSpecialColor('obstacle-rock-bg'),
+                      borderColor: theme.getSpecialColor('obstacle-rock-border')
+                    }}
+                  >
                     <span className="text-2xl">🪨</span>
                   </div>
                 )}
                 {obstacle.type === 'ice' && (
-                  <div className="w-12 h-12 bg-cyan-200/50 rounded-lg border-2 border-cyan-400 shadow-md flex items-center justify-center">
+                  <div 
+                    className="w-12 h-12 rounded-lg border-2 shadow-md flex items-center justify-center"
+                    style={{
+                      backgroundColor: theme.getSpecialColor('obstacle-ice-bg'),
+                      borderColor: theme.getSpecialColor('obstacle-ice-border')
+                    }}
+                  >
                     <span className="text-2xl">🧊</span>
                   </div>
                 )}
                 {obstacle.type === 'water' && (
-                  <div className="w-12 h-12 bg-blue-400/30 rounded-full border-2 border-blue-500 shadow-md flex items-center justify-center">
+                  <div 
+                    className="w-12 h-12 rounded-full border-2 shadow-md flex items-center justify-center"
+                    style={{
+                      backgroundColor: theme.getSpecialColor('obstacle-water-bg'),
+                      borderColor: theme.getSpecialColor('obstacle-water-border')
+                    }}
+                  >
                     <span className="text-2xl">💧</span>
                   </div>
                 )}
@@ -145,10 +180,13 @@ export function ClosureCaveBoard({
                 exit={{ scale: 0 }}
                 className="absolute inset-0 flex items-center justify-center"
               >
-                <div className={`
-                  text-2xl z-10
-                  ${treasure.locked ? 'opacity-50' : ''}
-                `}>
+                <div 
+                  className={`text-2xl z-10 ${treasure.locked ? 'opacity-50' : ''}`}
+                  style={{
+                    filter: treasure.locked ? 'grayscale(100%)' : 'none',
+                    textShadow: `0 0 8px ${theme.getTreasureColor('gold')}`
+                  }}
+                >
                   {treasure.value}
                   {treasure.locked && (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -195,12 +233,24 @@ export function ClosureCaveBoard({
   }
   
   return (
-    <div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4">
+    <div 
+      className="rounded-lg p-4 border transition-all duration-200"
+      style={{
+        ...theme.getCardStyles(),
+        ...theme.getGameStateStyle(isAnimating ? 'playing' : 'idle')
+      }}
+    >
       <div className="mb-3">
-        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 mb-1">
+        <h3 
+          className="text-base font-semibold mb-1"
+          style={{ color: theme.getTextColor('primary') }}
+        >
           {level.objective}
         </h3>
-        <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+        <div 
+          className="flex items-center gap-2 text-sm"
+          style={{ color: theme.getTextColor('primary') }}
+        >
           <span>수집한 보물:</span>
           {collectedTreasures.length > 0 ? (
             <div className="flex gap-1">
@@ -212,7 +262,7 @@ export function ClosureCaveBoard({
               })}
             </div>
           ) : (
-            <span className="text-slate-700 dark:text-slate-400">없음</span>
+            <span style={{ color: theme.getTextColor('secondary') }}>없음</span>
           )}
         </div>
       </div>
@@ -236,7 +286,8 @@ export function ClosureCaveBoard({
           <motion.div
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-sm text-blue-600 dark:text-blue-400"
+            className="text-sm"
+            style={{ color: theme.getPrimaryColor() }}
           >
             펭귄이 이동 중입니다...
           </motion.div>

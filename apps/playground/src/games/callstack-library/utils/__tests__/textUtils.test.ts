@@ -15,7 +15,7 @@ import {
   createTextDisplayClasses,
   typography,
   type TextOverflowConfig
-} from '../textUtils';
+} from '@/games/callstack-library/textUtils';
 
 describe('textUtils', () => {
   describe('createTextOverflowStyles', () => {

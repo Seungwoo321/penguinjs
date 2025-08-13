@@ -5,4 +5,4 @@
  * 재사용 가능한 CQRS 인프라스트럭처
  */
 
-export * from '../../../domain/cqrs';
+export * from '@/games/callstack-library/domain/cqrs';

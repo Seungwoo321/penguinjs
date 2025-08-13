@@ -17,7 +17,7 @@ import {
   getEffectiveColor,
   getColorDebugInfo,
   type AccessibleColorPair
-} from '../colorUtils';
+} from '@/games/callstack-library/colorUtils';
 
 describe('colorUtils', () => {
   describe('getRelativeLuminance', () => {

@@ -1,4 +1,30 @@
-import { CallStackLevel } from '../types'
+import { CallStackLevel } from '@/games/callstack-library/types'
+import { callstackLibraryThemeConfig } from '@/games/callstack-library/theme/callstackLibraryGameTheme'
+
+// 함수별 색상 매핑 (테마 시스템 사용)
+const getFunctionColor = (functionName: string): string => {
+  const baseColors = callstackLibraryThemeConfig.specialColors
+  
+  // 함수명에 따른 색상 분류
+  if (functionName.includes('<global>')) {
+    return `rgb(${baseColors['function-global']})`
+  }
+  if (functionName.includes('main')) {
+    return `rgb(${baseColors['function-main']})`
+  }
+  if (functionName.includes('processUser') || functionName.includes('calculate') || 
+      functionName.includes('factorial') || functionName.includes('checkNumbers') || 
+      functionName.includes('dangerousRecursion')) {
+    return `rgb(${baseColors['function-primary']})`
+  }
+  if (functionName.includes('greet') || functionName.includes('multiply') || 
+      functionName.includes('isEven')) {
+    return `rgb(${baseColors['function-secondary']})`
+  }
+  
+  // 기본값은 primary 색상
+  return `rgb(${baseColors['function-primary']})`
+}
 
 export const advancedLevels: CallStackLevel[] = [
   {
@@ -34,22 +60,22 @@ processUser();`,
     snapshotCheckpoints: [2, 3, 4, 6], // 각 브레이크포인트에 해당하는 실행 단계들
     expectedSnapshots: {
       2: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'process-1', functionName: 'processUser', color: 'rgb(21, 94, 173)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'process-1', functionName: 'processUser', color: getFunctionColor('primary'), height: 40 }
       ], // Step 2: greet 호출 직전 (라인 7) - greet은 아직 스택에 없음
       3: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'process-1', functionName: 'processUser', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'greet-1', functionName: 'greet', color: 'rgb(21, 128, 61)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'process-1', functionName: 'processUser', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'greet-1', functionName: 'greet', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 3: greet 내부 console.log 실행 (라인 2)
       4: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'process-1', functionName: 'processUser', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'greet-1', functionName: 'greet', color: 'rgb(21, 128, 61)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'process-1', functionName: 'processUser', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'greet-1', functionName: 'greet', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 4: greet의 return 실행 (라인 3) - 아직 스택에 있음
       6: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'process-1', functionName: 'processUser', color: 'rgb(21, 94, 173)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'process-1', functionName: 'processUser', color: getFunctionColor('primary'), height: 40 }
       ] // Step 6: processUser의 console.log 실행 (라인 8) - greet은 이미 종료됨
     },
     functionCalls: [
@@ -120,24 +146,24 @@ console.log("결과:", result);`,
     snapshotCheckpoints: [2, 3, 4, 5], // breakpoints 라인에서 실행되는 단계들
     expectedSnapshots: {
       2: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'calc-1', functionName: 'calculate', color: 'rgb(21, 94, 173)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'calc-1', functionName: 'calculate', color: getFunctionColor('primary'), height: 40 }
       ], // Step 2: multiply 호출 (라인 2)
       3: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'calc-1', functionName: 'calculate', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'mult-1', functionName: 'multiply', color: 'rgb(21, 128, 61)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'calc-1', functionName: 'calculate', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'mult-1', functionName: 'multiply', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 3: add 호출 (라인 6)
       4: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'calc-1', functionName: 'calculate', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'mult-1', functionName: 'multiply', color: 'rgb(21, 128, 61)', height: 40 }, 
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'calc-1', functionName: 'calculate', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'mult-1', functionName: 'multiply', color: getFunctionColor('secondary'), height: 40 }, 
         { id: 'add-1', functionName: 'add', color: 'rgb(126, 34, 206)', height: 40 }
       ], // Step 4: console.log 실행 (라인 10)
       5: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'calc-1', functionName: 'calculate', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'mult-1', functionName: 'multiply', color: 'rgb(21, 128, 61)', height: 40 }, 
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'calc-1', functionName: 'calculate', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'mult-1', functionName: 'multiply', color: getFunctionColor('secondary'), height: 40 }, 
         { id: 'add-1', functionName: 'add', color: 'rgb(126, 34, 206)', height: 40 }
       ] // Step 5: add return (라인 11) - return 실행 중이므로 add는 아직 스택에 있음
     },
@@ -223,25 +249,25 @@ console.log("최종 결과:", answer);`,
     snapshotCheckpoints: [4, 8, 9, 10], // 실제 체크포인트에 해당하는 단계들
     expectedSnapshots: {
       4: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'fact-3', functionName: 'factorial(3)', color: 'rgb(21, 94, 173)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'fact-3', functionName: 'factorial(3)', color: getFunctionColor('primary'), height: 40 }
       ], // Step 4: factorial(2) 호출 직전 (라인 9) - factorial(2)는 아직 스택에 없음
       8: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'fact-3', functionName: 'factorial(3)', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'fact-2', functionName: 'factorial(2)', color: 'rgb(21, 128, 61)', height: 40 }, 
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'fact-3', functionName: 'factorial(3)', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'fact-2', functionName: 'factorial(2)', color: getFunctionColor('secondary'), height: 40 }, 
         { id: 'fact-1', functionName: 'factorial(1)', color: 'rgb(126, 34, 206)', height: 40 }
       ], // Step 8: 기저 조건 (라인 5)
       9: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'fact-3', functionName: 'factorial(3)', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'fact-2', functionName: 'factorial(2)', color: 'rgb(21, 128, 61)', height: 40 }, 
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'fact-3', functionName: 'factorial(3)', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'fact-2', functionName: 'factorial(2)', color: getFunctionColor('secondary'), height: 40 }, 
         { id: 'fact-1', functionName: 'factorial(1)', color: 'rgb(126, 34, 206)', height: 40 }
       ], // Step 9: factorial(1) return 실행 (라인 6) - return 실행 중이므로 아직 스택에 있음
       10: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'fact-3', functionName: 'factorial(3)', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'fact-2', functionName: 'factorial(2)', color: 'rgb(21, 128, 61)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'fact-3', functionName: 'factorial(3)', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'fact-2', functionName: 'factorial(2)', color: getFunctionColor('secondary'), height: 40 }
       ] // Step 10: factorial(2)로 복귀 (라인 10) - factorial(1)은 종료됨
     },
     functionCalls: [
@@ -335,27 +361,27 @@ checkNumbers([1, 2, 3]);`,
     snapshotCheckpoints: [2, 3, 6, 7, 9], // breakpoints 라인에서 실행되는 단계들
     expectedSnapshots: {
       2: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(21, 94, 173)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }
       ], // Step 2: 첫 번째 요소 확인 (라인 5)
       3: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'even-1', functionName: 'isEven', color: 'rgb(21, 128, 61)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'even-1', functionName: 'isEven', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 3: isEven(1) 호출 (라인 5)
       6: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(21, 94, 173)', height: 40 }, 
-        { id: 'even-2', functionName: 'isEven', color: 'rgb(21, 128, 61)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'even-2', functionName: 'isEven', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 6: isEven(2) 호출 (라인 5)
       7: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(21, 94, 173)', height: 40 }, 
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }, 
         { id: 'process-1', functionName: 'processEven', color: 'rgb(126, 34, 206)', height: 40 }
       ], // Step 7: processEven(2) 호출 (라인 7)
       9: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(21, 94, 173)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }
       ] // Step 9: 검사 완료 (라인 13) - checkNumbers는 아직 실행 중
     },
     functionCalls: [
@@ -451,34 +477,34 @@ dangerousRecursion(3);`,
     snapshotCheckpoints: [4, 8, 12, 16, 19],
     expectedSnapshots: {
       4: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 },
-        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: 'rgb(21, 94, 173)', height: 40 },
-        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: 'rgb(21, 128, 61)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 }
       ],
       8: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 },
-        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: 'rgb(21, 94, 173)', height: 40 },
-        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: 'rgb(21, 128, 61)', height: 40 },
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 },
         { id: 'danger-1-1', functionName: 'dangerousRecursion(1)', color: 'rgb(126, 34, 206)', height: 40 },
         { id: 'danger-0-1', functionName: 'dangerousRecursion(0)', color: 'rgb(185, 28, 28)', height: 40 }
       ],
       12: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 },
-        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: 'rgb(21, 94, 173)', height: 40 },
-        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: 'rgb(21, 128, 61)', height: 40 },
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 },
         { id: 'danger-1-2', functionName: 'dangerousRecursion(1)', color: 'rgb(126, 34, 206)', height: 40 }
       ],
       16: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 },
-        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: 'rgb(21, 94, 173)', height: 40 },
-        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: 'rgb(21, 128, 61)', height: 40 },
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 },
         { id: 'danger-1-2', functionName: 'dangerousRecursion(1)', color: 'rgb(126, 34, 206)', height: 40 },
         { id: 'danger-0-3', functionName: 'dangerousRecursion(0)', color: 'rgb(185, 28, 28)', height: 40 }
       ],
       19: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(92, 51, 23)', height: 40 },
-        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: 'rgb(21, 94, 173)', height: 40 },
-        { id: 'danger-2-2', functionName: 'dangerousRecursion(2)', color: 'rgb(21, 128, 61)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-2', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 }
       ]
     },
     functionCalls: [

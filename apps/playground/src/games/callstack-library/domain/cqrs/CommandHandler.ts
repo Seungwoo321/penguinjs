@@ -24,9 +24,9 @@ import {
   getCommandPriority
 } from './Commands';
 
-import { EventSourcedEventLoopEngine } from '../event-sourcing/EventSourcedEventLoopEngine';
-import { IEventStore } from '../event-sourcing/EventStore';
-import { EventLoopConfig } from '../event-loop/types';
+import { EventSourcedEventLoopEngine } from '@/games/callstack-library/domain/event-sourcing/EventSourcedEventLoopEngine';
+import { IEventStore } from '@/games/callstack-library/domain/event-sourcing/EventStore';
+import { EventLoopConfig } from '@/games/callstack-library/domain/event-loop/types';
 
 // 명령 처리 컨텍스트
 export interface CommandContext {

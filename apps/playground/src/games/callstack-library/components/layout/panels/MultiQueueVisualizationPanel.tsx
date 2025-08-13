@@ -3,16 +3,17 @@
 
 import React, { useRef, useMemo, useCallback, memo } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
-import { MultiQueueVisualizationPanelProps } from '../../../types/layout'
+import { MultiQueueVisualizationPanelProps } from '@/games/callstack-library/types/layout'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, Zap, BookOpen, Book, ArrowRight, Calendar, Users } from 'lucide-react'
-import { useContainerResponsive } from '../../../hooks/useResponsiveLayout'
-import { useOptimizedAnimations } from '../../../hooks/useOptimizedAnimations'
-import { typography, createTextOverflowStyles } from '../../../utils/textUtils'
-import { usePerformanceOptimization } from '../../../hooks/usePerformanceOptimization'
-import { useMemoryManagement, useLeakDetection } from '../../../hooks/useMemoryManagement'
-import { useCallStackLibraryContext } from '../../../contexts/CallStackLibraryContext'
-import { gameEvents } from '../../../utils/eventSystem'
+import { useContainerResponsive } from '@/games/callstack-library/hooks/useResponsiveLayout'
+import { useOptimizedAnimations } from '@/games/callstack-library/hooks/useOptimizedAnimations'
+import { typography, createTextOverflowStyles } from '@/games/callstack-library/utils/textUtils'
+import { usePerformanceOptimization } from '@/games/callstack-library/hooks/usePerformanceOptimization'
+import { useMemoryMonitor } from '@/games/callstack-library/hooks/useMemoryMonitor'
+import { useLeakDetection } from '@/games/callstack-library/hooks/useMemoryManagement'
+import { useCallStackLibraryContext } from '@/games/callstack-library/contexts/CallStackLibraryContext'
+import { gameEvents } from '@/games/callstack-library/utils/eventSystem'
 
 /**
  * 다중 큐 시각화 패널
@@ -28,12 +29,13 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
+  
   // 경량화된 메모리 관리 (개발 환경에서만)
-  const { registerCleanup, isMemoryPressure } = useMemoryManagement({
-    enableMonitoring: process.env.NODE_ENV === 'development',
-    leakThreshold: 150, // 더 관대하게
-    cleanupInterval: 120000 // 2분으로 늘림
-  })
+  const { registerCleanup, isMemoryPressure } = useMemoryMonitor()
   
   // 개발 환경에서만 메모리 누수 감지
   if (process.env.NODE_ENV === 'development') {
@@ -69,7 +71,7 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
         };
         
         return (
-          <div className="flex items-center justify-center py-8 text-gray-400">
+          <div className="flex items-center justify-center py-8" style={{ color: 'rgb(var(--muted-foreground))' }}>
             <p className="text-sm">{emptyMessages[queueType]}</p>
           </div>
         );
@@ -80,19 +82,12 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
           {items.map((item, index) => (
             <div
               key={item.id || index}
-              className={cn(
-                "px-3 py-2 rounded-md border transition-all cursor-pointer",
-                "hover:shadow-sm hover:scale-[1.02]",
-                queueType === 'callstack' && "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700",
-                queueType === 'microtask' && "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100",
-                queueType === 'macrotask' && "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-900 dark:text-orange-100",
-                highlightedQueue === queueType && "ring-2 ring-offset-1 ring-blue-400"
-              )}
+              className="bg-card rounded-lg shadow-sm p-3 border border-border cursor-pointer"
               onClick={() => handleQueueItemClick(queueType, item)}
             >
               <div className="flex items-center justify-between">
                 <span className="font-mono text-sm">{item.functionName || item.name}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">#{index + 1}</span>
+                <span className="text-xs text-muted-foreground">#{index + 1}</span>
               </div>
             </div>
           ))}
@@ -134,15 +129,17 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
     >
       {/* 큐 헤더 */}
       <div 
-        className="flex-shrink-0 shadow-sm bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+        className="flex-shrink-0 shadow-sm border-b"
         style={{
+          backgroundColor: 'rgb(var(--muted))',
+          borderColor: 'rgb(var(--border))',
           padding: responsiveLayout.getResponsiveSpacing(16)
         }}
       >
         <div className="flex items-center justify-between">
           <div>
             <h3 
-              className="font-bold flex items-center gap-2 text-gray-800 dark:text-gray-200"
+              className="font-bold flex items-center gap-2 text-[rgb(var(--foreground))]"
               style={{ 
                 fontSize: typography.heading.h3,
                 ...createTextOverflowStyles({ maxLines: 1, breakWord: false })
@@ -153,9 +150,10 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
             </h3>
             {!responsiveLayout.isCompact && (
               <p 
-                className="mt-1 flex items-center gap-2 min-w-0 text-gray-600 dark:text-gray-400"
+                className="mt-1 flex items-center gap-2 min-w-0"
                 style={{ 
                   fontSize: typography.caption.large,
+                  color: 'rgb(var(--muted-foreground))',
                   ...createTextOverflowStyles({ maxLines: 2, breakWord: true })
                 }}
               >
@@ -167,12 +165,14 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
           <div className="flex items-center gap-2">
             {isExecuting && (
               <span 
-                className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300"
+                className="flex items-center gap-1 px-2 py-1 rounded-full"
                 style={{
-                  fontSize: responsiveLayout.config.fontSize.caption
+                  fontSize: responsiveLayout.config.fontSize.caption,
+                  backgroundColor: 'rgb(var(--success))',
+                  color: 'rgb(var(--success-foreground))'
                 }}
               >
-                <div className="w-2 h-2 rounded-full animate-pulse bg-green-500"></div>
+                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'rgb(var(--success))' }}></div>
                 {responsiveLayout.isMobile ? '실행중' : '실행 중'}
               </span>
             )}
@@ -182,8 +182,9 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
       
       {/* 메인 큐 시각화 영역 */}
       <div 
-        className="flex-1 overflow-hidden relative bg-gray-50 dark:bg-gray-900"
+        className="flex-1 overflow-hidden relative"
         style={{
+          backgroundColor: 'rgb(var(--card))',
           padding: responsiveLayout.getResponsiveSpacing(16)
         }}
       >
@@ -205,7 +206,7 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
           {/* 콜스택 영역 */}
           <motion.div
             className={cn(
-              "relative border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+              "relative border rounded-lg bg-[rgb(var(--card))] border-[rgb(var(--border))]",
               highlightedQueue === 'callstack' && "ring-2 ring-blue-400 ring-opacity-50 shadow-lg"
             )}
             animate={{
@@ -213,9 +214,12 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
             }}
             transition={{ duration: 0.2 }}
           >
-            <div className="flex items-center gap-2 p-3 border-b border-gray-200 dark:border-gray-700">
-              <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              <h3 className="font-semibold text-base text-gray-800 dark:text-gray-200">콜스택</h3>
+            <div 
+              className="flex items-center gap-2 p-3 border-b"
+              style={{ borderColor: 'rgb(var(--border))' }}
+            >
+              <BookOpen className="w-5 h-5" style={{ color: 'rgb(var(--game-callstack-queue-callstack))' }} />
+              <h3 className="font-semibold text-base" style={{ color: 'rgb(var(--text-primary))' }}>콜스택</h3>
             </div>
             {renderQueue('callstack', memoizedQueueStates.callstack)}
           </motion.div>
@@ -223,23 +227,32 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
           {/* 마이크로태스크 큐 */}
           <motion.div
             className={cn(
-              "relative border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",
-              highlightedQueue === 'microtask' && "ring-2 ring-blue-400 ring-opacity-50 shadow-lg bg-blue-200 dark:bg-blue-800/40"
+              "relative rounded-lg",
+              highlightedQueue === 'microtask' && "ring-2 ring-opacity-50 shadow-lg"
             )}
+            style={{
+              backgroundColor: 'rgb(var(--card))',
+              border: '1px solid rgb(var(--border))',
+              ...(highlightedQueue === 'microtask' && {
+                ringColor: 'rgb(var(--ring))'
+              })
+            }}
             animate={{
               scale: highlightedQueue === 'microtask' ? 1.02 : 1,
             }}
             transition={{ duration: 0.2 }}
           >
-            <div className={cn(
-              "flex items-center gap-2 p-3 border-b border-blue-200 dark:border-blue-800",
-              highlightedQueue === 'microtask' && "bg-blue-200 dark:bg-blue-800/40"
-            )}>
-              <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <h3 className={cn(
-                "font-semibold text-base",
-                highlightedQueue === 'microtask' ? "text-blue-900 dark:text-blue-100" : "text-gray-800 dark:text-gray-200"
-              )}>마이크로태스크</h3>
+            <div 
+              className="flex items-center gap-2 p-3 border-b"
+              style={{ 
+                borderColor: 'rgb(var(--border))',
+                ...(highlightedQueue === 'microtask' && {
+                  backgroundColor: 'rgb(var(--muted))'
+                })
+              }}
+            >
+              <Zap className="w-5 h-5" style={{ color: 'rgb(var(--foreground))' }} />
+              <h3 className="font-semibold text-base" style={{ color: 'rgb(var(--text-primary))' }}>마이크로태스크</h3>
             </div>
             {renderQueue('microtask', memoizedQueueStates.microtask)}
           </motion.div>
@@ -247,23 +260,32 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
           {/* 매크로태스크 큐 */}
           <motion.div
             className={cn(
-              "relative border rounded-lg bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800",
-              highlightedQueue === 'macrotask' && "ring-2 ring-orange-400 ring-opacity-50 shadow-lg bg-orange-200 dark:bg-orange-800/40"
+              "relative rounded-lg",
+              highlightedQueue === 'macrotask' && "ring-2 ring-opacity-50 shadow-lg"
             )}
+            style={{
+              backgroundColor: 'rgb(var(--card))',
+              border: '1px solid rgb(var(--border))',
+              ...(highlightedQueue === 'macrotask' && {
+                ringColor: 'rgb(var(--ring))'
+              })
+            }}
             animate={{
               scale: highlightedQueue === 'macrotask' ? 1.02 : 1,
             }}
             transition={{ duration: 0.2 }}
           >
-            <div className={cn(
-              "flex items-center gap-2 p-3 border-b border-orange-200 dark:border-orange-800",
-              highlightedQueue === 'macrotask' && "bg-orange-200 dark:bg-orange-800/40"
-            )}>
-              <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-              <h3 className={cn(
-                "font-semibold text-base",
-                highlightedQueue === 'macrotask' ? "text-orange-900 dark:text-orange-100" : "text-gray-800 dark:text-gray-200"
-              )}>매크로태스크</h3>
+            <div 
+              className="flex items-center gap-2 p-3 border-b"
+              style={{ 
+                borderColor: 'rgb(var(--border))',
+                ...(highlightedQueue === 'macrotask' && {
+                  backgroundColor: 'rgb(var(--muted))'
+                })
+              }}
+            >
+              <Calendar className="w-5 h-5" style={{ color: 'rgb(var(--foreground))' }} />
+              <h3 className="font-semibold text-base" style={{ color: 'rgb(var(--text-primary))' }}>매크로태스크</h3>
             </div>
             {renderQueue('macrotask', memoizedQueueStates.macrotask)}
           </motion.div>
@@ -274,7 +296,11 @@ export const MultiQueueVisualizationPanel: React.FC<MultiQueueVisualizationPanel
       {/* 실행 상태 표시 */}
       {(state.gameState === 'playing' || isExecuting) && (
         <motion.div
-          className="absolute top-2 right-2 px-3 py-1 bg-blue-500 text-white text-sm rounded-full"
+          className="absolute top-2 right-2 px-3 py-1 text-sm rounded-full"
+          style={{ 
+            background: 'rgb(var(--game-callstack-button-primary))',
+            color: 'white'
+          }}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}

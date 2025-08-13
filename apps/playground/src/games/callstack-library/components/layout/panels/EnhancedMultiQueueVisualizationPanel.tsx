@@ -8,13 +8,14 @@ import {
   Clock, Zap, BookOpen, Book, ArrowRight, Calendar, Users,
   Film, RefreshCw, HardDrive, Cpu
 } from 'lucide-react'
-import { useContainerResponsive } from '../../../hooks/useResponsiveLayout'
-import { useOptimizedAnimations } from '../../../hooks/useOptimizedAnimations'
-import { typography, createTextOverflowStyles } from '../../../utils/textUtils'
-import { usePerformanceOptimization } from '../../../hooks/usePerformanceOptimization'
-import { useMemoryManagement, useLeakDetection } from '../../../hooks/useMemoryManagement'
-import { useCallStackLibraryContext } from '../../../contexts/CallStackLibraryContext'
-import { gameEvents } from '../../../utils/eventSystem'
+import { useContainerResponsive } from '@/games/callstack-library/hooks/useResponsiveLayout'
+import { useOptimizedAnimations } from '@/games/callstack-library/hooks/useOptimizedAnimations'
+import { typography, createTextOverflowStyles } from '@/games/callstack-library/utils/textUtils'
+import { usePerformanceOptimization } from '@/games/callstack-library/hooks/usePerformanceOptimization'
+import { useMemoryMonitor } from '@/games/callstack-library/hooks/useMemoryMonitor'
+import { useLeakDetection } from '@/games/callstack-library/hooks/useMemoryManagement'
+import { useCallStackLibraryContext } from '@/games/callstack-library/contexts/CallStackLibraryContext'
+import { gameEvents } from '@/games/callstack-library/utils/eventSystem'
 
 interface EnhancedMultiQueueVisualizationPanelProps {
   queueTypes: ReadonlyArray<string>;
@@ -26,72 +27,112 @@ interface EnhancedMultiQueueVisualizationPanelProps {
   className?: string;
 }
 
-// 큐 타입별 스타일 정의
-const queueStyles = {
+// 큐 타입별 스타일 정의 - CSS 변수 사용
+const getQueueStyles = () => {
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
+
+  return {
   callstack: {
-    background: 'bg-gray-50 dark:bg-gray-800',
-    border: 'border-gray-200 dark:border-gray-700',
-    highlight: 'bg-gray-100 dark:bg-gray-700',
     icon: BookOpen,
-    iconColor: 'text-gray-600 dark:text-gray-400',
     title: '콜스택',
-    emptyMessage: '콜스택이 비어있습니다'
+    emptyMessage: '콜스택이 비어있습니다',
+    getColors: () => ({
+      background: 'rgb(var(--game-callstack-queue-callstack-light))',
+      border: '2px solid rgb(var(--game-callstack-queue-callstack-light))',
+      highlight: 'rgba(var(--game-callstack-queue-callstack), 0.8)',
+      icon: 'rgb(var(--game-callstack-queue-callstack))',
+      text: 'rgb(var(--text-primary))'
+    })
   },
   microtask: {
-    background: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-800',
-    highlight: 'bg-blue-100 dark:bg-blue-800/40',
     icon: Zap,
-    iconColor: 'text-blue-600 dark:text-blue-400',
     title: '마이크로태스크',
-    emptyMessage: '마이크로태스크가 없습니다'
+    emptyMessage: '마이크로태스크가 없습니다',
+    getColors: () => ({
+      background: 'rgb(var(--game-callstack-queue-microtask-light))',
+      border: '2px solid rgb(var(--game-callstack-queue-microtask-light))',
+      highlight: 'rgba(var(--game-callstack-queue-microtask), 0.8)',
+      icon: 'rgb(var(--game-callstack-queue-microtask))',
+      text: 'rgb(var(--text-primary))'
+    })
   },
   macrotask: {
-    background: 'bg-orange-50 dark:bg-orange-900/20',
-    border: 'border-orange-200 dark:border-orange-800',
-    highlight: 'bg-orange-100 dark:bg-orange-800/40',
     icon: Calendar,
-    iconColor: 'text-orange-600 dark:text-orange-400',
     title: '매크로태스크',
-    emptyMessage: '매크로태스크가 없습니다'
+    emptyMessage: '매크로태스크가 없습니다',
+    getColors: () => ({
+      background: 'rgb(var(--game-callstack-queue-macrotask-light))',
+      border: '2px solid rgb(var(--game-callstack-queue-macrotask-light))',
+      highlight: 'rgba(var(--game-callstack-queue-macrotask), 0.8)',
+      icon: 'rgb(var(--game-callstack-queue-macrotask))',
+      text: 'rgb(var(--text-primary))'
+    })
+  },
+  priority: {
+    icon: Zap,
+    title: '우선순위',
+    emptyMessage: '우선순위 작업이 없습니다',
+    getColors: () => ({
+      background: 'rgb(var(--game-callstack-queue-priority-light))',
+      border: '2px solid rgb(var(--game-callstack-queue-priority-light))',
+      highlight: 'rgba(var(--game-callstack-queue-priority), 0.8)',
+      icon: 'rgb(var(--game-callstack-queue-priority))',
+      text: 'rgb(var(--text-primary))'
+    })
   },
   animation: {
-    background: 'bg-purple-50 dark:bg-purple-900/20',
-    border: 'border-purple-200 dark:border-purple-800',
-    highlight: 'bg-purple-100 dark:bg-purple-800/40',
     icon: Film,
-    iconColor: 'text-purple-600 dark:text-purple-400',
     title: '애니메이션',
-    emptyMessage: '애니메이션 프레임이 없습니다'
+    emptyMessage: '애니메이션 프레임이 없습니다',
+    getColors: () => ({
+      background: 'rgb(var(--game-callstack-queue-animation-light))',
+      border: '2px solid rgb(var(--game-callstack-queue-animation-light))',
+      highlight: 'rgba(var(--game-callstack-queue-animation), 0.8)',
+      icon: 'rgb(var(--game-callstack-queue-animation))',
+      text: 'rgb(var(--text-primary))'
+    })
   },
   generator: {
-    background: 'bg-teal-50 dark:bg-teal-900/20',
-    border: 'border-teal-200 dark:border-teal-800',
-    highlight: 'bg-teal-100 dark:bg-teal-800/40',
     icon: RefreshCw,
-    iconColor: 'text-teal-600 dark:text-teal-400',
     title: '제너레이터',
-    emptyMessage: '제너레이터가 없습니다'
+    emptyMessage: '제너레이터가 없습니다',
+    getColors: () => ({
+      background: 'rgb(var(--game-callstack-queue-generator-light))',
+      border: '2px solid rgb(var(--game-callstack-queue-generator-light))',
+      highlight: 'rgba(var(--game-callstack-queue-generator), 0.8)',
+      icon: 'rgb(var(--game-callstack-queue-generator))',
+      text: 'rgb(var(--text-primary))'
+    })
   },
   io: {
-    background: 'bg-indigo-50 dark:bg-indigo-900/20',
-    border: 'border-indigo-200 dark:border-indigo-800',
-    highlight: 'bg-indigo-100 dark:bg-indigo-800/40',
     icon: HardDrive,
-    iconColor: 'text-indigo-600 dark:text-indigo-400',
     title: 'I/O 작업',
-    emptyMessage: 'I/O 작업이 없습니다'
+    emptyMessage: 'I/O 작업이 없습니다',
+    getColors: () => ({
+      background: 'rgb(var(--game-callstack-queue-io-light))',
+      border: '2px solid rgb(var(--game-callstack-queue-io-light))',
+      highlight: 'rgba(var(--game-callstack-queue-io), 0.8)',
+      icon: 'rgb(var(--game-callstack-queue-io))',
+      text: 'rgb(var(--text-primary))'
+    })
   },
   worker: {
-    background: 'bg-amber-50 dark:bg-amber-900/20',
-    border: 'border-amber-200 dark:border-amber-800',
-    highlight: 'bg-amber-100 dark:bg-amber-800/40',
     icon: Cpu,
-    iconColor: 'text-amber-600 dark:text-amber-400',
     title: '웹 워커',
-    emptyMessage: '워커 작업이 없습니다'
+    emptyMessage: '워커 작업이 없습니다',
+    getColors: () => ({
+      background: 'rgb(var(--game-callstack-queue-worker-light))',
+      border: '2px solid rgb(var(--game-callstack-queue-worker-light))',
+      highlight: 'rgba(var(--game-callstack-queue-worker), 0.8)',
+      icon: 'rgb(var(--game-callstack-queue-worker))',
+      text: 'rgb(var(--text-primary))'
+    })
   }
-};
+  };
+}
 
 /**
  * 향상된 다중 큐 시각화 패널
@@ -108,12 +149,13 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
+  
   // 경량화된 메모리 관리 (개발 환경에서만)
-  const { registerCleanup, isMemoryPressure } = useMemoryManagement({
-    enableMonitoring: process.env.NODE_ENV === 'development',
-    leakThreshold: 150,
-    cleanupInterval: 120000
-  })
+  const { registerCleanup, isMemoryPressure } = useMemoryMonitor()
   
   // 개발 환경에서만 메모리 누수 감지
   if (process.env.NODE_ENV === 'development') {
@@ -127,6 +169,9 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
   // Context API 사용
   const { state, dispatch } = useCallStackLibraryContext();
   
+  // CSS 변수 기반 큐 스타일 가져오기
+  const queueStyles = useMemo(() => getQueueStyles(), [])
+  
   // 최적화된 이벤트 핸들러
   const handleQueueItemClick = useCallback(
     (queueType: string, item: any) => {
@@ -138,45 +183,37 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
   
   // 큐 아이템 렌더링
   const renderQueueItem = useCallback(
-    (queueType: string, item: any, index: number, style: typeof queueStyles[keyof typeof queueStyles]) => (
-      <motion.div
-        key={item.id || index}
-        layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.2, delay: index * 0.05 }}
-        className={cn(
-          "px-3 py-2 rounded-md border transition-all cursor-pointer",
-          "hover:shadow-md hover:scale-[1.02]",
-          style.background,
-          style.border,
-          queueType === 'callstack' && "text-gray-900 dark:text-gray-100",
-          queueType === 'microtask' && "text-blue-900 dark:text-blue-100",
-          queueType === 'macrotask' && "text-orange-900 dark:text-orange-100",
-          queueType === 'animation' && "text-purple-900 dark:text-purple-100",
-          queueType === 'generator' && "text-teal-900 dark:text-teal-100",
-          queueType === 'io' && "text-indigo-900 dark:text-indigo-100",
-          queueType === 'worker' && "text-amber-900 dark:text-amber-100",
-          highlightedQueue === queueType && "ring-2 ring-offset-1 ring-blue-400"
-        )}
-        onClick={() => handleQueueItemClick(queueType, item)}
-      >
-        <div className="flex items-center justify-between">
-          <span className="font-mono text-sm">{item.functionName || item.name}</span>
-          <span className="text-xs opacity-70">#{index + 1}</span>
-        </div>
-      </motion.div>
-    ),
+    (queueType: string, item: any, index: number, style: ReturnType<typeof getQueueStyles>[keyof ReturnType<typeof getQueueStyles>]) => {
+      const colors = style.getColors();
+      return (
+        <motion.div
+          key={item.id || index}
+          layout
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.2, delay: index * 0.05 }}
+          className="bg-card rounded-lg shadow-sm p-3 border border-border cursor-pointer"
+          onClick={() => handleQueueItemClick(queueType, item)}
+        >
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-sm">{item.functionName || item.name}</span>
+            <span className="text-xs opacity-70">#{index + 1}</span>
+          </div>
+        </motion.div>
+      );
+    },
     [highlightedQueue, handleQueueItemClick]
   );
   
   // 큐 렌더링
   const renderQueue = useCallback(
-    (queueType: string, items: any[], style: typeof queueStyles[keyof typeof queueStyles]) => {
+    (queueType: string, items: any[], style: ReturnType<typeof getQueueStyles>[keyof ReturnType<typeof getQueueStyles>]) => {
+      const colors = style.getColors();
+      
       if (!items || items.length === 0) {
         return (
-          <div className="flex items-center justify-center py-8 text-gray-400">
+          <div className="flex items-center justify-center py-8" style={{ color: 'rgb(var(--muted-foreground))' }}>
             <p className="text-sm">{style.emptyMessage}</p>
           </div>
         );
@@ -190,14 +227,14 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
             )}
           </AnimatePresence>
           {items.length > maxSize && (
-            <div className="text-center text-xs text-gray-500 dark:text-gray-400 pt-2">
+            <div className="text-center text-xs pt-2" style={{ color: 'rgb(var(--muted-foreground))' }}>
               +{items.length - maxSize} more items...
             </div>
           )}
         </div>
       );
     },
-    [renderQueueItem, maxSize]
+    [renderQueueItem, maxSize, responsiveLayout]
   );
   
   // 그리드 레이아웃 계산 - 세로 공간 활용을 위한 개선
@@ -254,17 +291,20 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
     >
       {/* 큐 헤더 */}
       <div 
-        className="flex-shrink-0 shadow-sm bg-gradient-to-r from-amber-900 to-amber-800 border-b border-amber-700"
+        className="flex-shrink-0 shadow-sm border-b"
         style={{
+          backgroundColor: 'rgb(var(--muted))',
+          borderColor: 'rgb(var(--border))',
           padding: responsiveLayout.getResponsiveSpacing(16)
         }}
       >
         <div className="flex items-center justify-between">
           <div>
             <h3 
-              className="font-bold flex items-center gap-2 text-white"
+              className="font-bold flex items-center gap-2"
               style={{ 
                 fontSize: typography.heading.h3,
+                color: 'rgb(var(--foreground))',
                 ...createTextOverflowStyles({ maxLines: 1, breakWord: false })
               }}
             >
@@ -273,9 +313,10 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
             </h3>
             {!responsiveLayout.isCompact && (
               <p 
-                className="mt-1 flex items-center gap-2 min-w-0 text-amber-100"
+                className="mt-1 flex items-center gap-2 min-w-0"
                 style={{ 
                   fontSize: typography.caption.large,
+                  color: 'rgb(var(--muted-foreground))',
                   ...createTextOverflowStyles({ maxLines: 2, breakWord: true })
                 }}
               >
@@ -292,12 +333,14 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
           <div className="flex items-center gap-2">
             {isExecuting && (
               <span 
-                className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300"
+                className="flex items-center gap-1 px-2 py-1 rounded-full"
                 style={{
-                  fontSize: responsiveLayout.config.fontSize.caption
+                  fontSize: responsiveLayout.config.fontSize.caption,
+                  backgroundColor: 'rgb(var(--success))',
+                  color: 'rgb(var(--success-foreground))'
                 }}
               >
-                <div className="w-2 h-2 rounded-full animate-pulse bg-green-500"></div>
+                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'rgb(var(--success))' }}></div>
                 {responsiveLayout.isMobile ? '실행중' : '실행 중'}
               </span>
             )}
@@ -307,8 +350,9 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
       
       {/* 메인 큐 시각화 영역 */}
       <div 
-        className="flex-1 overflow-auto relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-900 dark:to-gray-800"
+        className="flex-1 overflow-auto relative"
         style={{
+          backgroundColor: 'rgb(var(--card))',
           padding: responsiveLayout.getResponsiveSpacing(16)
         }}
       >
@@ -329,6 +373,7 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
             const style = queueStyles[queueType as keyof typeof queueStyles] || queueStyles.callstack;
             const Icon = style.icon;
             const items = queueStates[queueType] || [];
+            const colors = style.getColors();
             
             // Layout C에서 마지막 아이템(5번째)은 전체 너비 사용
             const isLastInLayoutC = gridLayout.specialLayout === 'layout-c' && index === 4;
@@ -337,32 +382,44 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
               <motion.div
                 key={queueType}
                 className={cn(
-                  "relative border rounded-lg shadow-md flex flex-col",
-                  style.background,
-                  style.border,
-                  highlightedQueue === queueType && "ring-2 ring-blue-400 ring-opacity-50 shadow-lg",
+                  "relative rounded-lg shadow-md flex flex-col",
+                  highlightedQueue === queueType && "ring-2 ring-opacity-50 shadow-lg",
                   gridLayout.itemHeight,
                   isLastInLayoutC && "col-span-2"
                 )}
+                style={{
+                  backgroundColor: 'rgb(var(--card))',
+                  border: '1px solid rgb(var(--border))',
+                  ...(highlightedQueue === queueType && {
+                    ringColor: 'rgb(var(--ring))'
+                  })
+                }}
                 animate={{
                   scale: highlightedQueue === queueType ? 1.02 : 1,
                 }}
                 transition={{ duration: 0.2 }}
-                style={{
-                  minHeight: responsiveLayout.isDesktop ? '180px' : '150px'
-                }}
               >
-                <div className={cn(
-                  "flex items-center gap-2 p-3 border-b",
-                  style.border,
-                  highlightedQueue === queueType && style.highlight
-                )}>
-                  <Icon className={cn("w-5 h-5", style.iconColor)} />
-                  <h3 className="font-semibold text-base text-gray-800 dark:text-gray-200">
+                <div 
+                  className="flex items-center gap-2 p-3 border-b"
+                  style={{
+                    borderColor: 'rgb(var(--border))',
+                    ...(highlightedQueue === queueType && {
+                      backgroundColor: 'rgb(var(--muted))'
+                    })
+                  }}
+                >
+                  <Icon className="w-5 h-5" style={{ color: 'rgb(var(--foreground))' }} />
+                  <h3 className="font-semibold text-base" style={{ color: 'rgb(var(--foreground))' }}>
                     {style.title}
                   </h3>
                   {items.length > 0 && (
-                    <span className="ml-auto text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
+                    <span 
+                      className="ml-auto text-xs px-2 py-1 rounded-full"
+                      style={{ 
+                        backgroundColor: 'rgb(var(--muted))',
+                        color: 'rgb(var(--muted-foreground))'
+                      }}
+                    >
                       {items.length}
                     </span>
                   )}
@@ -379,7 +436,11 @@ export const EnhancedMultiQueueVisualizationPanel: React.FC<EnhancedMultiQueueVi
       {/* 실행 상태 표시 */}
       {(state.gameState === 'playing' || isExecuting) && (
         <motion.div
-          className="absolute top-2 right-2 px-3 py-1 bg-blue-500 text-white text-sm rounded-full"
+          className="absolute top-2 right-2 px-3 py-1 text-sm rounded-full"
+          style={{ 
+            background: 'rgb(var(--game-callstack-button-primary))',
+            color: 'white'
+          }}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}

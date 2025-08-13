@@ -6,15 +6,14 @@
 import React, { forwardRef, useRef, useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@penguinjs/ui';
-import { useCallStackLibraryTheme } from '../../hooks/useCallStackLibraryTheme';
-import { useTouchFriendly } from '../../hooks/useMobileFirst';
+import { useTouchFriendly } from '@/games/callstack-library/hooks/useMobileFirst';
 import { 
   AriaAttributes, 
   createAriaAttributes, 
   focusRingStyles,
   isPrefersReducedMotion 
-} from '../../utils/ariaUtils';
-import { useLiveRegion } from '../../hooks/useKeyboardNavigation';
+} from '@/games/callstack-library/utils/ariaUtils';
+import { useLiveRegion } from '@/games/callstack-library/hooks/useKeyboardNavigation';
 import { useDesignTokens } from './DesignSystemProvider';
 
 interface AccessibleButtonProps extends 
@@ -92,7 +91,6 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
   children,
   ...ariaProps
 }, ref) => {
-  const libraryTheme = useCallStackLibraryTheme();
   const designTokens = useDesignTokens();
   const { viewport, getTouchStyles } = useTouchFriendly();
   const announce = useLiveRegion('polite');
@@ -142,13 +140,13 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     // 디자인 시스템의 기본 스타일 사용
     const baseStyle = designTokens.getButtonStyle(variant, size);
     
-    // 레거시 지원을 위한 색상 매핑
+    // CSS 변수 기반 색상 매핑
     const colors = {
-      text: libraryTheme.getQueueText(themeColor, 'primary'),
-      background: libraryTheme.getQueueColor(themeColor, 'main'),
-      border: libraryTheme.getQueueBorder(themeColor),
-      hover: libraryTheme.getQueueColor(themeColor, 'hover'),
-      active: libraryTheme.getQueueColor(themeColor, 'button')
+      text: 'rgb(var(--text-primary))',
+      background: `rgb(var(--game-callstack-queue-${themeColor}))`,
+      border: `rgb(var(--game-callstack-queue-${themeColor}))`,
+      hover: `rgba(var(--game-callstack-queue-${themeColor}), 0.8)`,
+      active: `rgb(var(--game-callstack-button-primary))`
     };
 
     switch (variant) {
@@ -163,7 +161,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
       case 'secondary':
         return {
           ...baseStyle,
-          backgroundColor: libraryTheme.getQueueColor(themeColor, 'light'),
+          backgroundColor: `rgb(var(--game-callstack-queue-${themeColor}-light))`,
           color: colors.text,
           border: `2px solid ${colors.border}`
         };
@@ -195,12 +193,12 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
       default:
         return {};
     }
-  }, [variant, size, themeColor, designTokens, libraryTheme]);
+  }, [variant, size, themeColor, designTokens]);
 
   // 포커스 스타일
   const focusStyles: React.CSSProperties = hasFocus ? {
     ...focusRingStyles,
-    outlineColor: libraryTheme.getQueueColor(themeColor, 'button')
+    outlineColor: `rgb(var(--game-callstack-focus-ring))`
   } : {};
 
   // 비활성화 스타일
@@ -220,7 +218,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    borderRadius: libraryTheme.theme.borderRadius.button,
+    borderRadius: '6px', // 기본 버튼 radius
     fontWeight: '500',
     fontSize: currentSize.fontSize,
     lineHeight: '1.2',
@@ -235,7 +233,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     overflow: 'hidden',
     outline: 'none',
     cursor: (disabled || loading) ? 'not-allowed' : 'pointer'
-  }), [touchStyles, variantStyles, focusStyles, disabledStyles, fullWidth, currentSize, libraryTheme, prefersReducedMotion, disabled, loading]);
+  }), [touchStyles, variantStyles, focusStyles, disabledStyles, fullWidth, currentSize, prefersReducedMotion, disabled, loading]);
 
   // 클릭 핸들러
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {

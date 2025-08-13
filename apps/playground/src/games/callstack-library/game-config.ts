@@ -1,4 +1,4 @@
-import { GameConfig, DifficultyStageRanges } from '../shared/types'
+import { GameConfig, DifficultyStageRanges } from '@/games/shared/types'
 
 export const callstackLibraryConfig: GameConfig = {
   id: 'callstack-library',

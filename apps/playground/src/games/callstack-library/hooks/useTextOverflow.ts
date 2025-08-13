@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { checkTextOverflow, TextOverflowConfig, createTextOverflowStyles } from '../utils/textUtils';
+import { checkTextOverflow, TextOverflowConfig, createTextOverflowStyles } from '@/games/callstack-library/utils/textUtils';
 
 interface UseTextOverflowOptions extends TextOverflowConfig {
   text: string;

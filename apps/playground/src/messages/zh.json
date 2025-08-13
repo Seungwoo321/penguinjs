@@ -1,0 +1,538 @@
+{
+  "HomePage": {
+    "slogan": "酷炫代码，温暖学习",
+    "description": "通过有趣的游戏学习JavaScript核心概念。与企鹅一起开始交互式编程冒险！",
+    "viewAllGames": "查看所有游戏",
+    "subtitle": "用游戏学习JavaScript的新方法",
+    "detailedDescription": "将复杂的JavaScript概念制作成交互式游戏，让您直观地学习的教育平台",
+    "availableGames": "可体验的游戏",
+    "gameProgress": "个完成（18个中约11%进度）",
+    "portfolioHighlights": {
+      "completedGames": "完成游戏",
+      "aiCollaboration": "AI协作",
+      "dualInput": "双重",
+      "touchMouse": "触摸/鼠标",
+      "realtimeFeedback": "实时",
+      "codeFeedback": "代码反馈"
+    },
+    "tryNow": "立即体验",
+    "tryNowSubtitle": "直接体验JavaScript学习的新方式",
+    "navigation": {
+      "projectStory": "项目故事",
+      "techStack": "技术栈",
+      "allGames": "全部游戏"
+    },
+    "cta": {
+      "playGame": "🎮 游戏体验",
+      "learnMore": "📝 了解更多"
+    },
+    "games": {
+      "closureCave": {
+        "title": "闭包洞穴",
+        "description": "探索闭包的神秘世界，理解作用域和环境",
+        "concepts": "闭包,作用域,词法环境",
+        "difficulty": "中级"
+      },
+      "callstackLibrary": {
+        "title": "调用栈图书馆",
+        "description": "可视化理解函数调用栈和执行顺序",
+        "concepts": "调用栈,执行上下文,函数调用",
+        "difficulty": "高级"
+      }
+    },
+    "gameCard": {
+      "stages": "关卡",
+      "difficulties": "初级·中级·高级",
+      "startGame": "开始游戏",
+      "new": "NEW",
+      "locked": "🔒 已锁定",
+      "recommended": "推荐"
+    }
+  },
+  "GamesPage": {
+    "title": "所有JavaScript学习游戏",
+    "description": "通过18个交互式游戏掌握JavaScript核心概念",
+    "gameCollection": "游戏合集",
+    "masterJavaScript": "通过18个交互式游戏掌握JavaScript",
+    "homeTitle": "返回首页",
+    "progress": {
+      "overallProgress": "整体进度",
+      "completed": "完成",
+      "completionEstimate": "按当前速度约{months}个月后完成",
+      "startFirstGame": "开始第一个游戏！",
+      "completedGames": "已完成游戏",
+      "completedStages": "已完成关卡",
+      "studyTime": "学习时间",
+      "studyTimeHours": "约{hours}小时",
+      "remainingGames": "剩余游戏",
+      "awaitingChallenge": "等待挑战"
+    },
+    "categories": {
+      "title": "按类别浏览",
+      "viewAll": "查看全部",
+      "completed": "完成",
+      "basicConcepts": {
+        "name": "基础概念",
+        "description": "JavaScript的核心基础概念"
+      },
+      "functionsExecution": {
+        "name": "函数与执行",
+        "description": "函数调用和执行机制"
+      },
+      "asyncProcessing": {
+        "name": "异步处理",
+        "description": "异步编程和Promise"
+      },
+      "advancedFeatures": {
+        "name": "高级功能",
+        "description": "元编程和高级技巧"
+      },
+      "practicalSkills": {
+        "name": "实用技能",
+        "description": "实务中常用的技术"
+      },
+      "domEvents": {
+        "name": "DOM和事件",
+        "description": "DOM操作和事件处理"
+      }
+    },
+    "gameCard": {
+      "completed": "已完成",
+      "inProgress": "进行中",
+      "recommended": "推荐",
+      "comingSoon": "即将发布",
+      "stages": "关卡",
+      "difficulties": "初级·中级·高级",
+      "minutes": "分钟",
+      "prerequisiteRequired": "需先完成前置游戏",
+      "nextRecommended": "完成前一个游戏后推荐此游戏！",
+      "playAgain": "重新游戏",
+      "continueGame": "继续游戏",
+      "startGame": "开始游戏",
+      "difficulty": {
+        "beginner": "入门",
+        "basic": "初级",
+        "intermediate": "中级",
+        "advanced": "高级",
+        "expert": "专家"
+      }
+    },
+    "games": {
+      "closureCave": {
+        "title": "闭包洞穴",
+        "description": "探索闭包的神秘世界，理解作用域和环境",
+        "concepts": "闭包, 作用域, 词法环境",
+        "type": "Flexbox Froggy风格"
+      },
+      "callstackLibrary": {
+        "title": "调用栈图书馆",
+        "description": "可视化理解函数调用栈和执行顺序",
+        "concepts": "调用栈, 执行上下文, 函数调用",
+        "type": "拖拽操作"
+      },
+      "promiseBattle": {
+        "title": "Promise战斗",
+        "description": "通过回合制卡牌游戏学习Promise状态和异步处理",
+        "concepts": "Promise, then/catch, 异步处理",
+        "type": "回合制卡牌游戏"
+      },
+      "asyncAirways": {
+        "title": "异步航空",
+        "description": "通过航班调度管理学习async/await和异步编程",
+        "concepts": "async/await, 并发, 错误处理",
+        "type": "实时调度管理"
+      },
+      "proxyLaboratory": {
+        "title": "代理实验室",
+        "description": "通过实验探索Proxy对象和元编程",
+        "concepts": "Proxy, Reflect, 元编程",
+        "type": "益智/实验"
+      },
+      "eventTarget": {
+        "title": "事件目标",
+        "description": "通过目标游戏掌握事件处理和冒泡",
+        "concepts": "事件, 冒泡, 捕获",
+        "type": "Flexbox Froggy风格"
+      },
+      "prototypeChain": {
+        "title": "原型链",
+        "description": "通过连接谜题理解原型继承和链",
+        "concepts": "原型, 继承, __proto__",
+        "type": "连接谜题"
+      },
+      "eventloopCinema": {
+        "title": "事件循环电影院",
+        "description": "像看电影一样观看事件循环和异步执行顺序",
+        "concepts": "事件循环, 任务队列, 微任务",
+        "type": "时机控制"
+      },
+      "memoryMuseum": {
+        "title": "内存管理博物馆",
+        "description": "在博物馆中学习垃圾收集和内存优化",
+        "concepts": "垃圾收集, 内存泄漏, 优化",
+        "type": "管理模拟"
+      },
+      "scopeForest": {
+        "title": "作用域森林",
+        "description": "通过森林探险理解作用域链和变量访问",
+        "concepts": "作用域, 词法作用域, 块作用域",
+        "type": "探险/益智"
+      },
+      "hoistingHelicopter": {
+        "title": "提升直升机",
+        "description": "通过直升机飞行体验提升和变量声明",
+        "concepts": "提升, var/let/const, TDZ",
+        "type": "物理模拟"
+      },
+      "thisBinding": {
+        "title": "this绑定目标",
+        "description": "通过目标射击掌握this关键字和绑定",
+        "concepts": "this, bind/call/apply, 箭头函数",
+        "type": "目标射击"
+      },
+      "destructuringCircus": {
+        "title": "解构马戏团",
+        "description": "通过马戏团表演学习解构赋值",
+        "concepts": "解构, 展开运算符, 默认值",
+        "type": "益智/模式匹配"
+      },
+      "arrayMethodsRacing": {
+        "title": "数组方法赛车",
+        "description": "通过赛车学习数组方法和函数式编程",
+        "concepts": "map/filter/reduce, 链式调用, 不可变性",
+        "type": "赛车/竞技"
+      },
+      "modulesMarketplace": {
+        "title": "模块市场",
+        "description": "在市场中运营模块系统和import/export",
+        "concepts": "ES6模块, import/export, 循环依赖",
+        "type": "商业模拟"
+      },
+      "templateLiteralArt": {
+        "title": "模板字面量艺术",
+        "description": "通过艺术创作学习模板字面量和字符串处理",
+        "concepts": "模板字面量, 标记模板, 字符串插值",
+        "type": "创意/艺术"
+      },
+      "errorHandlingHospital": {
+        "title": "错误处理医院",
+        "description": "在医院急诊室学习错误处理和调试",
+        "concepts": "try/catch, 自定义错误, 调试",
+        "type": "医疗模拟"
+      },
+      "weakmapVault": {
+        "title": "弱引用保险库",
+        "description": "在安全保险库中学习WeakMap/WeakSet和内存管理",
+        "concepts": "WeakMap, WeakSet, 垃圾收集",
+        "type": "安全/间谍"
+      }
+    },
+    "footer": {
+      "title": "🎯 JavaScript大师之路",
+      "description": "通过18个游戏可以完美掌握JavaScript的所有核心概念。",
+      "encouragement": "与企鹅一起逐一征服吧！"
+    }
+  },
+  "AboutPage": {
+    "title": "项目故事",
+    "backToHome": "返回首页",
+    "subtitle": "受FlexboxFroggy启发而开始的JavaScript学习游戏平台开发故事",
+    "inspiration": {
+      "title": "灵感的开始",
+      "content1": "使用FlexboxFroggy学习CSS Flex的经历令人印象深刻。不是简单地阅读文档，而是通过编写代码移动青蛙的过程中，Flexbox的概念自然而然地被掌握了。",
+      "content2": "一直专注于管理页面和仪表板开发的我，需要一个全新的挑战。",
+      "content3": "\"JavaScript的复杂概念是否也能像这样游戏化？\"PenguinJS项目就是从这个想法开始的。",
+      "flexboxInspiration": "FlexboxFroggy启发",
+      "flexboxExample": "\"使用justify-content: center将青蛙移到荷叶上\"",
+      "penguinExample": "\"在闭包洞穴中找到路径救出企鹅\""
+    },
+    "vibreCoding": {
+      "title": "与Claude Code的协作编程",
+      "ideation": {
+        "title": "构思创意",
+        "content": "\"如何可视化调用栈？\"通过与Claude对话将脑海中的想法具体化"
+      },
+      "wireframe": {
+        "title": "线框图",
+        "content": "用HTML勾画布局，请Claude实现。快速实验各种布局"
+      },
+      "iteration": {
+        "title": "反复试错",
+        "content": "仅布局系统就重构了6次以上。即使不直接编码也体会到了设计的重要性"
+      },
+      "insights": "获得的洞察",
+      "aiAdvantages": {
+        "title": "AI协作的优势",
+        "item1": "快速原型设计",
+        "item2": "尝试多样化方法",
+        "item3": "实时反馈和改进"
+      },
+      "stillImportant": {
+        "title": "仍然重要的事",
+        "item1": "明确的需求定义",
+        "item2": "用户体验设计",
+        "item3": "架构理解"
+      }
+    },
+    "currentAndFuture": {
+      "title": "现在与未来",
+      "currentStatus": {
+        "title": "当前进展",
+        "completedGames": "已完成游戏",
+        "implementedStages": "已实现关卡",
+        "overallProgress": "整体进度"
+      },
+      "futurePlans": {
+        "title": "未来计划",
+        "item1": "逐步开发剩余16个游戏",
+        "item2": "收集用户反馈并改进",
+        "item3": "测量和优化学习效果",
+        "item4": "扩展到其他语言（Python、Go等）"
+      }
+    },
+    "personalReflection": {
+      "title": "开发过程中的感悟",
+      "content1": "我获得了\"能够真正创造出想象中的东西\"的信心。意识到思考要做什么、用户如何学习的时间比技术实现更重要。",
+      "content2": "虽然AI工具的发展正在改变开发者的角色，但定义问题和提出解决方案的能力仍然是核心。",
+      "quote": "\"即使不编码，开发者仍然是必需的\" 🚀"
+    },
+    "cta": {
+      "playGames": "体验游戏",
+      "viewTechStack": "查看技术栈"
+    }
+  },
+  "TechPage": {
+    "title": "技术栈",
+    "homeLink": "返回首页",
+    "hero": {
+      "title": "技术栈与架构",
+      "description": "介绍使用现代技术栈构建的交互式学习平台的技术组成和设计决策"
+    },
+    "coreStack": {
+      "title": "🚀 核心技术栈",
+      "frontend": {
+        "title": "前端",
+        "react": {
+          "name": "React 19",
+          "description": "最新Hooks和并发特性"
+        },
+        "nextjs": {
+          "name": "Next.js 15",
+          "description": "App Router和服务器组件"
+        },
+        "typescript": {
+          "name": "TypeScript",
+          "description": "严格的类型安全"
+        },
+        "framerMotion": {
+          "name": "Framer Motion",
+          "description": "流畅的动画"
+        },
+        "tailwind": {
+          "name": "Tailwind CSS",
+          "description": "实用优先的样式"
+        }
+      },
+      "architecture": {
+        "title": "架构",
+        "monorepo": {
+          "name": "Monorepo结构",
+          "description": "高效的代码共享"
+        },
+        "singleton": {
+          "name": "单例模式",
+          "description": "内存监控优化"
+        },
+        "stateManagement": {
+          "name": "状态管理优化",
+          "description": "基于React ref的性能提升"
+        },
+        "componentSeparation": {
+          "name": "组件分离",
+          "description": "可重用的UI组件"
+        },
+        "customHooks": {
+          "name": "自定义Hook",
+          "description": "逻辑抽象和重用"
+        }
+      },
+      "features": {
+        "title": "功能",
+        "interactiveGames": {
+          "name": "交互式游戏",
+          "description": "拖放、代码编辑器"
+        },
+        "realtimeVisualization": {
+          "name": "实时可视化",
+          "description": "调用栈、闭包操作可视化"
+        },
+        "multiLanguage": {
+          "name": "多语言支持",
+          "description": "中文/英文/日文/韩文 next-intl"
+        },
+        "responsiveDesign": {
+          "name": "响应式设计",
+          "description": "移动端/桌面端优化"
+        },
+        "darkMode": {
+          "name": "深色模式",
+          "description": "系统设置联动"
+        }
+      }
+    },
+    "architecture": {
+      "title": "🏛️ 系统架构",
+      "presentationLayer": {
+        "title": "🎨 表现层",
+        "description": "UI/UX与动画",
+        "components": {
+          "reactComponents": "React组件",
+          "framerMotion": "Framer Motion",
+          "tailwindCSS": "Tailwind CSS"
+        }
+      },
+      "businessLogic": {
+        "title": "🧠 业务逻辑",
+        "description": "游戏逻辑与状态管理",
+        "components": {
+          "gameEngine": "游戏引擎",
+          "stateManagement": "状态管理",
+          "memoryMonitor": "内存监控"
+        }
+      },
+      "dataLayer": {
+        "title": "💾 数据层",
+        "description": "数据存储与国际化",
+        "components": {
+          "levelConfigurations": "关卡配置",
+          "userProgress": "用户进度",
+          "i18nResources": "国际化资源"
+        }
+      },
+      "dataFlow": {
+        "title": "数据流",
+        "userInput": "用户输入",
+        "gameLogic": "游戏逻辑处理",
+        "stateUpdate": "状态更新",
+        "uiRendering": "UI渲染",
+        "arrow": "→"
+      }
+    },
+    "devTools": {
+      "title": "🛠️ 开发环境与工具",
+      "devTools": {
+        "title": "开发工具",
+        "tools": {
+          "claudeCode": {
+            "name": "Claude Code",
+            "description": "AI协作开发"
+          },
+          "git": {
+            "name": "Git",
+            "description": "版本控制"
+          },
+          "pnpm": {
+            "name": "pnpm",
+            "description": "包管理"
+          },
+          "vsCode": {
+            "name": "VS Code",
+            "description": "代码审查"
+          }
+        }
+      },
+      "performance": {
+        "title": "性能优化",
+        "memoryMonitoring": {
+          "name": "内存监控",
+          "description": "Chrome DevTools API集成"
+        },
+        "bundleOptimization": {
+          "name": "包优化",
+          "description": "Next.js自动代码分割"
+        },
+        "imageOptimization": {
+          "name": "图像优化",
+          "description": "Next.js Image组件"
+        },
+        "animationOptimization": {
+          "name": "动画优化",
+          "description": "GPU加速利用"
+        }
+      }
+    },
+    "challenges": {
+      "title": "🎯 技术挑战与解决方案",
+      "challenges": {
+        "title": "🚨 主要挑战",
+        "memoryLeak": {
+          "title": "内存泄漏问题",
+          "description": "游戏状态管理中发生的内存泄漏导致内存使用量增至234MB"
+        },
+        "complexAnimation": {
+          "title": "复杂动画",
+          "description": "同时处理拖放和可视化的性能问题"
+        },
+        "layoutSystem": {
+          "title": "布局系统",
+          "description": "设计适用于各种游戏界面的灵活布局"
+        }
+      },
+      "solutions": {
+        "title": "✅ 解决方案",
+        "singletonPattern": {
+          "title": "应用单例模式",
+          "description": "将内存监控器实现为单例，优化至156MB"
+        },
+        "reactRef": {
+          "title": "利用React Ref",
+          "description": "使用ref代替state防止不必要的重新渲染"
+        },
+        "componentAbstraction": {
+          "title": "组件抽象化",
+          "description": "通过可重用的布局组件确保一致性"
+        }
+      }
+    },
+    "performance": {
+      "title": "📊 已实现的性能监控",
+      "memoryMonitoring": {
+        "title": "🧠 实时内存监控",
+        "chromeApi": {
+          "title": "Chrome内存API集成",
+          "description": "通过performance.memory进行实时堆内存跟踪"
+        },
+        "singletonImplementation": {
+          "title": "单例模式实现",
+          "description": "全局单一实例最大化内存效率"
+        },
+        "autoCleanup": {
+          "title": "自动清理系统",
+          "description": "每30秒自动清理旧组件（5分钟阈值）"
+        },
+        "thresholdAlerts": {
+          "title": "阈值警报",
+          "description": "超过80MB时警告，超过120MB时critical警报"
+        }
+      },
+      "metrics": {
+        "optimizedMemory": {
+          "value": "156MB",
+          "label": "优化后内存",
+          "change": "234MB → 156MB (-33%)"
+        },
+        "realtimeMonitoring": {
+          "value": "实时",
+          "label": "监控周期",
+          "description": "组件生命周期跟踪"
+        }
+      },
+      "note": "* 通过MemoryMonitor服务进行实时监控（仅在开发环境中激活）"
+    },
+    "cta": {
+      "tryTech": "🎮 体验技术",
+      "projectStory": "📖 项目故事",
+      "arrow": "→"
+    }
+  }
+}

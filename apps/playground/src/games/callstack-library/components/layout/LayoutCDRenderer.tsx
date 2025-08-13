@@ -1,15 +1,15 @@
 import React, { memo, useMemo } from 'react'
 import { cn, CodeEditor, GamePanel } from '@penguinjs/ui'
-import { getLayoutConfig } from '../../utils/layoutClassifier'
+import { getLayoutConfig } from '@/games/callstack-library/utils/layoutClassifier'
 import { HintPanel } from './panels/HintPanel'
 import { EvaluationPanel } from './panels/EvaluationPanel'
 import { EnhancedMultiQueueVisualizationPanel } from './panels/EnhancedMultiQueueVisualizationPanel'
 import { QueueSnapshotBuilderPanel } from './panels/QueueSnapshotBuilderPanel'
-import { useDynamicLayout, usePanelMetrics, createGridStyles, createPanelStyles } from '../../hooks/useDynamicLayout'
-import { useMemoryManagement, useLeakDetection } from '../../hooks/useMemoryManagement'
-import { useCallStackLibraryContext, ActionType } from '../../contexts/CallStackLibraryContext'
-import { gameEvents } from '../../utils/eventSystem'
-import { QueueType } from '../../types'
+import { useDynamicLayout, usePanelMetrics, createGridStyles, createPanelStyles } from '@/games/callstack-library/hooks/useDynamicLayout'
+import { useMemoryManagement, useLeakDetection } from '@/games/callstack-library/hooks/useMemoryManagement'
+import { useCallStackLibraryContext, ActionType } from '@/games/callstack-library/contexts/CallStackLibraryContext'
+import { gameEvents } from '@/games/callstack-library/utils/eventSystem'
+import { QueueType } from '@/games/callstack-library/types'
 
 /**
  * Layout C, D 전용 동적 레이아웃 렌더러

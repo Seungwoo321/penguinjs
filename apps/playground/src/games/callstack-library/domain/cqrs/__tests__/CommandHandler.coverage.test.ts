@@ -5,14 +5,14 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { EventLoopCommandHandler } from '../CommandHandler';
+import { EventLoopCommandHandler } from '@/games/callstack-library/CommandHandler';
 import { 
   Command,
   CommandContext
-} from '../Commands';
-import { EventSourcedEventLoopEngine } from '../../event-sourcing/EventSourcedEventLoopEngine';
-import { InMemoryEventStore } from '../../event-sourcing/EventStore';
-import { EventLoopConfig } from '../../event-loop/types';
+} from '@/games/callstack-library/Commands';
+import { EventSourcedEventLoopEngine } from '@/games/callstack-library/domain/event-sourcing/EventSourcedEventLoopEngine';
+import { InMemoryEventStore } from '@/games/callstack-library/domain/event-sourcing/EventStore';
+import { EventLoopConfig } from '@/games/callstack-library/domain/event-loop/types';
 
 describe('CommandHandler 커버리지 개선', () => {
   let engine: EventSourcedEventLoopEngine;

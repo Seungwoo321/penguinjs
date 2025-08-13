@@ -3,7 +3,7 @@
  * 런타임 타입 검증 및 데이터 유효성 검사
  */
 
-import { LayoutType, QueueType } from '../types';
+import { LayoutType, QueueType } from '@/games/callstack-library/types';
 
 /**
  * 레이아웃 타입 검증

@@ -6,12 +6,11 @@ import { Play, RotateCcw, Lightbulb, ChevronRight, ChevronLeft, Home, Globe, Loc
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { CallStackEngine } from './game-engine'
-import { GameManager } from '../shared/GameManager'
-import { GameDifficulty } from '../shared/types'
+import { GameManager } from '@/games/shared/GameManager'
+import { GameDifficulty } from '@/games/shared/types'
 import { CallStackLevel, QueueItem, StackItem, QueueType, CallStackGameState } from './types'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
-import { useCallStackLibraryTheme } from './hooks/useCallStackLibraryTheme'
-import { useCSSThemeSync } from './hooks/useCSSThemeSync'
+import { useDarkModeDetection } from './hooks/useCSSThemeSync'
 import { IntegratedCallStackBoard } from './IntegratedCallStackBoard'
 import { EnhancedCallStackBoard } from './EnhancedCallStackBoard'
 import { UniversalQueueBoard } from './UniversalQueueBoard'
@@ -22,7 +21,7 @@ import { getDelay, AnimationSpeed } from './constants/animationConfig'
 import { LayoutRenderer } from './components/layout/LayoutRenderer'
 import { getLayoutType, getLayoutConfig } from './utils/layoutClassifier'
 import { GameData, GameHandlers } from './types/layout'
-import { useStageNavigation } from '../shared/hooks/useStageNavigation'
+import { useStageNavigation } from '@/games/shared/hooks/useStageNavigation'
 import { CALLSTACK_STAGE_RANGES } from './game-config'
 import { simulateExecution, interpolateFromSnapshots, SimulatorConfig } from './utils/executionSimulator'
 import { simulateEventLoop, createEmptyQueueSnapshot } from './utils/queueSimulator'
@@ -40,14 +39,13 @@ interface CallStackLibraryGameProps {
 }
 
 export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackLibraryGameProps) {
-  // 테마 시스템
-  const libraryTheme = useCallStackLibraryTheme()
+  // 다크모드 감지
+  const isDarkMode = useDarkModeDetection()
   
   // 마운트 상태 먼저 확인
   const [mounted, setMounted] = useState(false)
   
-  // CSS 변수 동기화
-  useCSSThemeSync(libraryTheme.isDarkMode)
+  // CSS 변수는 이미 동기화됨
   
   // URL 파라미터로부터 초기 값 설정 (검증 포함)
   const rawDifficulty = searchParams?.difficulty
@@ -107,16 +105,8 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   
   // 모든 실행 단계의 정확한 스택 상태 계산
   const calculateAllStackStates = (level: CallStackLevel): StackItem[][] => {
-    console.log('🔧 calculateAllStackStates 시작:', {
-      levelId: level.id,
-      hasSimulationSteps: level.simulationSteps?.length || 0,
-      hasExpectedSnapshots: Object.keys(level.expectedSnapshots || {}).length,
-      hasExecutionSteps: level.executionSteps?.length || 0
-    })
-    
     // simulationSteps가 있으면 시뮬레이터 사용
     if (level.simulationSteps && level.simulationSteps.length > 0) {
-      console.log('📊 simulateExecution 사용 중...')
       // 레이아웃별 시뮬레이터 설정
       const layoutType = getLayoutType(level.difficulty, level.stageNumber)
       const config: SimulatorConfig = {
@@ -131,26 +121,14 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       }
       
       const result = simulateExecution(level, config)
-      console.log('📊 simulateExecution 결과:', {
-        총단계수: result.length,
-        각단계별스택크기: result.map(stack => stack.length),
-        첫번째단계: result[0]?.map(s => s.functionName),
-        마지막단계: result[result.length - 1]?.map(s => s.functionName)
-      })
       return result
     }
     
     // simulationSteps가 없는 경우 expectedSnapshots 기반 보간
-    console.log('📈 interpolateFromSnapshots 사용 중...')
     const result = interpolateFromSnapshots(level)
-    console.log('📈 interpolateFromSnapshots 결과:', {
-      총단계수: result.length,
-      각단계별스택크기: result.map(stack => stack.length)
-    })
     
     // Fallback: 결과가 비어있거나 문제가 있으면 expectedSnapshots로 직접 생성
     if (result.length === 0 || result.every(stack => stack.length === 0) || result.length < (level.executionSteps?.length || 0)) {
-      console.log('⚠️ 시뮬레이션 결과가 부족함, expectedSnapshots로 Fallback 생성')
       const executionStepsLength = level.executionSteps?.length || 0
       const fallbackResult: StackItem[][] = []
       
@@ -188,13 +166,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         }
       }
       
-      console.log('🔄 Fallback 결과:', {
-        총단계수: fallbackResult.length,
-        각단계별스택크기: fallbackResult.map(stack => stack.length),
-        체크포인트들: level.snapshotCheckpoints,
-        expectedSnapshots키들: Object.keys(level.expectedSnapshots || {})
-      })
-      
       return fallbackResult
     }
     
@@ -211,21 +182,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     const computedStack = callstackHistory[currentStep] || []
     const userStack = userSnapshots[currentStep] || []
     
-    console.log('🔍 getCurrentDisplayStack Debug:', {
-      currentStep,
-      isCheckpoint,
-      checkpoints,
-      computedStackLength: computedStack.length,
-      userStackLength: userStack.length,
-      computedStack: computedStack.map(s => s.functionName),
-      userStack: userStack.map(s => s.functionName),
-      callstackHistoryLength: callstackHistory.length,
-      전체히스토리: callstackHistory.map((stack, idx) => ({ 
-        단계: idx, 
-        크기: stack.length, 
-        함수들: stack.map(s => s.functionName) 
-      }))
-    })
     
     if (isCheckpoint) {
       // 체크포인트인 경우 사용자가 구성한 스택 표시
@@ -503,7 +459,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       id: `${funcName}-${Date.now()}`,
       functionName: funcName,
       height: 40,
-      color: 'rgb(59, 130, 246)' // blue-500
+      color: 'rgb(var(--game-callstack-queue-primary))' // 글로벌 CSS 변수 사용
     }
     
     setUserSnapshots(prev => ({
@@ -1128,18 +1084,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         // 이중 스택 시스템: 계산된 스택 + 사용자 스택
         const computedHistory = calculateAllStackStates(level)
         
-        console.log('🔍 Type E Initialization Debug:', {
-          levelId: level.id,
-          executionStepsLength: level.executionSteps.length,
-          simulationStepsLength: level.simulationSteps?.length || 0,
-          computedHistoryLength: computedHistory.length,
-          snapshotCheckpoints: level.snapshotCheckpoints,
-          computedHistory: computedHistory.map((stack, index) => ({ 
-            step: index, 
-            stackLength: stack.length, 
-            functions: stack.map(s => s.functionName) 
-          }))
-        })
         
         // 사용자 스냅샷은 체크포인트만 빈 상태로 초기화
         const initialUserSnapshots: Record<number, StackItem[]> = {}
@@ -1147,12 +1091,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           initialUserSnapshots[checkpoint] = []
         })
         
-        console.log('🎯 Type E 초기화 완료:', {
-          callstackHistoryLength: computedHistory.length,
-          userSnapshotsKeys: Object.keys(initialUserSnapshots),
-          현재단계: currentStep,
-          체크포인트들: level.snapshotCheckpoints
-        })
         
         setCallstackHistory(computedHistory) // 계산된 전체 스택 상태
         setUserSnapshots(initialUserSnapshots) // 사용자가 구성할 체크포인트만
@@ -1324,7 +1262,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `global-${Date.now()}`,
           functionName: '<global>',
           height: 40,
-          color: 'rgb(59, 130, 246)',
+          color: 'rgb(var(--game-callstack-queue-primary))',
           isGlobalContext: true
         })
         simulationOrder.push('<global>')
@@ -1346,7 +1284,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `console.log-start-${Date.now()}`,
           functionName: 'console.log("시작")',
           height: 40,
-          color: 'rgb(16, 185, 129)'
+          color: 'rgb(var(--game-callstack-urgent-primary))'
         })
         simulationOrder.push('console.log("시작")')
         
@@ -1377,7 +1315,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `setTimeout-${Date.now()}`,
           functionName: 'setTimeout',
           height: 40,
-          color: 'rgb(245, 158, 11)'
+          color: 'rgb(var(--game-callstack-scheduled-primary))'
         })
         simulationOrder.push('setTimeout')
         
@@ -1397,7 +1335,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `timeout-callback-${Date.now()}`,
           functionName: 'console.log("타임아웃")',
           height: 40,
-          color: 'rgb(107, 114, 128)',
+          color: 'rgb(var(--text-secondary))',
           queueType: 'macrotask',
           returnValue: undefined
         })
@@ -1418,7 +1356,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `promise-resolve-${Date.now()}`,
           functionName: 'Promise.resolve',
           height: 40,
-          color: 'rgb(139, 92, 246)'
+          color: 'rgb(var(--primary))'
         })
         simulationOrder.push('Promise.resolve')
         
@@ -1449,7 +1387,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `then-${Date.now()}`,
           functionName: 'then',
           height: 40,
-          color: 'rgb(236, 72, 153)'
+          color: 'rgb(var(--accent))'
         })
         simulationOrder.push('then')
         
@@ -1469,7 +1407,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `promise-callback-${Date.now()}`,
           functionName: 'console.log("프로미스")',
           height: 40,
-          color: 'rgb(59, 130, 246)',
+          color: 'rgb(var(--game-callstack-queue-primary))',
           queueType: 'microtask',
           returnValue: undefined
         })
@@ -1490,7 +1428,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `console.log-end-${Date.now()}`,
           functionName: 'console.log("끝")',
           height: 40,
-          color: 'rgb(16, 185, 129)'
+          color: 'rgb(var(--game-callstack-urgent-primary))'
         })
         simulationOrder.push('console.log("끝")')
         
@@ -1543,7 +1481,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
             id: `console.log-promise-${Date.now()}`,
             functionName: 'console.log("프로미스")',
               height: 40,
-            color: 'rgb(16, 185, 129)'
+            color: 'rgb(var(--game-callstack-urgent-primary))'
           })
           simulationOrder.push('console.log("프로미스")')
           
@@ -1597,7 +1535,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
             id: `console.log-timeout-${Date.now()}`,
             functionName: 'console.log("타임아웃")',
               height: 40,
-            color: 'rgb(16, 185, 129)'
+            color: 'rgb(var(--game-callstack-urgent-primary))'
           })
           simulationOrder.push('console.log("타임아웃")')
           
@@ -1659,10 +1597,10 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               macrotask: [],
               priority: [],
               circular: [],
-              deque: [],
               animation: [],
-              immediate: [],
-              idle: []
+              generator: [],
+              io: [],
+              worker: []
             },
             executionOrder: []
           }
@@ -1674,7 +1612,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               const stackItem: StackItem = {
                 id: `${funcCall.name}-${Date.now()}`,
                 functionName: funcCall.name,
-                color: 'rgb(59, 130, 246)',
+                color: 'rgb(var(--game-callstack-queue-primary))',
                 height: 40,
                 returnValue: funcCall.returns
               }
@@ -1743,12 +1681,12 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
             functionName: funcName,
               height: 40,
             color: [
-              'rgb(59, 130, 246)',   // blue-500
-              'rgb(16, 185, 129)',   // emerald-500  
-              'rgb(245, 158, 11)',   // amber-500
-              'rgb(239, 68, 68)',    // red-500
-              'rgb(139, 92, 246)',   // violet-500
-              'rgb(236, 72, 153)'    // pink-500
+              'rgb(var(--game-callstack-queue-primary))',   // callstack primary
+              'rgb(var(--game-callstack-urgent-primary))',   // microtask primary  
+              'rgb(var(--game-callstack-scheduled-primary))', // macrotask primary
+              'rgb(var(--text-secondary))',    // text secondary
+              'rgb(var(--primary))',   // accent
+              'rgb(var(--muted))'    // muted
             ][simulationStack.length % 6]
           })
           
@@ -1829,7 +1767,13 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         layoutType={currentLayoutType}
         currentStage={currentStage}
       />
-      <div className="min-h-screen bg-background">
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundColor: 'rgb(var(--background))',
+          color: 'rgb(var(--text-primary))'
+        }}
+      >
         <div className="w-full p-4">
           {!mounted || !currentLevel ? (
             <div className="flex items-center justify-center h-96">
@@ -1897,24 +1841,55 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 advanced: '고급'
               }
               
-              const difficultyColors = {
-                beginner: 'bg-green-100 dark:bg-green-900/20 border-green-300 dark:border-green-700',
-                intermediate: 'bg-yellow-100 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700',
-                advanced: 'bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+              const getDifficultyTheme = (diff: string) => {
+                switch (diff) {
+                  case 'beginner':
+                    return {
+                      bg: 'rgb(var(--game-callstack-stage-beginner) / 0.1)',
+                      border: '1px solid rgb(var(--game-callstack-stage-beginner))'
+                    }
+                  case 'intermediate':
+                    return {
+                      bg: 'rgb(var(--game-callstack-stage-intermediate) / 0.1)',
+                      border: '1px solid rgb(var(--game-callstack-stage-intermediate))'
+                    }
+                  case 'advanced':
+                    return {
+                      bg: 'rgb(var(--game-callstack-stage-advanced) / 0.1)',
+                      border: '1px solid rgb(var(--game-callstack-stage-advanced))'
+                    }
+                  default:
+                    return {
+                      bg: 'rgb(var(--game-callstack-queue-callstack-light))',
+                      border: '1px solid rgb(var(--game-callstack-queue-callstack))'
+                    }
+                }
               }
               
+              const difficultyTheme = getDifficultyTheme(difficulty)
+
               return (
                 <Button
                   key={difficulty}
                   variant={isSelected ? "default" : "outline"}
-                  className={`relative ${isSelected ? '' : difficultyColors[difficulty]} ${!isUnlocked ? 'opacity-50' : ''}`}
+                  className={`relative ${!isUnlocked ? 'opacity-50' : ''}`}
                   onClick={() => handleDifficultyChange(difficulty)}
                   disabled={!isUnlocked}
+                  style={!isSelected ? {
+                    background: difficultyTheme.bg,
+                    borderColor: difficultyTheme.border,
+                    color: 'rgb(var(--text-primary))'
+                  } : undefined}
                 >
                   <div className="flex items-center gap-2">
                     {!isUnlocked && <Lock className="h-4 w-4" />}
                     <span>{difficultyLabels[difficulty]}</span>
-                    {completedStages === gameEngine.getTotalStages(difficulty) && <Trophy className="h-4 w-4 text-yellow-500" />}
+                    {completedStages === gameEngine.getTotalStages(difficulty) && (
+                      <Trophy 
+                        className="h-4 w-4" 
+                        style={{ color: `rgb(var(--game-callstack-library-success))` }}
+                      />
+                    )}
                     <span className="text-xs">({completedStages}/{gameEngine.getTotalStages(difficulty)})</span>
                   </div>
                 </Button>
@@ -1946,13 +1921,17 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               return stageRange.map((stageNumber, index) => (
                 <div
                   key={stageNumber}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    progress?.completedStages.has(stageNumber)
-                      ? 'bg-green-500 text-white'
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                  style={{
+                    background: progress?.completedStages.has(stageNumber)
+                      ? `rgb(var(--game-callstack-library-success))`
                       : stageNumber === currentStage
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
-                  }`}
+                      ? `rgb(var(--primary))`
+                      : `rgb(var(--muted))`,
+                    color: progress?.completedStages.has(stageNumber) || stageNumber === currentStage
+                      ? `rgb(var(--primary-foreground))`
+                      : `rgb(var(--muted-foreground))`
+                  }}
                 >
                   {progress?.completedStages.has(stageNumber) ? <Star className="h-4 w-4" /> : getRelativeStageNumber(stageNumber)}
                 </div>
@@ -1987,11 +1966,28 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
             
             {/* 메시지 표시 영역 */}
             {message && (
-              <div className={`mb-4 p-3 rounded-lg text-sm ${
-                message.type === 'success' ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200' :
-                message.type === 'error' ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200' :
-                'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200'
-              }`}>
+              <div 
+                className="mb-4 p-3 rounded-lg text-sm"
+                style={{
+                  background: message.type === 'success' 
+                    ? `rgb(var(--game-callstack-library-success) / 0.1)`
+                    : message.type === 'error' 
+                      ? `rgb(var(--game-callstack-library-overdue) / 0.1)`
+                      : 'rgb(var(--game-callstack-queue-microtask-light))',
+                  color: message.type === 'success'
+                    ? `rgb(var(--game-callstack-library-success))`
+                    : message.type === 'error'
+                      ? `rgb(var(--game-callstack-library-overdue))`
+                      : 'rgb(var(--text-primary))',
+                  border: `1px solid ${
+                    message.type === 'success'
+                      ? `rgb(var(--game-callstack-library-success))`
+                      : message.type === 'error'
+                        ? `rgb(var(--game-callstack-library-overdue))`
+                        : '1px solid rgb(var(--game-callstack-queue-microtask))'
+                  }`
+                }}
+              >
                 {message.text}
               </div>
             )}
@@ -2039,11 +2035,24 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               </div>
               
               {/* 게임 방법 설명 */}
-              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-1">
+              <div 
+                className="mt-4 p-4 rounded-lg"
+                style={{
+                  background: 'rgb(var(--game-callstack-queue-microtask-light))',
+                  border: '1px solid rgb(var(--game-callstack-queue-microtask))',
+                  borderRadius: '8px'
+                }}
+              >
+                <h3 
+                  className="text-sm font-semibold mb-2 flex items-center gap-1"
+                  style={{ color: 'rgb(var(--text-primary))' }}
+                >
                   🎯 게임 방법:
                 </h3>
-                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                <ul 
+                  className="text-xs space-y-1"
+                  style={{ color: 'rgb(var(--text-secondary))' }}
+                >
                   <li><strong>1️⃣</strong> 코드를 읽고 함수 호출 순서를 파악하세요</li>
                   <li><strong>2️⃣</strong> 우측의 함수 칩을 클릭하여 순서대로 배치하세요</li>
                   <li><strong>3️⃣</strong> 드래그로 순서를 조정할 수 있습니다</li>
@@ -2058,7 +2067,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               <div className="flex-1 flex flex-col space-y-4">
                 {/* 코드 에디터 섹션 */}
                 <div>
-                  <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">코드 보기</h4>
+                  <h4 className="text-sm font-medium text-[rgb(var(--muted-foreground))] mb-2">코드 보기</h4>
                   <div className="h-[300px]">
                     <CodeEditor
                       value={currentLevel.code}
@@ -2071,11 +2080,11 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 
                 {/* 예상 실행 순서 섹션 */}
                 <div className="flex-1 flex flex-col">
-                  <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">🎯 예상 실행 순서</h4>
+                  <h4 className="text-sm font-medium text-[rgb(var(--muted-foreground))] mb-3">🎯 예상 실행 순서</h4>
                   
                   {/* 사용 가능한 함수 */}
                   <div className="mb-3">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">사용 가능한 함수 (클릭하여 추가)</p>
+                    <p className="text-xs text-[rgb(var(--muted-foreground))] mb-2">사용 가능한 함수 (클릭하여 추가)</p>
                     <div className="flex flex-wrap gap-2">
                       {availableFunctions.map((func, index) => {
                         const funcObj = typeof func === 'string' ? { name: func } : func
@@ -2084,13 +2093,36 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                             key={`${funcObj.name}-${index}`}
                             onClick={() => handleFunctionSelect(funcObj.name)}
                             disabled={isExecuting}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                              funcObj.queueType === 'microtask'
-                                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50'
+                            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                            style={{
+                              background: funcObj.queueType === 'microtask'
+                                ? 'rgb(var(--game-callstack-queue-microtask-light))'
                                 : funcObj.queueType === 'macrotask'
-                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
-                            }`}
+                                ? 'rgb(var(--game-callstack-queue-macrotask-light))'
+                                : 'rgb(var(--game-callstack-queue-callstack-light))',
+                              color: funcObj.queueType === 'microtask'
+                                ? 'rgb(var(--text-primary))'
+                                : funcObj.queueType === 'macrotask'
+                                ? 'rgb(var(--text-primary))'
+                                : 'rgb(var(--text-primary))',
+                              border: `1px solid ${
+                                funcObj.queueType === 'microtask'
+                                  ? 'rgb(var(--game-callstack-queue-microtask))'
+                                  : funcObj.queueType === 'macrotask'
+                                  ? 'rgb(var(--game-callstack-queue-macrotask))'
+                                  : 'rgb(var(--game-callstack-queue-callstack))'
+                              }`
+                            }}
+                            onMouseEnter={(e) => {
+                              const queueType = funcObj.queueType === 'microtask' ? 'microtask' : 
+                                              funcObj.queueType === 'macrotask' ? 'macrotask' : 'callstack'
+                              e.currentTarget.style.background = queueType === 'microtask' ? 'rgb(var(--game-callstack-queue-microtask))' : queueType === 'macrotask' ? 'rgb(var(--game-callstack-queue-macrotask))' : 'rgb(var(--game-callstack-queue-callstack))'
+                            }}
+                            onMouseLeave={(e) => {
+                              const queueType = funcObj.queueType === 'microtask' ? 'microtask' : 
+                                              funcObj.queueType === 'macrotask' ? 'macrotask' : 'callstack'
+                              e.currentTarget.style.background = queueType === 'microtask' ? 'rgb(var(--game-callstack-queue-microtask-light))' : queueType === 'macrotask' ? 'rgb(var(--game-callstack-queue-macrotask-light))' : 'rgb(var(--game-callstack-queue-callstack-light))'
+                            }}
                           >
                             {funcObj.name}
                             {funcObj.queueType && (
@@ -2106,10 +2138,10 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                   
                   {/* 드래그 가능한 순서 목록 */}
                   <div className="flex-1 min-h-0">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">실행 순서 (드래그하여 정렬)</p>
+                    <p className="text-xs text-[rgb(var(--muted-foreground))] mb-2">실행 순서 (드래그하여 정렬)</p>
                     {userOrder.length === 0 ? (
-                      <div className="h-full bg-white dark:bg-slate-800 rounded-lg p-4 border-2 border-dashed border-slate-300 dark:border-slate-600">
-                        <div className="flex items-center justify-center h-full text-slate-400 dark:text-slate-500 text-sm">
+                      <div className="h-full bg-[rgb(var(--card))] rounded-lg p-4 border-2 border-dashed border-[rgb(var(--border))]">
+                        <div className="flex items-center justify-center h-full text-[rgb(var(--muted-foreground))] text-sm">
                           위의 함수를 클릭하여 추가하세요
                         </div>
                       </div>
@@ -2118,7 +2150,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                         axis="y"
                         values={userOrder}
                         onReorder={setUserOrder}
-                        className="space-y-2 h-full overflow-y-auto bg-white dark:bg-slate-800 rounded-lg p-3"
+                        className="space-y-2 h-full overflow-y-auto bg-[rgb(var(--card))] rounded-lg p-3"
                       >
                         {userOrder.map((funcName, index) => {
                           const funcObj = availableFunctions.find(f => 
@@ -2130,17 +2162,25 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                             <Reorder.Item
                               key={`${funcName}-${index}`}
                               value={funcName}
-                              className={`flex items-center justify-between p-2.5 rounded-lg cursor-move ${
-                                queueType === 'microtask'
-                                  ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'
+                              className="flex items-center justify-between p-2.5 rounded-lg cursor-move"
+                              style={{
+                                background: queueType === 'microtask'
+                                  ? 'rgb(var(--game-callstack-queue-microtask-light))'
                                   : queueType === 'macrotask'
-                                  ? 'bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600'
-                                  : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
-                              }`}
+                                  ? 'rgb(var(--game-callstack-queue-macrotask-light))'
+                                  : 'rgb(var(--game-callstack-queue-callstack-light))',
+                                border: `1px solid ${
+                                  queueType === 'microtask'
+                                    ? 'rgb(var(--game-callstack-queue-microtask))'
+                                    : queueType === 'macrotask'
+                                    ? 'rgb(var(--game-callstack-queue-macrotask))'
+                                    : 'rgb(var(--game-callstack-queue-callstack))'
+                                }`
+                              }}
                               whileDrag={{ scale: 1.05, boxShadow: "0px 5px 20px rgba(0,0,0,0.1)" }}
                             >
                               <div className="flex items-center gap-2">
-                                <span className="text-slate-400 dark:text-slate-500">
+                                <span className="text-[rgb(var(--muted-foreground))]">
                                   <svg width="10" height="16" viewBox="0 0 12 20" fill="currentColor">
                                     <circle cx="3" cy="5" r="1.5" />
                                     <circle cx="9" cy="5" r="1.5" />
@@ -2150,21 +2190,30 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                                     <circle cx="9" cy="15" r="1.5" />
                                   </svg>
                                 </span>
-                                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                <span className="text-sm font-medium text-[rgb(var(--muted-foreground))]">
                                   {index + 1}.
                                 </span>
                                 <span className="font-medium text-sm">
                                   {funcName}
                                 </span>
                                 {queueType && (
-                                  <span className="text-xs px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10">
+                                  <span className="text-xs px-1.5 py-0.5 rounded bg-[rgb(var(--surface-secondary))]/10">
                                     {queueType === 'microtask' ? '긴급' : '일반'}
                                   </span>
                                 )}
                               </div>
                               <button
                                 onClick={() => setUserOrder(userOrder.filter(f => f !== funcName))}
-                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                                className="text-sm transition-colors"
+                                style={{
+                                  color: `rgb(var(--game-callstack-library-overdue))`
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.color = `rgb(var(--game-callstack-library-overdue) / 0.8)`
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.color = `rgb(var(--game-callstack-library-overdue))`
+                                }}
                                 disabled={isExecuting}
                               >
                                 ✕
@@ -2209,7 +2258,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                     
                     {/* 속도 조절 버튼 */}
                     <div className="ml-auto flex items-center gap-2">
-                      <span className="text-xs text-slate-500 dark:text-slate-400">속도:</span>
+                      <span className="text-xs text-[rgb(var(--muted-foreground))]">속도:</span>
                       <Button
                         variant={simulationSpeed === 'fast' ? 'default' : 'outline'}
                         size="sm"
@@ -2250,13 +2299,26 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className={`mt-4 p-3 rounded-lg text-sm font-medium shadow-lg ${
-                          message.type === 'success'
-                            ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700'
+                        className="mt-4 p-3 rounded-lg text-sm font-medium shadow-lg"
+                        style={{
+                          background: message.type === 'success'
+                            ? `rgb(var(--game-callstack-library-success) / 0.1)`
                             : message.type === 'error'
-                            ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700'
-                            : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700'
-                        }`}
+                            ? `rgb(var(--game-callstack-library-overdue) / 0.1)`
+                            : 'rgb(var(--game-callstack-queue-microtask-light))',
+                          color: message.type === 'success'
+                            ? `rgb(var(--game-callstack-library-success))`
+                            : message.type === 'error'
+                            ? `rgb(var(--game-callstack-library-overdue))`
+                            : 'rgb(var(--text-primary))',
+                          border: `1px solid ${
+                            message.type === 'success'
+                              ? `rgb(var(--game-callstack-library-success))`
+                              : message.type === 'error'
+                              ? `rgb(var(--game-callstack-library-overdue))`
+                              : '1px solid rgb(var(--game-callstack-queue-microtask))'
+                          }`
+                        }}
                       >
                         {message.text}
                       </motion.div>
@@ -2346,15 +2408,19 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
                     onClick={handleShowHint}
-                    className="text-xs"
+                    className="text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 transition-all"
+                    style={{
+                      backgroundColor: 'rgb(var(--destructive))',
+                      color: 'white',
+                      border: '1px solid rgb(var(--destructive))',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                    }}
                   >
-                    <Lightbulb className="h-3 w-3 mr-1" />
+                    <Lightbulb className="h-3 w-3" />
                     힌트 {showHints ? '숨기기' : '보기'}
-                  </Button>
+                  </button>
                   <span className="text-xs text-muted-foreground font-medium self-center">
                     {hintsUsed}개 사용됨
                   </span>
@@ -2371,9 +2437,16 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                       {currentLevel.hints.map((hint, index) => (
                         <div
                           key={index}
-                          className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded p-2"
+                          className="rounded p-2"
+                          style={{
+                            background: `rgb(var(--game-callstack-library-warning) / 0.1)`,
+                            border: `1px solid rgb(var(--game-callstack-library-warning))`
+                          }}
                         >
-                          <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                          <p 
+                            className="text-xs"
+                            style={{ color: `rgb(var(--game-callstack-library-warning))` }}
+                          >
                             💡 힌트 {index + 1}: {hint}
                           </p>
                         </div>
@@ -2390,7 +2463,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 <div className="space-y-4">
                   {/* 사용 가능한 함수 */}
                   <div>
-                    <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
+                    <h4 className="text-sm font-medium text-[rgb(var(--muted-foreground))] mb-3">
                       사용 가능한 함수 (클릭하여 추가)
                     </h4>
                     <div className="flex flex-wrap gap-2">
@@ -2401,13 +2474,36 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                             key={`${funcObj.name}-${index}`}
                             onClick={() => handleFunctionSelect(funcObj.name)}
                             disabled={isExecuting}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              funcObj.queueType === 'microtask'
-                                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50'
+                            className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                            style={{
+                              background: funcObj.queueType === 'microtask'
+                                ? 'rgb(var(--game-callstack-queue-microtask-light))'
                                 : funcObj.queueType === 'macrotask'
-                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
-                            }`}
+                                ? 'rgb(var(--game-callstack-queue-macrotask-light))'
+                                : 'rgb(var(--game-callstack-queue-callstack-light))',
+                              color: funcObj.queueType === 'microtask'
+                                ? 'rgb(var(--text-primary))'
+                                : funcObj.queueType === 'macrotask'
+                                ? 'rgb(var(--text-primary))'
+                                : 'rgb(var(--text-primary))',
+                              border: `1px solid ${
+                                funcObj.queueType === 'microtask'
+                                  ? 'rgb(var(--game-callstack-queue-microtask))'
+                                  : funcObj.queueType === 'macrotask'
+                                  ? 'rgb(var(--game-callstack-queue-macrotask))'
+                                  : 'rgb(var(--game-callstack-queue-callstack))'
+                              }`
+                            }}
+                            onMouseEnter={(e) => {
+                              const queueType = funcObj.queueType === 'microtask' ? 'microtask' : 
+                                              funcObj.queueType === 'macrotask' ? 'macrotask' : 'callstack'
+                              e.currentTarget.style.background = queueType === 'microtask' ? 'rgb(var(--game-callstack-queue-microtask))' : queueType === 'macrotask' ? 'rgb(var(--game-callstack-queue-macrotask))' : 'rgb(var(--game-callstack-queue-callstack))'
+                            }}
+                            onMouseLeave={(e) => {
+                              const queueType = funcObj.queueType === 'microtask' ? 'microtask' : 
+                                              funcObj.queueType === 'macrotask' ? 'macrotask' : 'callstack'
+                              e.currentTarget.style.background = queueType === 'microtask' ? 'rgb(var(--game-callstack-queue-microtask-light))' : queueType === 'macrotask' ? 'rgb(var(--game-callstack-queue-macrotask-light))' : 'rgb(var(--game-callstack-queue-callstack-light))'
+                            }}
                           >
                             {funcObj.name}
                             {funcObj.queueType && (
@@ -2423,12 +2519,12 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                   
                   {/* 드래그 가능한 순서 목록 */}
                   <div className="flex-1">
-                    <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
+                    <h4 className="text-sm font-medium text-[rgb(var(--muted-foreground))] mb-3">
                       실행 순서 (드래그하여 정렬)
                     </h4>
                     {userOrder.length === 0 ? (
-                      <div className="min-h-[200px] bg-white dark:bg-slate-800 rounded-lg p-4">
-                        <div className="text-center py-8 text-slate-400 dark:text-slate-500">
+                      <div className="min-h-[200px] bg-[rgb(var(--card))] rounded-lg p-4">
+                        <div className="text-center py-8 text-[rgb(var(--muted-foreground))]">
                           위의 함수를 클릭하여 추가하세요
                         </div>
                       </div>
@@ -2437,7 +2533,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                         axis="y"
                         values={userOrder}
                         onReorder={setUserOrder}
-                        className="space-y-2 min-h-[200px] bg-white dark:bg-slate-800 rounded-lg p-4"
+                        className="space-y-2 min-h-[200px] bg-[rgb(var(--card))] rounded-lg p-4"
                       >
                         {userOrder.map((funcName, index) => {
                           const funcObj = availableFunctions.find(f => 
@@ -2449,17 +2545,25 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                             <Reorder.Item
                               key={`${funcName}-${index}`}
                               value={funcName}
-                              className={`flex items-center justify-between p-3 rounded-lg cursor-move ${
-                                queueType === 'microtask'
-                                  ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'
+                              className="flex items-center justify-between p-3 rounded-lg cursor-move"
+                              style={{
+                                background: queueType === 'microtask'
+                                  ? 'rgb(var(--game-callstack-queue-microtask-light))'
                                   : queueType === 'macrotask'
-                                  ? 'bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600'
-                                  : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
-                              }`}
+                                  ? 'rgb(var(--game-callstack-queue-macrotask-light))'
+                                  : 'rgb(var(--game-callstack-queue-callstack-light))',
+                                border: `1px solid ${
+                                  queueType === 'microtask'
+                                    ? 'rgb(var(--game-callstack-queue-microtask))'
+                                    : queueType === 'macrotask'
+                                    ? 'rgb(var(--game-callstack-queue-macrotask))'
+                                    : 'rgb(var(--game-callstack-queue-callstack))'
+                                }`
+                              }}
                               whileDrag={{ scale: 1.05, boxShadow: "0px 5px 20px rgba(0,0,0,0.1)" }}
                             >
                               <div className="flex items-center gap-3">
-                                <span className="text-slate-400 dark:text-slate-500">
+                                <span className="text-[rgb(var(--muted-foreground))]">
                                   <svg width="12" height="20" viewBox="0 0 12 20" fill="currentColor">
                                     <circle cx="3" cy="5" r="1.5" />
                                     <circle cx="9" cy="5" r="1.5" />
@@ -2469,21 +2573,30 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                                     <circle cx="9" cy="15" r="1.5" />
                                   </svg>
                                 </span>
-                                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                <span className="text-sm font-medium text-[rgb(var(--muted-foreground))]">
                                   {index + 1}.
                                 </span>
                                 <span className="font-medium">
                                   {funcName}
                                 </span>
                                 {queueType && (
-                                  <span className="text-xs px-2 py-1 rounded bg-black/10 dark:bg-white/10">
+                                  <span className="text-xs px-2 py-1 rounded bg-[rgb(var(--surface-secondary))]/10">
                                     {queueType === 'microtask' ? '긴급' : '일반'}
                                   </span>
                                 )}
                               </div>
                               <button
                                 onClick={() => setUserOrder(userOrder.filter(f => f !== funcName))}
-                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                className="transition-colors"
+                                style={{
+                                  color: `rgb(var(--game-callstack-library-overdue))`
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.color = `rgb(var(--game-callstack-library-overdue) / 0.8)`
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.color = `rgb(var(--game-callstack-library-overdue))`
+                                }}
                                 disabled={isExecuting}
                               >
                                 ✕
@@ -2514,13 +2627,26 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className={`p-3 rounded-lg text-sm font-medium ${
-                      message.type === 'success'
-                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                    className="p-3 rounded-lg text-sm font-medium"
+                    style={{
+                      background: message.type === 'success'
+                        ? `rgb(var(--game-callstack-library-success) / 0.1)`
                         : message.type === 'error'
-                        ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
-                        : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
-                    }`}
+                        ? `rgb(var(--game-callstack-library-overdue) / 0.1)`
+                        : 'rgb(var(--game-callstack-queue-microtask-light))',
+                      color: message.type === 'success'
+                        ? `rgb(var(--game-callstack-library-success))`
+                        : message.type === 'error'
+                        ? `rgb(var(--game-callstack-library-overdue))`
+                        : 'rgb(var(--text-primary))',
+                      border: `1px solid ${
+                        message.type === 'success'
+                          ? `rgb(var(--game-callstack-library-success))`
+                          : message.type === 'error'
+                          ? `rgb(var(--game-callstack-library-overdue))`
+                          : '1px solid rgb(var(--game-callstack-queue-microtask))'
+                      }`
+                    }}
                   >
                     {message.text}
                   </motion.div>
@@ -2620,15 +2746,19 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <button
                       onClick={handleShowHint}
-                      className="text-xs"
+                      className="text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 transition-all"
+                      style={{
+                        backgroundColor: 'rgb(var(--destructive))',
+                        color: 'white',
+                        border: '1px solid rgb(var(--destructive))',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                      }}
                     >
-                      <Lightbulb className="h-3 w-3 mr-1" />
+                      <Lightbulb className="h-3 w-3" />
                       힌트 {showHints ? '숨기기' : '보기'}
-                    </Button>
+                    </button>
                     <span className="text-xs text-muted-foreground font-medium self-center">
                       {hintsUsed}개 사용됨
                     </span>
@@ -2645,9 +2775,16 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                         {currentLevel.hints.map((hint, index) => (
                           <div
                             key={index}
-                            className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded p-2"
+                            className="rounded p-2"
+                          style={{
+                            background: `rgb(var(--game-callstack-library-warning) / 0.1)`,
+                            border: `1px solid rgb(var(--game-callstack-library-warning))`
+                          }}
                           >
-                            <p className="text-xs text-yellow-900 dark:text-yellow-100">
+                            <p 
+                              className="text-xs"
+                              style={{ color: `rgb(var(--game-callstack-library-warning))` }}
+                            >
                               힌트 {index + 1}: {hint}
                             </p>
                           </div>
@@ -2679,13 +2816,26 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className={`p-3 rounded-lg border ${
-                        message.type === 'success'
-                          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+                      className="p-3 rounded-lg"
+                      style={{
+                        background: message.type === 'success'
+                          ? `rgb(var(--game-callstack-library-success) / 0.1)`
                           : message.type === 'error'
-                          ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
-                          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200'
-                      }`}
+                          ? `rgb(var(--game-callstack-library-overdue) / 0.1)`
+                          : 'rgb(var(--game-callstack-queue-microtask-light))',
+                        color: message.type === 'success'
+                          ? `rgb(var(--game-callstack-library-success))`
+                          : message.type === 'error'
+                          ? `rgb(var(--game-callstack-library-overdue))`
+                          : 'rgb(var(--text-primary))',
+                        border: `1px solid ${
+                          message.type === 'success'
+                            ? `rgb(var(--game-callstack-library-success))`
+                            : message.type === 'error'
+                            ? `rgb(var(--game-callstack-library-overdue))`
+                            : '1px solid rgb(var(--game-callstack-queue-microtask))'
+                        }`
+                      }}
                     >
                       {message.text}
                     </motion.div>

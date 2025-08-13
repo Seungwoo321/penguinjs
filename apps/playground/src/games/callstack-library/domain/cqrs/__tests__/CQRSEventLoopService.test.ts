@@ -9,9 +9,9 @@ import {
   createCQRSEventLoopService,
   getDefaultCQRSService,
   destroyDefaultCQRSService
-} from '../CQRSEventLoopService';
-import { createCommand } from '../Commands';
-import { createQuery } from '../Queries';
+} from '@/games/callstack-library/CQRSEventLoopService';
+import { createCommand } from '@/games/callstack-library/Commands';
+import { createQuery } from '@/games/callstack-library/Queries';
 
 describe('CQRSEventLoopService', () => {
   let service: CQRSEventLoopService;

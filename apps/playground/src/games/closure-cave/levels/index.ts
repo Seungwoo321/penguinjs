@@ -1,10 +1,6 @@
-import { beginnerLevels } from './beginner-levels'
-import { intermediateLevels } from './intermediate-levels'
-import { advancedLevels } from './advanced-levels'
-
-console.log('Loading levels - beginnerLevels:', beginnerLevels)
-console.log('Loading levels - intermediateLevels:', intermediateLevels)
-console.log('Loading levels - advancedLevels:', advancedLevels)
+import { beginnerLevels } from '@/games/closure-cave/levels/beginner-levels'
+import { intermediateLevels } from '@/games/closure-cave/levels/intermediate-levels'
+import { advancedLevels } from '@/games/closure-cave/levels/advanced-levels'
 
 export const allClosureLevels = {
   beginner: beginnerLevels,
@@ -13,5 +9,3 @@ export const allClosureLevels = {
 }
 
 export const levels = allClosureLevels
-
-console.log('Exported allClosureLevels:', allClosureLevels)

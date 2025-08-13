@@ -10,12 +10,12 @@
 import React, { memo, useEffect, useState } from 'react';
 import { cn } from '@penguinjs/ui';
 
-import { useCurrentStage, useGameData, useGameHandlers } from '../../../features/game-progression';
-import { EventLoopVisualizerWidget } from '../../../widgets/event-loop-visualizer';
-import { GameProgressTrackerWidget } from '../../../widgets/game-progress-tracker';
+import { useCurrentStage, useGameData, useGameHandlers } from '@/games/callstack-library/features/game-progression';
+import { EventLoopVisualizerWidget } from '@/games/callstack-library/widgets/event-loop-visualizer';
+import { GameProgressTrackerWidget } from '@/games/callstack-library/widgets/game-progress-tracker';
 
 // 기존 레이아웃 컴포넌트들 (마이그레이션 중)
-import { LayoutRenderer } from '../../../components/layout/LayoutRenderer';
+import { LayoutRenderer } from '@/games/callstack-library/components/layout/LayoutRenderer';
 
 // 페이지 Props
 export interface GameLayoutPageProps {

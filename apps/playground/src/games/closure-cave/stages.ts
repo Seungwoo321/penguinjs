@@ -1,1 +1,1 @@
-export { closureCaveGameStages as closureCaveStages } from './game-stages'
+export { closureCaveGameStages as closureCaveStages } from '@/games/closure-cave/game-stages'

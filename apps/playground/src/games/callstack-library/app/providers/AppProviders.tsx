@@ -10,8 +10,8 @@
 import React, { memo, ReactNode } from 'react';
 
 // 기존 프로바이더들 (마이그레이션 중)
-import { DesignSystemProvider } from '../../components/ui/DesignSystemProvider';
-import { CallStackLibraryProvider } from '../../contexts/CallStackLibraryContext';
+import { DesignSystemProvider } from '@/games/callstack-library/components/ui/DesignSystemProvider';
+import { CallStackLibraryProvider } from '@/games/callstack-library/contexts/CallStackLibraryContext';
 
 // 새로운 FSD 프로바이더들
 import { GameProgressionProvider } from './GameProgressionProvider';

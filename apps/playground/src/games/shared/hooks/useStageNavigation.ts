@@ -1,4 +1,4 @@
-import { DifficultyStageRanges, GameDifficulty } from '../types'
+import { DifficultyStageRanges, GameDifficulty } from '@/games/shared/types'
 
 export interface StageNavigationHook {
   handleStageChange: (direction: 'prev' | 'next') => void

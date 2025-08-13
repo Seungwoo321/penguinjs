@@ -250,8 +250,8 @@ export function GameGuideModal({ isOpen, onClose, gameId, gameTitle }: GameGuide
                     className="space-y-3"
                   >
                     {guide.tips.map((tip, index) => (
-                      <div key={index} className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                        <Lightbulb className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                      <div key={index} className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg">
+                        <Lightbulb className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                         <p className="text-[rgb(var(--text-primary))]">{tip}</p>
                       </div>
                     ))}

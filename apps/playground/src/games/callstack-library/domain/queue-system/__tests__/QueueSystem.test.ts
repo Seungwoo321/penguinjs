@@ -11,12 +11,12 @@ import {
   MicrotaskQueue,
   MacrotaskQueue,
   QueueSystemSnapshot
-} from '../QueueSystem';
+} from '@/games/callstack-library/QueueSystem';
 import {
   CallStackFrame,
   MicrotaskItem,
   MacrotaskItem
-} from '../../event-loop/types';
+} from '@/games/callstack-library/domain/event-loop/types';
 
 describe('CallStack', () => {
   let callStack: CallStack;

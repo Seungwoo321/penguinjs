@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Closure Cave Theme Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        card: {
+                            DEFAULT: 'rgb(var(--card))',
+                            foreground: 'rgb(var(--card-foreground))',
+                        },
+                        background: 'rgb(var(--background))',
+                        foreground: 'rgb(var(--foreground))',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            /* Light theme */
+            --card: 255 255 255;
+            --card-foreground: 45 62 80;
+            --background: 246 249 252;
+            --foreground: 27 42 58;
+        }
+
+        .dark {
+            /* Dark theme */
+            --card: 30 41 59;
+            --card-foreground: 226 232 240;
+            --background: 15 23 42;
+            --foreground: 248 250 252;
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Closure Cave Theme Debug Test</h1>
+        
+        <div class="mb-6">
+            <button onclick="setTheme('light')" class="px-4 py-2 bg-blue-500 text-white rounded mr-2">
+                Light Theme
+            </button>
+            <button onclick="setTheme('dark')" class="px-4 py-2 bg-gray-700 text-white rounded mr-2">
+                Dark Theme
+            </button>
+            <span id="current-theme" class="ml-4 font-semibold"></span>
+        </div>
+
+        <!-- Main Game Container (similar to GamePanel) -->
+        <div class="grid lg:grid-cols-2 gap-6">
+            <!-- Left Panel: Game Board -->
+            <div class="space-y-4">
+                <div class="bg-card text-card-foreground rounded-xl border shadow-lg p-6">
+                    <h2 class="text-lg font-semibold mb-4">Game Board (GamePanel)</h2>
+                    
+                    <!-- ClosureCaveBoard Container -->
+                    <div class="bg-gray-50 dark:bg-slate-900 rounded-lg p-4 border border-gray-200 dark:border-slate-700">
+                        <h3 class="text-base font-semibold text-slate-800 dark:text-slate-200 mb-3">
+                            클로저로 펭귄이 기억을 간직하게 해보세요
+                        </h3>
+                        
+                        <!-- Game Grid -->
+                        <div class="flex justify-center">
+                            <div class="grid grid-cols-4 gap-1">
+                                <!-- Start Cell -->
+                                <div class="relative w-16 h-16 border-2 flex items-center justify-center bg-green-100 dark:bg-green-900/30 border-green-400">
+                                    <div class="absolute inset-0 flex items-center justify-center text-xs text-green-800 dark:text-green-200 font-bold">
+                                        START
+                                    </div>
+                                </div>
+                                
+                                <!-- Regular Cells -->
+                                <div class="relative w-16 h-16 border-2 flex items-center justify-center bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700">
+                                </div>
+                                <div class="relative w-16 h-16 border-2 flex items-center justify-center bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700">
+                                </div>
+                                
+                                <!-- Goal Cell -->
+                                <div class="relative w-16 h-16 border-2 flex items-center justify-center bg-yellow-100 dark:bg-yellow-900/30 border-yellow-400">
+                                    <div class="absolute inset-0 flex items-center justify-center text-xs text-yellow-800 dark:text-yellow-200 font-bold">
+                                        GOAL
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel: Code Editor -->
+            <div class="space-y-4">
+                <div class="bg-card text-card-foreground rounded-xl border shadow-lg p-6 h-full">
+                    <h2 class="text-lg font-semibold mb-4">💻 Code Editor (GamePanel)</h2>
+                    <div class="bg-gray-100 dark:bg-gray-800 rounded p-4">
+                        <p>Code editor would go here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debug Info -->
+        <div class="mt-8 bg-card text-card-foreground border rounded-lg p-4">
+            <h3 class="font-bold mb-2">Debug Information</h3>
+            <div id="debug-info" class="text-sm space-y-1"></div>
+        </div>
+    </div>
+
+    <script>
+        function setTheme(theme) {
+            const html = document.documentElement;
+            if (theme === 'dark') {
+                html.classList.add('dark');
+            } else {
+                html.classList.remove('dark');
+            }
+            updateDebugInfo();
+        }
+
+        function updateDebugInfo() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            const currentTheme = isDark ? 'dark' : 'light';
+            
+            document.getElementById('current-theme').textContent = `Current: ${currentTheme}`;
+            
+            const computedStyle = getComputedStyle(html);
+            const cardValue = computedStyle.getPropertyValue('--card').trim();
+            const backgroundValue = computedStyle.getPropertyValue('--background').trim();
+            
+            // Get actual background colors of test elements
+            const gameBoard = document.querySelector('.bg-gray-50.dark\\:bg-slate-900');
+            const regularCell = document.querySelector('.bg-white.dark\\:bg-slate-800');
+            const gameBoardBg = getComputedStyle(gameBoard).backgroundColor;
+            const regularCellBg = getComputedStyle(regularCell).backgroundColor;
+            
+            const debugInfo = document.getElementById('debug-info');
+            debugInfo.innerHTML = `
+                <div><strong>HTML Classes:</strong> ${html.className}</div>
+                <div><strong>CSS --card:</strong> ${cardValue}</div>
+                <div><strong>CSS --background:</strong> ${backgroundValue}</div>
+                <div><strong>Game Board BG:</strong> ${gameBoardBg}</div>
+                <div><strong>Regular Cell BG:</strong> ${regularCellBg}</div>
+                <div><strong>Expected Game Board (Light):</strong> rgb(249, 250, 251) (gray-50)</div>
+                <div><strong>Expected Game Board (Dark):</strong> rgb(15, 23, 42) (slate-900)</div>
+                <div><strong>Expected Cell (Light):</strong> rgb(255, 255, 255) (white)</div>
+                <div><strong>Expected Cell (Dark):</strong> rgb(30, 41, 59) (slate-800)</div>
+            `;
+        }
+
+        // Initialize
+        setTheme('light');
+        setTimeout(updateDebugInfo, 100);
+    </script>
+</body>
+</html>

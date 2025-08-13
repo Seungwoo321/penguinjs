@@ -3,23 +3,536 @@
     "slogan": "시원한 코드, 따뜻한 학습",
     "description": "JavaScript 핵심 개념을 재미있는 게임으로 배워보세요. 펭귄과 함께하는 인터랙티브 코딩 모험이 시작됩니다!",
     "viewAllGames": "모든 게임 보기",
+    "subtitle": "JavaScript를 게임으로 배우는 새로운 방법",
+    "detailedDescription": "복잡한 JavaScript 개념을 인터랙티브한 게임으로 만들어 직관적으로 학습할 수 있는 교육 플랫폼",
+    "availableGames": "체험 가능한 게임",
+    "gameProgress": "개 완성 (18개 중 약 11% 진행)",
+    "portfolioHighlights": {
+      "completedGames": "완성 게임",
+      "aiCollaboration": "AI 협업",
+      "dualInput": "듀얼",
+      "touchMouse": "터치/마우스",
+      "realtimeFeedback": "실시간",
+      "codeFeedback": "코드 피드백"
+    },
+    "tryNow": "지금 바로 체험해보세요",
+    "tryNowSubtitle": "JavaScript 학습의 새로운 경험을 직접 확인해보세요",
+    "navigation": {
+      "projectStory": "프로젝트 스토리",
+      "techStack": "기술 스택",
+      "allGames": "전체 게임"
+    },
+    "cta": {
+      "playGame": "🎮 게임 체험하기",
+      "learnMore": "📝 더 알아보기"
+    },
     "games": {
       "closureCave": {
         "title": "클로저 동굴",
-        "description": "클로저의 신비로운 세계를 탐험하며 스코프와 환경을 이해해보세요."
+        "description": "클로저의 신비로운 세계를 탐험하며 스코프와 환경을 이해해보세요",
+        "concepts": "클로저,스코프,렉시컬 환경",
+        "difficulty": "중급"
       },
-      "promisePlanet": {
-        "title": "프로미스 행성",
-        "description": "비동기 프로그래밍의 우주에서 Promise와 콜백을 마스터하세요."
-      },
-      "asyncAdventure": {
-        "title": "Async 모험",
-        "description": "async/await의 힘으로 복잡한 비동기 작업을 정복해보세요."
+      "callstackLibrary": {
+        "title": "콜스택 도서관",
+        "description": "함수 호출 스택과 실행 순서를 시각적으로 이해하세요",
+        "concepts": "콜스택,실행 컨텍스트,함수 호출",
+        "difficulty": "고급"
       }
+    },
+    "gameCard": {
+      "stages": "개 스테이지",
+      "difficulties": "초급·중급·고급",
+      "startGame": "게임 시작하기",
+      "new": "NEW",
+      "locked": "🔒 잠김",
+      "recommended": "추천"
     }
   },
   "GamesPage": {
     "title": "모든 JavaScript 학습 게임",
-    "description": "총 18개의 인터랙티브 게임으로 JavaScript 핵심 개념을 마스터하세요"
+    "description": "총 18개의 인터랙티브 게임으로 JavaScript 핵심 개념을 마스터하세요",
+    "gameCollection": "게임 컬렉션",
+    "masterJavaScript": "18개의 인터랙티브 게임으로 JavaScript를 마스터하세요",
+    "homeTitle": "홈으로",
+    "progress": {
+      "overallProgress": "전체 진행도",
+      "completed": "완료",
+      "completionEstimate": "현재 속도로 약 {months}개월 후 완성 예정",
+      "startFirstGame": "첫 게임을 시작해보세요!",
+      "completedGames": "완료한 게임",
+      "completedStages": "완료한 스테이지",
+      "studyTime": "학습한 시간",
+      "studyTimeHours": "약 {hours}시간",
+      "remainingGames": "남은 게임",
+      "awaitingChallenge": "도전 대기중"
+    },
+    "categories": {
+      "title": "카테고리별 탐색",
+      "viewAll": "전체 보기",
+      "completed": "완료",
+      "basicConcepts": {
+        "name": "기본 개념",
+        "description": "JavaScript의 핵심 기초 개념들"
+      },
+      "functionsExecution": {
+        "name": "함수와 실행",
+        "description": "함수 호출과 실행 메커니즘"
+      },
+      "asyncProcessing": {
+        "name": "비동기 처리",
+        "description": "비동기 프로그래밍과 Promise"
+      },
+      "advancedFeatures": {
+        "name": "고급 기능",
+        "description": "메타프로그래밍과 고급 기법"
+      },
+      "practicalSkills": {
+        "name": "실용 스킬",
+        "description": "실무에서 자주 사용하는 기술들"
+      },
+      "domEvents": {
+        "name": "DOM & 이벤트",
+        "description": "DOM 조작과 이벤트 처리"
+      }
+    },
+    "gameCard": {
+      "completed": "완료",
+      "inProgress": "진행중",
+      "recommended": "추천",
+      "comingSoon": "개발 예정",
+      "stages": "개 스테이지",
+      "difficulties": "초급·중급·고급",
+      "minutes": "분",
+      "prerequisiteRequired": "먼저 완료 필요",
+      "nextRecommended": "이전 게임을 완료했으니 이 게임을 추천해요!",
+      "playAgain": "다시 플레이",
+      "continueGame": "이어서 플레이",
+      "startGame": "게임 시작하기",
+      "difficulty": {
+        "beginner": "입문",
+        "basic": "초급",
+        "intermediate": "중급",
+        "advanced": "고급",
+        "expert": "전문가"
+      }
+    },
+    "games": {
+      "closureCave": {
+        "title": "클로저 동굴",
+        "description": "클로저의 신비로운 세계를 탐험하며 스코프와 환경을 이해해보세요",
+        "concepts": "클로저, 스코프, 렉시컬 환경",
+        "type": "Flexbox Froggy 스타일"
+      },
+      "callstackLibrary": {
+        "title": "콜스택 도서관",
+        "description": "함수 호출 스택과 실행 순서를 시각적으로 이해하세요",
+        "concepts": "콜스택, 실행 컨텍스트, 함수 호출",
+        "type": "드래그 앤 드롭"
+      },
+      "promiseBattle": {
+        "title": "프로미스 배틀",
+        "description": "Promise 상태와 비동기 처리를 턴제 카드 게임으로 학습하세요",
+        "concepts": "Promise, then/catch, 비동기 처리",
+        "type": "턴제 카드 게임"
+      },
+      "asyncAirways": {
+        "title": "비동기 항공사",
+        "description": "async/await와 비동기 프로그래밍을 항공 스케줄 관리로 배웁니다",
+        "concepts": "async/await, 동시성, 에러 처리",
+        "type": "실시간 스케줄 관리"
+      },
+      "proxyLaboratory": {
+        "title": "프록시 실험실",
+        "description": "Proxy 객체와 메타프로그래밍을 실험으로 탐구하세요",
+        "concepts": "Proxy, Reflect, 메타프로그래밍",
+        "type": "퍼즐/실험"
+      },
+      "eventTarget": {
+        "title": "이벤트 타겟",
+        "description": "이벤트 처리와 버블링을 타겟 게임으로 마스터하세요",
+        "concepts": "이벤트, 버블링, 캐처링",
+        "type": "Flexbox Froggy 스타일"
+      },
+      "prototypeChain": {
+        "title": "프로토타입 체인",
+        "description": "프로토타입 상속과 체인을 연결 퍼즐로 이해하세요",
+        "concepts": "프로토타입, 상속, __proto__",
+        "type": "연결 퍼즐"
+      },
+      "eventloopCinema": {
+        "title": "이벤트 루프 영화관",
+        "description": "이벤트 루프와 비동기 실행 순서를 영화처럼 감상하세요",
+        "concepts": "이벤트 루프, 태스크 큐, 마이크로태스크",
+        "type": "타이밍 기반"
+      },
+      "memoryMuseum": {
+        "title": "메모리 관리 박물관",
+        "description": "가비지 컬렉션과 메모리 최적화를 박물관에서 학습하세요",
+        "concepts": "가비지 컬렉션, 메모리 누수, 최적화",
+        "type": "관리 시뮬레이션"
+      },
+      "scopeForest": {
+        "title": "스코프 숲",
+        "description": "스코프 체인과 변수 접근을 숲 탐험으로 이해하세요",
+        "concepts": "스코프, 렉시컬 스코프, 블록 스코프",
+        "type": "탐험/퍼즐"
+      },
+      "hoistingHelicopter": {
+        "title": "호이스팅 헬리콥터",
+        "description": "호이스팅과 변수 선언을 헬리콥터 비행으로 체험하세요",
+        "concepts": "호이스팅, var/let/const, TDZ",
+        "type": "물리 시뮬레이션"
+      },
+      "thisBinding": {
+        "title": "this 바인딩 타겟",
+        "description": "this 키워드와 바인딩을 타겟 슈팅으로 마스터하세요",
+        "concepts": "this, bind/call/apply, 화살표 함수",
+        "type": "타겟 슈팅"
+      },
+      "destructuringCircus": {
+        "title": "구조분해 서커스",
+        "description": "구조분해 할당을 서커스 공연으로 익혀보세요",
+        "concepts": "구조분해, 전개 연산자, 기본값",
+        "type": "퍼즐/패턴 매칭"
+      },
+      "arrayMethodsRacing": {
+        "title": "배열 메서드 레이싱",
+        "description": "배열 메서드와 함수형 프로그래밍을 레이싱으로 배웁니다",
+        "concepts": "map/filter/reduce, 체이닝, 불변성",
+        "type": "레이싱/경쟁"
+      },
+      "modulesMarketplace": {
+        "title": "모듈 마켓플레이스",
+        "description": "모듈 시스템과 import/export를 마켓플레이스에서 운영하세요",
+        "concepts": "ES6 모듈, import/export, 순환 의존성",
+        "type": "경영 시뮬레이션"
+      },
+      "templateLiteralArt": {
+        "title": "템플릿 리터럴 아트",
+        "description": "템플릿 리터럴과 문자열 처리를 예술 창작으로 익히세요",
+        "concepts": "템플릿 리터럴, 태그드 템플릿, 문자열 보간",
+        "type": "창작/아트"
+      },
+      "errorHandlingHospital": {
+        "title": "에러 처리 병원",
+        "description": "에러 처리와 디버깅을 병원 응급실에서 학습하세요",
+        "concepts": "try/catch, 커스텀 에러, 디버깅",
+        "type": "의료 시뮬레이션"
+      },
+      "weakmapVault": {
+        "title": "약한 참조 금고",
+        "description": "WeakMap/WeakSet과 메모리 관리를 보안 금고에서 배웁니다",
+        "concepts": "WeakMap, WeakSet, 가비지 컬렉션",
+        "type": "보안/스파이"
+      }
+    },
+    "footer": {
+      "title": "JavaScript 마스터가 되는 여정",
+      "description": "18개의 게임으로 JavaScript의 모든 핵심 개념을 완벽하게 마스터할 수 있습니다.",
+      "encouragement": "펭귄과 함께 하나씩 정복해나가세요!"
+    }
+  },
+  "AboutPage": {
+    "title": "프로젝트 스토리",
+    "backToHome": "홈으로",
+    "subtitle": "FlexboxFroggy에서 영감을 받아 시작된 JavaScript 학습 게임 플랫폼의 개발 이야기",
+    "inspiration": {
+      "title": "영감의 시작",
+      "content1": "FlexboxFroggy로 CSS Flex를 학습했던 경험이 인상 깊었습니다. 단순히 문서를 읽는 것이 아닌, 직접 코드를 작성하며 개구리를 움직이는 과정에서 Flexbox의 개념이 자연스럽게 체화되었죠.",
+      "content2": "그동안 관리자 페이지와 대시보드 개발에만 집중해왔던 저에게는 완전히 새로운 도전이 필요했습니다.",
+      "content3": "\"JavaScript의 복잡한 개념들도 이런 식으로 게임화할 수 있지 않을까?\" 이런 생각에서 PenguinJS 프로젝트가 시작되었습니다.",
+      "flexboxInspiration": "FlexboxFroggy 영감",
+      "flexboxExample": "\"justify-content: center로 개구리를 연꽃잎 위로 이동시키세요\"",
+      "penguinExample": "\"클로저 동굴에서 길을 찾아 펭귄을 구출하세요\""
+    },
+    "vibreCoding": {
+      "title": "Claude Code와의 바이브 코딩",
+      "ideation": {
+        "title": "아이디어 구상",
+        "content": "\"콜스택을 시각화하려면 어떻게 해야 할까?\" 머릿속 아이디어를 Claude와 대화하며 구체화"
+      },
+      "wireframe": {
+        "title": "와이어프레임",
+        "content": "HTML로 레이아웃을 스케치하고, Claude에게 구현을 요청. 여러 레이아웃을 빠르게 실험"
+      },
+      "iteration": {
+        "title": "시행착오",
+        "content": "레이아웃 시스템만 6번 이상 리팩토링. 직접 코딩하지 않아도 설계의 중요성을 체감"
+      },
+      "insights": "깨달은 점들",
+      "aiAdvantages": {
+        "title": "AI 협업의 장점",
+        "item1": "빠른 프로토타이핑",
+        "item2": "다양한 접근법 시도",
+        "item3": "실시간 피드백과 개선"
+      },
+      "stillImportant": {
+        "title": "여전히 중요한 것",
+        "item1": "명확한 요구사항 정의",
+        "item2": "사용자 경험 설계",
+        "item3": "아키텍처 이해"
+      }
+    },
+    "currentAndFuture": {
+      "title": "현재와 미래",
+      "currentStatus": {
+        "title": "현재 진행 상황",
+        "completedGames": "완성된 게임",
+        "implementedStages": "구현된 스테이지",
+        "overallProgress": "전체 진행률"
+      },
+      "futurePlans": {
+        "title": "앞으로의 계획",
+        "item1": "나머지 16개 게임 순차 개발",
+        "item2": "사용자 피드백 수집 및 개선",
+        "item3": "학습 효과 측정 및 최적화",
+        "item4": "다른 언어로 확장 (Python, Go 등)"
+      }
+    },
+    "personalReflection": {
+      "title": "개발하면서 느낀 점",
+      "content1": "\"내가 상상한 것을 실제로 만들어낼 수 있다\"는 확신을 얻었습니다. 기술적 구현보다도 무엇을 만들지, 어떻게 사용자가 학습할지를 고민하는 시간이 더 중요하다는 것을 깨달았죠.",
+      "content2": "AI 도구의 발전으로 개발자의 역할이 변화하고 있지만, 문제를 정의하고 해결 방향을 제시하는 능력은 여전히 핵심이라고 생각합니다.",
+      "quote": "\"코딩을 하지 않아도, 개발자는 여전히 필요하다\" 🚀"
+    },
+    "cta": {
+      "playGames": "게임 체험하기",
+      "viewTechStack": "기술 스택 보기"
+    }
+  },
+  "TechPage": {
+    "title": "기술 스택",
+    "homeLink": "홈으로",
+    "hero": {
+      "title": "기술 스택 & 아키텍처",
+      "description": "최신 기술 스택으로 구축한 인터랙티브 학습 플랫폼의 기술적 구성과 설계 결정들을 소개합니다"
+    },
+    "coreStack": {
+      "title": "🚀 핵심 기술 스택",
+      "frontend": {
+        "title": "Frontend",
+        "react": {
+          "name": "React 19",
+          "description": "최신 Hooks & Concurrent Features"
+        },
+        "nextjs": {
+          "name": "Next.js 15",
+          "description": "App Router & Server Components"
+        },
+        "typescript": {
+          "name": "TypeScript",
+          "description": "엄격한 타입 안정성"
+        },
+        "framerMotion": {
+          "name": "Framer Motion",
+          "description": "부드러운 애니메이션"
+        },
+        "tailwind": {
+          "name": "Tailwind CSS",
+          "description": "유틸리티 퍼스트 스타일링"
+        }
+      },
+      "architecture": {
+        "title": "Architecture",
+        "monorepo": {
+          "name": "모노레포 구조",
+          "description": "효율적인 코드 공유"
+        },
+        "singleton": {
+          "name": "싱글톤 패턴",
+          "description": "메모리 모니터링 최적화"
+        },
+        "stateManagement": {
+          "name": "상태 관리 최적화",
+          "description": "React ref 기반 성능 향상"
+        },
+        "componentSeparation": {
+          "name": "컴포넌트 분리",
+          "description": "재사용 가능한 UI 컴포넌트"
+        },
+        "customHooks": {
+          "name": "커스텀 훅",
+          "description": "로직 추상화 및 재사용"
+        }
+      },
+      "features": {
+        "title": "Features",
+        "interactiveGames": {
+          "name": "인터랙티브 게임",
+          "description": "드래그 앤 드롭, 코드 에디터"
+        },
+        "realtimeVisualization": {
+          "name": "실시간 시각화",
+          "description": "콜스택, 클로저 동작 시각화"
+        },
+        "multiLanguage": {
+          "name": "다국어 지원",
+          "description": "한국어/영어 next-intl"
+        },
+        "responsiveDesign": {
+          "name": "반응형 디자인",
+          "description": "모바일/데스크톱 최적화"
+        },
+        "darkMode": {
+          "name": "다크모드",
+          "description": "시스템 설정 연동"
+        }
+      }
+    },
+    "architecture": {
+      "title": "🏛️ 시스템 아키텍처",
+      "presentationLayer": {
+        "title": "🎨 Presentation Layer",
+        "description": "UI/UX & 애니메이션",
+        "components": {
+          "reactComponents": "React Components",
+          "framerMotion": "Framer Motion",
+          "tailwindCSS": "Tailwind CSS"
+        }
+      },
+      "businessLogic": {
+        "title": "🧠 Business Logic",
+        "description": "게임 로직 & 상태 관리",
+        "components": {
+          "gameEngine": "Game Engine",
+          "stateManagement": "State Management",
+          "memoryMonitor": "Memory Monitor"
+        }
+      },
+      "dataLayer": {
+        "title": "💾 Data Layer",
+        "description": "데이터 저장 & 다국어",
+        "components": {
+          "levelConfigurations": "Level Configurations",
+          "userProgress": "User Progress",
+          "i18nResources": "i18n Resources"
+        }
+      },
+      "dataFlow": {
+        "title": "데이터 흐름",
+        "userInput": "사용자 입력",
+        "gameLogic": "게임 로직 처리",
+        "stateUpdate": "상태 업데이트",
+        "uiRendering": "UI 렌더링",
+        "arrow": "→"
+      }
+    },
+    "devTools": {
+      "title": "🛠️ 개발 환경 & 도구",
+      "devTools": {
+        "title": "개발 도구",
+        "tools": {
+          "claudeCode": {
+            "name": "Claude Code",
+            "description": "AI 협업 개발"
+          },
+          "git": {
+            "name": "Git",
+            "description": "버전 관리"
+          },
+          "pnpm": {
+            "name": "pnpm",
+            "description": "패키지 관리"
+          },
+          "vsCode": {
+            "name": "VS Code",
+            "description": "코드 리뷰"
+          }
+        }
+      },
+      "performance": {
+        "title": "성능 최적화",
+        "memoryMonitoring": {
+          "name": "메모리 모니터링",
+          "description": "Chrome DevTools API 활용"
+        },
+        "bundleOptimization": {
+          "name": "번들 최적화",
+          "description": "Next.js 자동 코드 분할"
+        },
+        "imageOptimization": {
+          "name": "이미지 최적화",
+          "description": "Next.js Image 컴포넌트"
+        },
+        "animationOptimization": {
+          "name": "애니메이션 최적화",
+          "description": "GPU 가속 활용"
+        }
+      }
+    },
+    "challenges": {
+      "title": "🎯 기술적 도전과 해결",
+      "challenges": {
+        "title": "🚨 주요 도전 과제",
+        "memoryLeak": {
+          "title": "메모리 누수 문제",
+          "description": "게임 상태 관리에서 발생한 메모리 누수로 234MB까지 증가"
+        },
+        "complexAnimation": {
+          "title": "복잡한 애니메이션",
+          "description": "드래그 앤 드롭과 시각화를 동시에 처리하는 성능 이슈"
+        },
+        "layoutSystem": {
+          "title": "레이아웃 시스템",
+          "description": "다양한 게임 화면에 적용 가능한 유연한 레이아웃 설계"
+        }
+      },
+      "solutions": {
+        "title": "✅ 해결 방법",
+        "singletonPattern": {
+          "title": "싱글톤 패턴 적용",
+          "description": "메모리 모니터를 싱글톤으로 구현하여 156MB로 최적화"
+        },
+        "reactRef": {
+          "title": "React Ref 활용",
+          "description": "상태 대신 ref 사용으로 불필요한 리렌더링 방지"
+        },
+        "componentAbstraction": {
+          "title": "컴포넌트 추상화",
+          "description": "재사용 가능한 레이아웃 컴포넌트로 일관성 확보"
+        }
+      }
+    },
+    "performance": {
+      "title": "📊 구현된 성능 모니터링",
+      "memoryMonitoring": {
+        "title": "🧠 실시간 메모리 모니터링",
+        "chromeApi": {
+          "title": "Chrome Memory API 연동",
+          "description": "performance.memory를 통한 실시간 힙 메모리 추적"
+        },
+        "singletonImplementation": {
+          "title": "싱글톤 패턴 구현",
+          "description": "전역 단일 인스턴스로 메모리 효율성 극대화"
+        },
+        "autoCleanup": {
+          "title": "자동 정리 시스템",
+          "description": "30초마다 오래된 컴포넌트 자동 정리 (5분 임계값)"
+        },
+        "thresholdAlerts": {
+          "title": "임계값 알림",
+          "description": "80MB 초과 시 경고, 120MB 초과 시 critical 알림"
+        }
+      },
+      "metrics": {
+        "optimizedMemory": {
+          "value": "156MB",
+          "label": "최적화 후 메모리",
+          "change": "234MB → 156MB (-33%)"
+        },
+        "realtimeMonitoring": {
+          "value": "실시간",
+          "label": "모니터링 주기",
+          "description": "컴포넌트 생명주기 추적"
+        }
+      },
+      "note": "* MemoryMonitor 서비스로 실시간 모니터링 중 (개발 환경에서만 활성화)"
+    },
+    "cta": {
+      "tryTech": "🎮 기술 체험하기",
+      "projectStory": "📖 프로젝트 스토리",
+      "arrow": "→"
+    }
   }
 }

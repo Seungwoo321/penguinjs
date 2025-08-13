@@ -7,16 +7,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X, AlertCircle, HelpCircle, Play, RotateCcw, Send } from 'lucide-react';
 import { cn, GamePanel } from '@penguinjs/ui';
-import { useCallStackLibraryTheme } from '../../hooks/useCallStackLibraryTheme';
-import { useLiveRegion, useFocusTrap } from '../../hooks/useKeyboardNavigation';
+import { useDarkModeDetection } from '@/games/callstack-library/hooks/useCSSThemeSync';
+import { useLiveRegion, useFocusTrap } from '@/games/callstack-library/hooks/useKeyboardNavigation';
 import { 
   CALLSTACK_LIBRARY_ARIA_LABELS,
   createAlertAttributes,
   createDialogAttributes,
   srOnlyStyles
-} from '../../utils/ariaUtils';
+} from '@/games/callstack-library/utils/ariaUtils';
 import { AccessibleButton, AccessibleButtonGroup } from './AccessibleButton';
-import { EvaluationPanelProps, QueueValidationResult } from '../../types/layout';
+import { EvaluationPanelProps, QueueValidationResult } from '@/games/callstack-library/types/layout';
 
 interface AccessibleEvaluationPanelProps extends EvaluationPanelProps {
   onClose?: () => void;
@@ -42,7 +42,7 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
   className
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const libraryTheme = useCallStackLibraryTheme();
+  const isDarkMode = useDarkModeDetection();
   const announce = useLiveRegion('assertive');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,8 +114,8 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
       ref={containerRef}
       className={cn('relative rounded-lg border', className)}
       style={{
-        backgroundColor: libraryTheme.getLibraryBackground(),
-        borderColor: libraryTheme.getQueueBorder('callstack')
+        backgroundColor: 'rgb(var(--game-callstack-library-bg-main))',
+        borderColor: 'rgb(var(--game-callstack-callstack-border))'
       }}
       {...(trapFocus && createDialogAttributes('평가 패널', 'evaluation-description'))}
     >
@@ -128,8 +128,8 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
         id="evaluation-description"
         className="mb-4 p-4 rounded-lg"
         style={{
-          backgroundColor: libraryTheme.getQueueColor('callstack', 'light'),
-          borderColor: libraryTheme.getQueueBorder('callstack')
+          backgroundColor: 'rgb(var(--game-callstack-callstack-light))',
+          borderColor: 'rgb(var(--game-callstack-callstack-border))'
         }}
       >
         <h3 className="font-bold mb-2 flex items-center gap-2">
@@ -157,7 +157,7 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
           </div>
           <div 
             className="h-2 rounded-full overflow-hidden"
-            style={{ backgroundColor: libraryTheme.getQueueColor('callstack', 'light') }}
+            style={{ backgroundColor: 'rgb(var(--game-callstack-callstack-light))' }}
             role="progressbar"
             aria-valuenow={progress}
             aria-valuemin={0}
@@ -166,7 +166,7 @@ export const AccessibleEvaluationPanel: React.FC<AccessibleEvaluationPanelProps>
           >
             <motion.div
               className="h-full"
-              style={{ backgroundColor: libraryTheme.getQueueColor('callstack', 'button') }}
+              style={{ backgroundColor: 'rgb(var(--game-callstack-callstack-button))' }}
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.3 }}

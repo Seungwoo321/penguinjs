@@ -18,7 +18,7 @@ import {
   type EventMap,
   type EventListener,
   type EventMiddleware
-} from '../eventSystem';
+} from '@/games/callstack-library/eventSystem';
 
 // Mock React
 vi.mock('react', () => ({

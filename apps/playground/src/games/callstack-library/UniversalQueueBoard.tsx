@@ -33,10 +33,10 @@ const queueIcons: Record<QueueType, React.ComponentType<any>> = {
   macrotask: Clock,
   priority: Target,
   circular: RotateCcw,
-  deque: ArrowLeftRight,
   animation: Film,
-  immediate: Rocket,
-  idle: Moon
+  generator: RotateCcw,
+  io: ArrowLeftRight,
+  worker: Target
 }
 
 export function UniversalQueueBoard({
@@ -71,8 +71,8 @@ export function UniversalQueueBoard({
     switch (queueType) {
       case 'circular':
         return renderCircularQueue()
-      case 'deque':
-        return renderDequeQueue()
+      case 'io':
+        return renderLinearQueue()
       case 'priority':
         return renderPriorityQueue()
       default:
@@ -166,7 +166,7 @@ export function UniversalQueueBoard({
         {sortedItems.map((item, index) => (
           <motion.div
             key={item.id}
-            variants={queueAnimationVariants.deque}
+            variants={queueAnimationVariants.circular}
             initial="initial"
             animate="animate"
             exit="exit"
@@ -213,7 +213,7 @@ export function UniversalQueueBoard({
   )
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-lg shadow-sm border overflow-hidden ${className}`}
+    <div className={`bg-[rgb(var(--surface-elevated))] rounded-lg shadow-sm border overflow-hidden ${className}`}
          style={{ borderColor: colorPalette.light }}>
       {/* 헤더 */}
       {showHeader && (
@@ -254,7 +254,7 @@ export function UniversalQueueBoard({
       </div>
 
       {/* 푸터 정보 */}
-      <div className="px-2 py-1 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
+      <div className="px-2 py-1 bg-[rgb(var(--surface-secondary))] border-t border-slate-200 dark:border-slate-700">
         <div className="flex justify-between items-center text-xs text-slate-600 dark:text-slate-400">
           <span>{config.fifo ? 'FIFO' : 'LIFO'}</span>
           <span>{items.length}</span>

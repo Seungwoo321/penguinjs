@@ -24,11 +24,12 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '@penguinjs/ui';
-import { useDesignTokens } from '../ui/DesignSystemProvider';
-import { useCallStackLibraryContext } from '../../contexts/CallStackLibraryContext';
-import { gameEvents } from '../../utils/eventSystem';
-import { AccessibleButton } from '../ui/AccessibleButton';
-import { ProgressIndicator } from '../common/ProgressIndicator';
+import { useDesignTokens } from '@/games/callstack-library/components/ui/DesignSystemProvider';
+import { useCallStackLibraryContext } from '@/games/callstack-library/contexts/CallStackLibraryContext';
+import { useDarkModeDetection } from '@/games/callstack-library/hooks/useCSSThemeSync';
+import { gameEvents } from '@/games/callstack-library/utils/eventSystem';
+import { AccessibleButton } from '@/games/callstack-library/components/ui/AccessibleButton';
+import { ProgressIndicator } from '@/games/callstack-library/components/common/ProgressIndicator';
 
 // 학습 컨셉 타입
 export interface LearningConcept {
@@ -99,6 +100,7 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
 }) => {
   const designTokens = useDesignTokens();
   const { state, dispatch } = useCallStackLibraryContext();
+  const isDarkMode = useDarkModeDetection();
   
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentHint, setCurrentHint] = useState<AdaptiveHint | null>(null);
@@ -369,14 +371,18 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-white rounded-lg shadow-xl border max-w-md w-80"
+            className="rounded-lg shadow-xl border max-w-md w-80"
+            style={{ backgroundColor: 'rgb(var(--game-callstack-library-bg-main))', borderColor: 'rgb(var(--game-callstack-library-border-default))' }}
           >
             {/* 헤더 */}
-            <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+            <div className="p-4 border-b" style={{ 
+              borderBottomColor: 'rgb(var(--game-callstack-library-border-default))',
+              background: 'linear-gradient(to right, rgb(var(--game-callstack-library-bg-secondary)), rgb(var(--game-callstack-library-bg-secondary)))'
+            }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <Brain className="w-5 h-5 text-blue-600 mr-2" />
-                  <h3 className="font-semibold text-gray-900">학습 도우미</h3>
+                  <Brain className="w-5 h-5 mr-2" style={{ color: 'rgb(var(--game-callstack-library-primary))' }} />
+                  <h3 className="font-semibold" style={{ color: 'rgb(var(--game-callstack-library-text-primary))' }}>학습 도우미</h3>
                 </div>
                 <AccessibleButton
                   size="sm"
@@ -396,10 +402,14 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                     className={cn(
                       'px-3 py-1 text-xs rounded-full transition-colors',
                       activeTab === tab
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? ''
+                        : 'hover:opacity-80'
                     )}
                     onClick={() => setActiveTab(tab)}
+                    style={{
+                      backgroundColor: activeTab === tab ? 'rgb(var(--game-callstack-library-primary))' : 'rgb(var(--game-callstack-library-bg-secondary))',
+                      color: activeTab === tab ? 'white' : 'rgb(var(--game-callstack-library-text-secondary))'
+                    }}
                   >
                     {tab === 'hints' && '힌트'}
                     {tab === 'progress' && '진행'}
@@ -414,14 +424,17 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
               {activeTab === 'hints' && (
                 <div className="space-y-3">
                   {currentHint ? (
-                    <div className="border rounded-lg p-3 bg-yellow-50">
+                    <div className="border rounded-lg p-3" style={{ 
+                      backgroundColor: 'rgba(var(--game-callstack-library-warning-rgb), 0.2)',
+                      borderColor: 'rgba(var(--game-callstack-library-warning-rgb), 0.4)'
+                    }}>
                       <div className="flex items-start">
-                        <Lightbulb className="w-5 h-5 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" />
+                        <Lightbulb className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" style={{ color: 'rgb(var(--game-callstack-library-warning))' }} />
                         <div>
-                          <h4 className="font-medium text-yellow-900 mb-1">
+                          <h4 className="font-medium mb-1" style={{ color: 'rgb(var(--game-callstack-library-warning))' }}>
                             {currentHint.title}
                           </h4>
-                          <p className="text-sm text-yellow-800">
+                          <p className="text-sm" style={{ color: 'rgb(var(--game-callstack-library-warning))' }}>
                             {currentHint.content}
                           </p>
                         </div>
@@ -429,8 +442,8 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                     </div>
                   ) : (
                     <div className="text-center py-6">
-                      <HelpCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600 mb-3">
+                      <HelpCircle className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgb(var(--game-callstack-library-text-muted))' }} />
+                      <p className="text-sm mb-3" style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>
                         막히는 부분이 있으신가요?
                       </p>
                       <AccessibleButton
@@ -447,13 +460,16 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                   
                   {/* 추천 사항 */}
                   <div className="mt-4">
-                    <h5 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">
+                    <h5 className="text-xs font-semibold mb-2 flex items-center" style={{ color: 'rgb(var(--game-callstack-library-text-primary))' }}>
                       <Sparkles className="w-3 h-3 mr-1" />
                       추천사항
                     </h5>
                     <div className="space-y-1">
                       {getRecommendations().map((rec, index) => (
-                        <p key={index} className="text-xs text-gray-600 bg-blue-50 p-2 rounded">
+                        <p key={index} className="text-xs p-2 rounded" style={{ 
+                          color: 'rgb(var(--game-callstack-library-text-secondary))',
+                          backgroundColor: 'rgba(var(--game-callstack-library-primary-rgb), 0.2)'
+                        }}>
                           {rec}
                         </p>
                       ))}
@@ -466,7 +482,7 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                 <div className="space-y-4">
                   {/* 현재 개념 진행률 */}
                   <div>
-                    <h5 className="text-sm font-semibold text-gray-900 mb-2">
+                    <h5 className="text-sm font-semibold mb-2" style={{ color: 'rgb(var(--game-callstack-library-text-primary))' }}>
                       현재 학습 개념
                     </h5>
                     {Object.entries(learningState.conceptMastery).map(([conceptId, mastery]) => {
@@ -477,7 +493,7 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                         <div key={conceptId} className="mb-3">
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-sm font-medium">{concept.name}</span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs" style={{ color: 'rgb(var(--game-callstack-library-text-muted))' }}>
                               {Math.round(mastery * 100)}%
                             </span>
                           </div>
@@ -496,7 +512,7 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                   {/* 강점과 약점 */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <h6 className="text-xs font-semibold text-green-700 mb-1 flex items-center">
+                      <h6 className="text-xs font-semibold mb-1 flex items-center" style={{ color: 'rgb(var(--game-callstack-library-success))' }}>
                         <CheckCircle className="w-3 h-3 mr-1" />
                         강점
                       </h6>
@@ -504,7 +520,10 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                         {learningState.strengths.map(conceptId => {
                           const concept = concepts.find(c => c.id === conceptId);
                           return concept ? (
-                            <span key={conceptId} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded block">
+                            <span key={conceptId} className="text-xs px-2 py-1 rounded block" style={{ 
+                              backgroundColor: 'rgba(var(--game-callstack-library-success-rgb), 0.2)',
+                              color: 'rgb(var(--game-callstack-library-success))'
+                            }}>
                               {concept.name}
                             </span>
                           ) : null;
@@ -513,7 +532,7 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                     </div>
 
                     <div>
-                      <h6 className="text-xs font-semibold text-red-700 mb-1 flex items-center">
+                      <h6 className="text-xs font-semibold mb-1 flex items-center" style={{ color: 'rgb(var(--game-callstack-library-error))' }}>
                         <AlertCircle className="w-3 h-3 mr-1" />
                         개선 필요
                       </h6>
@@ -521,7 +540,10 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                         {learningState.strugglingAreas.map(conceptId => {
                           const concept = concepts.find(c => c.id === conceptId);
                           return concept ? (
-                            <span key={conceptId} className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded block">
+                            <span key={conceptId} className="text-xs px-2 py-1 rounded block" style={{ 
+                              backgroundColor: 'rgba(var(--game-callstack-library-error-rgb), 0.2)',
+                              color: 'rgb(var(--game-callstack-library-error))'
+                            }}>
                               {concept.name}
                             </span>
                           ) : null;
@@ -537,34 +559,44 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
                   {concepts.map(concept => (
                     <div
                       key={concept.id}
-                      className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
+                      className="border rounded-lg p-3 cursor-pointer hover:opacity-80"
+                      style={{ 
+                        borderColor: 'rgb(var(--game-callstack-library-border-default))',
+                        backgroundColor: 'rgba(var(--game-callstack-library-bg-secondary-rgb), 0.5)'
+                      }}
                       onClick={() => setShowConceptExplainer(true)}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h5 className="font-medium text-gray-900 text-sm mb-1">
+                          <h5 className="font-medium text-sm mb-1" style={{ color: 'rgb(var(--game-callstack-library-text-primary))' }}>
                             {concept.name}
                           </h5>
-                          <p className="text-xs text-gray-600 mb-2">
+                          <p className="text-xs mb-2" style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>
                             {concept.description}
                           </p>
                           <div className="flex items-center space-x-2">
                             <span className={cn(
                               'text-xs px-2 py-1 rounded',
-                              concept.category === 'basic' ? 'bg-green-100 text-green-800' :
-                              concept.category === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
-                            )}>
+                              ''
+                            )}
+                            style={{
+                              backgroundColor: concept.category === 'basic' ? 'rgba(var(--game-callstack-library-success-rgb), 0.2)' :
+                                             concept.category === 'intermediate' ? 'rgba(var(--game-callstack-library-warning-rgb), 0.2)' :
+                                             'rgba(var(--game-callstack-library-error-rgb), 0.2)',
+                              color: concept.category === 'basic' ? 'rgb(var(--game-callstack-library-success))' :
+                                     concept.category === 'intermediate' ? 'rgb(var(--game-callstack-library-warning))' :
+                                     'rgb(var(--game-callstack-library-error))'
+                            }}>
                               {concept.category}
                             </span>
                             <div className="flex">
                               {Array.from({ length: Math.ceil(concept.difficulty / 2) }).map((_, i) => (
-                                <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                                <Star key={i} className="w-3 h-3 fill-current" style={{ color: 'rgb(var(--game-callstack-library-warning))' }} />
                               ))}
                             </div>
                           </div>
                         </div>
-                        <BookOpen className="w-4 h-4 text-gray-400" />
+                        <BookOpen className="w-4 h-4" style={{ color: 'rgb(var(--game-callstack-library-text-muted))' }} />
                       </div>
                     </div>
                   ))}
@@ -580,7 +612,8 @@ export const LearningAssistant = memo<LearningAssistantProps>(({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsExpanded(true)}
-            className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+            className="p-3 rounded-full shadow-lg transition-colors hover:opacity-90"
+            style={{ backgroundColor: 'rgb(var(--game-callstack-library-primary))', color: 'white' }}
             aria-label="학습 도우미 열기"
           >
             <Brain className="w-6 h-6" />

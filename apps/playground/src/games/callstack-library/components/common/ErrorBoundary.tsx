@@ -5,7 +5,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { AccessibleButton } from '../ui/AccessibleButton';
+import { AccessibleButton } from '@/games/callstack-library/components/ui/AccessibleButton';
 
 interface Props {
   children: ReactNode;
@@ -115,19 +115,26 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className={`
           ${isolate ? 'relative' : 'min-h-screen'} 
           flex items-center justify-center p-4
-          bg-gradient-to-br from-red-50 to-orange-50
-        `}>
-          <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-6 space-y-4">
+        `}
+        style={{
+          background: `linear-gradient(to bottom right, rgba(var(--destructive), 0.1), rgba(var(--game-callstack-library-warning), 0.1))`
+        }}>
+          <div className="max-w-md w-full rounded-lg shadow-xl p-6 space-y-4"
+            style={{
+              backgroundColor: 'rgb(var(--background))',
+              borderColor: 'rgb(var(--border))',
+              border: '1px solid rgb(var(--border))'
+            }}>
             {/* 에러 헤더 */}
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
-                <AlertTriangle className="h-8 w-8 text-red-500" />
+                <AlertTriangle className="h-8 w-8" style={{ color: 'rgb(var(--destructive))' }} />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold" style={{ color: 'rgb(var(--foreground))' }}>
                   {isolate ? '컴포넌트 오류' : '애플리케이션 오류'}
                 </h2>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm" style={{ color: 'rgb(var(--muted-foreground))' }}>
                   예기치 않은 오류가 발생했습니다
                 </p>
               </div>
@@ -135,17 +142,21 @@ export class ErrorBoundary extends Component<Props, State> {
 
             {/* 에러 상세 정보 (개발 환경) */}
             {process.env.NODE_ENV === 'development' && (
-              <div className="bg-gray-50 rounded-md p-3 space-y-2">
-                <p className="text-sm font-mono text-gray-800">
+              <div className="rounded-md p-3 space-y-2"
+                style={{
+                  backgroundColor: 'rgb(var(--muted))',
+                  border: '1px solid rgb(var(--border))'
+                }}>
+                <p className="text-sm font-mono" style={{ color: 'rgb(var(--foreground))' }}>
                   {error.toString()}
                 </p>
                 {this.props.componentName && (
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs" style={{ color: 'rgb(var(--muted-foreground))' }}>
                     컴포넌트: {this.props.componentName}
                   </p>
                 )}
                 {errorCount > 1 && (
-                  <p className="text-xs text-orange-600">
+                  <p className="text-xs" style={{ color: 'rgb(var(--game-callstack-library-warning))' }}>
                     오류 발생 횟수: {errorCount}회
                   </p>
                 )}
@@ -180,7 +191,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
 
             {/* 도움말 */}
-            <div className="text-xs text-gray-500 space-y-1">
+            <div className="text-xs space-y-1" style={{ color: 'rgb(var(--muted-foreground))' }}>
               <p>• 문제가 계속되면 페이지를 새로고침해주세요</p>
               <p>• 브라우저 캐시를 삭제하면 도움이 될 수 있습니다</p>
             </div>

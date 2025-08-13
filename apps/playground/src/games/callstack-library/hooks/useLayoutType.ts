@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { GameDifficulty } from '../../shared/types'
-import { getLayoutType, getStageQueues, getLayoutDescription } from '../utils/layoutClassifier'
-import { LayoutType } from '../types'
+import { GameDifficulty } from '@/games/shared/types'
+import { getLayoutType, getStageQueues, getLayoutDescription } from '@/games/callstack-library/utils/layoutClassifier'
+import { LayoutType } from '@/games/callstack-library/types'
 
 export interface UseLayoutTypeResult {
   layoutType: LayoutType

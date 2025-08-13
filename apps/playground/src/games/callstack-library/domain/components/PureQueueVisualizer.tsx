@@ -12,7 +12,7 @@ import {
   MicrotaskItem,
   MacrotaskItem,
   Task
-} from '../event-loop/types';
+} from '@/games/callstack-library/domain/event-loop/types';
 
 // Props 타입 정의
 export interface QueueVisualizerProps {

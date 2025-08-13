@@ -5,8 +5,8 @@
  * 성능 분석을 위한 예제 플러그인
  */
 
-import { AnalyzerPlugin } from '../BasePlugin';
-import { PluginContext } from '../PluginRegistry';
+import { AnalyzerPlugin } from '@/games/callstack-library/shared/lib/plugin-system/BasePlugin';
+import { PluginContext } from '@/games/callstack-library/shared/lib/plugin-system/PluginRegistry';
 
 // 성능 분석 결과 타입
 interface PerformanceAnalysis {

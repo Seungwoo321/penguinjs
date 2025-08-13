@@ -3,6 +3,8 @@
  * WCAG AA 기준(4.5:1 대비비) 충족 + 도서관 컨셉 유지
  */
 
+import { callstackLibraryThemeConfig } from './callstackLibraryGameTheme'
+
 // 색상 대비비 계산 함수
 function getContrastRatio(rgb1: string, rgb2: string): number {
   const getLuminance = (rgb: string) => {
@@ -22,48 +24,48 @@ function getContrastRatio(rgb1: string, rgb2: string): number {
   return (lighter + 0.05) / (darker + 0.05)
 }
 
-// 개선된 색상 팔레트
+// 테마 시스템을 사용한 색상 팔레트
 export const IMPROVED_COLORS = {
   // 📚 콜스택 (메인 서가) - 따뜻한 목재 색상
   callstack: {
     light: {
-      primary: 'rgb(92, 51, 23)',       // 진한 브라운 (대비비 9.8:1 on white)
-      secondary: 'rgb(120, 63, 25)',    // 중간 브라운
-      accent: 'rgb(194, 136, 75)',      // 밝은 목재색
+      primary: `rgb(${callstackLibraryThemeConfig.specialColors['function-global']})`,       // 테마에서 가져온 갈색
+      secondary: `rgb(${callstackLibraryThemeConfig.specialColors['function-main']})`,    // 메인 함수 색상
+      accent: `rgb(${callstackLibraryThemeConfig.specialColors['library-wood']})`,      // 도서관 목재색
       background: {
-        light: 'rgb(253, 248, 243)',   // 매우 연한 크림
-        main: 'rgb(249, 235, 218)',    // 연한 베이지
-        dark: 'rgb(241, 218, 187)'     // 베이지
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['library-paper']})`,   // 도서관 종이색
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-wood-light']})`,    // 선반 밝은색
+        dark: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-wood-dark']})`     // 선반 어두운색
       },
       text: {
-        primary: 'rgb(92, 51, 23)',     // 진한 브라운 (충분한 대비)
-        secondary: 'rgb(120, 85, 50)',  // 중간 브라운
+        primary: `rgb(${callstackLibraryThemeConfig.specialColors['function-global']})`,     // 갈색 텍스트
+        secondary: `rgb(${callstackLibraryThemeConfig.specialColors['function-main']})`,  // 메인 함수 텍스트
         contrast: 'rgb(255, 255, 255)'  // 흰색
       },
       border: {
-        main: 'rgb(194, 136, 75)',      // 목재 테두리
-        light: 'rgb(217, 180, 138)',    // 연한 테두리
-        focus: 'rgb(168, 103, 38)'      // 포커스 테두리
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['library-wood']})`,      // 목재 테두리
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-wood-light']})`,    // 연한 테두리
+        focus: `rgb(${callstackLibraryThemeConfig.specialColors['focus-ring']})`      // 포커스 테두리
       }
     },
     dark: {
-      primary: 'rgb(249, 235, 218)',    // 밝은 베이지 (대비비 13.7:1 on dark)
-      secondary: 'rgb(241, 218, 187)',  // 베이지
-      accent: 'rgb(217, 180, 138)',     // 따뜻한 베이지
+      primary: `rgb(${callstackLibraryThemeConfig.specialColors['library-paper']})`,    // 밝은 종이색
+      secondary: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-wood-light']})`,  // 연한 선반색
+      accent: `rgb(${callstackLibraryThemeConfig.specialColors['library-wood']})`,     // 목재색
       background: {
-        light: 'rgb(46, 32, 21)',       // 매우 진한 브라운
-        main: 'rgb(33, 23, 15)',        // 거의 검은 브라운
-        dark: 'rgb(23, 16, 10)'         // 검은 브라운
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`,       // 그림자색
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['library-ink']})`,        // 잉크색
+        dark: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`         // 그림자색
       },
       text: {
-        primary: 'rgb(249, 235, 218)',   // 밝은 베이지
-        secondary: 'rgb(217, 190, 158)', // 중간 베이지
-        contrast: 'rgb(23, 16, 10)'      // 거의 검정
+        primary: `rgb(${callstackLibraryThemeConfig.specialColors['library-paper']})`,   // 종이색 텍스트
+        secondary: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-wood-light']})`, // 연한 선반색 텍스트
+        contrast: `rgb(${callstackLibraryThemeConfig.specialColors['library-ink']})`      // 잉크색
       },
       border: {
-        main: 'rgb(120, 85, 50)',       // 어두운 목재
-        light: 'rgb(92, 65, 38)',       // 매우 어두운 목재
-        focus: 'rgb(217, 180, 138)'     // 밝은 포커스
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-wood-dark']})`,       // 어두운 선반색
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`,      // 그림자색
+        focus: `rgb(${callstackLibraryThemeConfig.specialColors['focus-ring']})`     // 포커스색
       }
     }
   },
@@ -71,87 +73,87 @@ export const IMPROVED_COLORS = {
   // 🚀 마이크로태스크 (긴급 처리대) - 신뢰감 있는 파란색
   microtask: {
     light: {
-      primary: 'rgb(21, 94, 173)',      // 진한 파랑 (대비비 5.4:1 on white)
-      secondary: 'rgb(37, 117, 203)',   // 중간 파랑
-      accent: 'rgb(79, 151, 230)',      // 밝은 파랑
+      primary: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask']})`,      // 테마 마이크로태스크 색상
+      secondary: `rgb(${callstackLibraryThemeConfig.specialColors['stage-intermediate']})`,   // 중급 단계 색상
+      accent: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask-light']})`,      // 밝은 마이크로태스크 색상
       background: {
-        light: 'rgb(243, 248, 254)',    // 매우 연한 파랑
-        main: 'rgb(225, 237, 251)',     // 연한 파랑
-        dark: 'rgb(203, 223, 246)'      // 파스텔 파랑
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['library-paper']})`,    // 종이색
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask-light']})`,     // 연한 마이크로태스크 색상
+        dark: `rgb(${callstackLibraryThemeConfig.specialColors['stage-intermediate']})`      // 중급 단계 색상
       },
       text: {
-        primary: 'rgb(21, 94, 173)',     // 진한 파랑
-        secondary: 'rgb(51, 107, 168)',  // 중간 파랑
+        primary: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask']})`,     // 마이크로태스크 색상
+        secondary: `rgb(${callstackLibraryThemeConfig.specialColors['stage-intermediate']})`,  // 중급 단계 색상
         contrast: 'rgb(255, 255, 255)'   // 흰색
       },
       border: {
-        main: 'rgb(79, 151, 230)',      // 파란 테두리
-        light: 'rgb(147, 194, 246)',    // 연한 테두리
-        focus: 'rgb(21, 94, 173)'       // 진한 포커스
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask']})`,      // 마이크로태스크 테두리
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask-light']})`,    // 연한 테두리
+        focus: `rgb(${callstackLibraryThemeConfig.specialColors['focus-ring']})`       // 포커스 테두리
       }
     },
     dark: {
-      primary: 'rgb(147, 194, 246)',    // 밝은 파랑 (대비비 9.3:1 on dark)
-      secondary: 'rgb(121, 175, 237)',  // 중간 밝은 파랑
-      accent: 'rgb(79, 151, 230)',      // 액센트 파랑
+      primary: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask-light']})`,    // 밝은 마이크로태스크 색상
+      secondary: `rgb(${callstackLibraryThemeConfig.specialColors['stage-intermediate']})`,  // 중급 단계 색상
+      accent: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask']})`,      // 마이크로태스크 색상
       background: {
-        light: 'rgb(17, 33, 51)',       // 매우 진한 네이비
-        main: 'rgb(10, 20, 31)',        // 거의 검은 네이비
-        dark: 'rgb(5, 10, 15)'          // 검은 네이비
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`,       // 그림자색
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['library-ink']})`,        // 잉크색
+        dark: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`          // 그림자색
       },
       text: {
-        primary: 'rgb(203, 223, 246)',   // 밝은 파랑
-        secondary: 'rgb(147, 194, 246)', // 중간 파랑
-        contrast: 'rgb(5, 10, 15)'       // 거의 검정
+        primary: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask-light']})`,   // 밝은 마이크로태스크 색상
+        secondary: `rgb(${callstackLibraryThemeConfig.specialColors['stage-intermediate']})`, // 중급 단계 색상
+        contrast: `rgb(${callstackLibraryThemeConfig.specialColors['library-ink']})`       // 잉크색
       },
       border: {
-        main: 'rgb(51, 107, 168)',      // 어두운 파랑
-        light: 'rgb(37, 78, 122)',      // 매우 어두운 파랑
-        focus: 'rgb(147, 194, 246)'     // 밝은 포커스
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask']})`,      // 마이크로태스크 색상
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`,      // 그림자색
+        focus: `rgb(${callstackLibraryThemeConfig.specialColors['focus-ring']})`     // 포커스색
       }
     }
   },
   
-  // 📅 매크로태스크 (예약 처리대) - 활력있는 주황색
+  // 📅 매크로태스크 (예약 처리대) - 활력있는 녹색
   macrotask: {
     light: {
-      primary: 'rgb(166, 70, 0)',       // 진한 주황 (대비비 6.7:1 on white)
-      secondary: 'rgb(194, 94, 14)',    // 중간 주황
-      accent: 'rgb(235, 140, 52)',      // 밝은 주황
+      primary: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask']})`,       // 테마 매크로태스크 색상
+      secondary: `rgb(${callstackLibraryThemeConfig.specialColors['stage-beginner']})`,    // 초급 단계 색상
+      accent: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask-light']})`,      // 밝은 매크로태스크 색상
       background: {
-        light: 'rgb(255, 248, 241)',    // 매우 연한 복숭아
-        main: 'rgb(254, 236, 220)',     // 연한 복숭아
-        dark: 'rgb(252, 217, 189)'      // 복숭아
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['library-paper']})`,    // 종이색
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask-light']})`,     // 연한 매크로태스크 색상
+        dark: `rgb(${callstackLibraryThemeConfig.specialColors['stage-beginner']})`      // 초급 단계 색상
       },
       text: {
-        primary: 'rgb(166, 70, 0)',      // 진한 주황
-        secondary: 'rgb(194, 94, 14)',   // 중간 주황
+        primary: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask']})`,      // 매크로태스크 색상
+        secondary: `rgb(${callstackLibraryThemeConfig.specialColors['stage-beginner']})`,   // 초급 단계 색상
         contrast: 'rgb(255, 255, 255)'   // 흰색
       },
       border: {
-        main: 'rgb(235, 140, 52)',      // 주황 테두리
-        light: 'rgb(249, 186, 127)',    // 연한 테두리
-        focus: 'rgb(166, 70, 0)'        // 진한 포커스
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask']})`,      // 매크로태스크 테두리
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask-light']})`,    // 연한 테두리
+        focus: `rgb(${callstackLibraryThemeConfig.specialColors['focus-ring']})`        // 포커스 테두리
       }
     },
     dark: {
-      primary: 'rgb(249, 186, 127)',    // 밝은 주황 (대비비 10.8:1 on dark)
-      secondary: 'rgb(243, 163, 89)',   // 중간 밝은 주황
-      accent: 'rgb(235, 140, 52)',      // 액센트 주황
+      primary: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask-light']})`,    // 밝은 매크로태스크 색상
+      secondary: `rgb(${callstackLibraryThemeConfig.specialColors['stage-beginner']})`,   // 초급 단계 색상
+      accent: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask']})`,      // 매크로태스크 색상
       background: {
-        light: 'rgb(51, 28, 13)',       // 매우 진한 브라운-오렌지
-        main: 'rgb(38, 20, 8)',         // 거의 검은 브라운-오렌지
-        dark: 'rgb(26, 13, 5)'          // 검은 브라운-오렌지
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`,       // 그림자색
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['library-ink']})`,         // 잉크색
+        dark: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`          // 그림자색
       },
       text: {
-        primary: 'rgb(252, 217, 189)',   // 밝은 복숭아
-        secondary: 'rgb(249, 186, 127)', // 중간 복숭아
-        contrast: 'rgb(26, 13, 5)'       // 거의 검정
+        primary: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask-light']})`,   // 밝은 매크로태스크 색상
+        secondary: `rgb(${callstackLibraryThemeConfig.specialColors['stage-beginner']})`, // 초급 단계 색상
+        contrast: `rgb(${callstackLibraryThemeConfig.specialColors['library-ink']})`       // 잉크색
       },
       border: {
-        main: 'rgb(194, 94, 14)',       // 어두운 주황
-        light: 'rgb(166, 70, 0)',       // 매우 어두운 주황
-        focus: 'rgb(249, 186, 127)'     // 밝은 포커스
+        main: `rgb(${callstackLibraryThemeConfig.specialColors['queue-macrotask']})`,       // 매크로태스크 색상
+        light: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`,       // 그림자색
+        focus: `rgb(${callstackLibraryThemeConfig.specialColors['focus-ring']})`     // 포커스색
       }
     }
   },
@@ -160,19 +162,19 @@ export const IMPROVED_COLORS = {
   common: {
     light: {
       background: 'rgb(255, 255, 255)',
-      surface: 'rgb(250, 249, 247)',
-      error: 'rgb(185, 28, 28)',       // 진한 빨강 (대비비 5.9:1)
-      success: 'rgb(21, 128, 61)',     // 진한 초록 (대비비 5.8:1)
-      warning: 'rgb(180, 83, 9)',      // 진한 주황 (대비비 5.2:1)
-      info: 'rgb(30, 64, 175)',        // 진한 파랑 (대비비 8.6:1)
+      surface: `rgb(${callstackLibraryThemeConfig.specialColors['library-paper']})`,
+      error: `rgb(${callstackLibraryThemeConfig.colorScheme.error})`,
+      success: `rgb(${callstackLibraryThemeConfig.colorScheme.success})`,
+      warning: `rgb(${callstackLibraryThemeConfig.colorScheme.warning})`,
+      info: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask']})`,
     },
     dark: {
-      background: 'rgb(13, 13, 13)',
-      surface: 'rgb(23, 23, 23)',
-      error: 'rgb(252, 165, 165)',     // 밝은 빨강 (대비비 9.1:1)
-      success: 'rgb(134, 239, 172)',   // 밝은 초록 (대비비 11.2:1)
-      warning: 'rgb(253, 186, 116)',   // 밝은 주황 (대비비 11.3:1)
-      info: 'rgb(147, 197, 253)',      // 밝은 파랑 (대비비 10.7:1)
+      background: `rgb(${callstackLibraryThemeConfig.specialColors['library-ink']})`,
+      surface: `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`,
+      error: `rgb(${callstackLibraryThemeConfig.specialColors['error-border']})`,
+      success: `rgb(${callstackLibraryThemeConfig.specialColors['success-border']})`,
+      warning: `rgb(${callstackLibraryThemeConfig.specialColors['function-quaternary']})`,
+      info: `rgb(${callstackLibraryThemeConfig.specialColors['queue-microtask-light']})`,
     }
   }
 }
@@ -186,15 +188,15 @@ export function createGradient(
   return `linear-gradient(${direction}, ${color1}, ${color2})`
 }
 
-// 도서관 배경 그라디언트
+// 도서관 배경 그라디언트 (테마 시스템 사용)
 export const LIBRARY_BACKGROUNDS = {
   light: createGradient(
-    'rgb(253, 248, 243)', // 매우 연한 크림
-    'rgb(249, 235, 218)'  // 연한 베이지
+    `rgb(${callstackLibraryThemeConfig.specialColors['library-paper']})`, // 종이색
+    `rgb(${callstackLibraryThemeConfig.specialColors['shelf-wood-light']})`  // 연한 선반색
   ),
   dark: createGradient(
-    'rgb(33, 23, 15)',    // 거의 검은 브라운
-    'rgb(23, 16, 10)'     // 검은 브라운
+    `rgb(${callstackLibraryThemeConfig.specialColors['library-ink']})`,    // 잉크색
+    `rgb(${callstackLibraryThemeConfig.specialColors['shelf-shadow']})`     // 그림자색
   )
 }
 
@@ -227,7 +229,7 @@ export function validateColorContrast(
   return ratio >= minRatio
 }
 
-// 자동 텍스트 색상 선택 함수
+// 자동 텍스트 색상 선택 함수 (테마 시스템 사용)
 export function getAutoTextColor(backgroundColor: string, isDark: boolean): string {
   const colors = isDark ? IMPROVED_COLORS.callstack.dark : IMPROVED_COLORS.callstack.light
   
@@ -236,4 +238,9 @@ export function getAutoTextColor(backgroundColor: string, isDark: boolean): stri
   const contrastRatio = getContrastRatio(colors.text.contrast, backgroundColor)
   
   return primaryRatio >= 4.5 ? colors.text.primary : colors.text.contrast
+}
+
+// 테마 시스템에서 색상 가져오기 헬퍼 함수
+export function getThemeColor(colorKey: string): string {
+  return `rgb(${callstackLibraryThemeConfig.specialColors[colorKey] || callstackLibraryThemeConfig.colorScheme.primary})`
 }

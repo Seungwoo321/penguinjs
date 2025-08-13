@@ -10,8 +10,8 @@ import {
   QueueType, 
   QueueItem, 
   ExecutionStep
-} from '../types';
-import { QueueStatesSnapshot, EventLoopStep, QueueValidationResult } from '../types/layout';
+} from '@/games/callstack-library/types';
+import { QueueStatesSnapshot, EventLoopStep, QueueValidationResult } from '@/games/callstack-library/types/layout';
 
 // 액션 타입 정의
 export enum ActionType {
@@ -323,11 +323,27 @@ function callStackLibraryReducer(
       };
       
     case ActionType.UPDATE_CURRENT_QUEUE_STATES:
+      // 최대 50개 히스토리만 유지
+      const MAX_HISTORY_SIZE = 50;
+      const historyKeys = Object.keys(state.queueStatesHistory)
+        .map(Number)
+        .sort((a, b) => a - b);
+      
+      let newHistory = { ...state.queueStatesHistory };
+      
+      // 50개 초과시 오래된 항목 제거
+      if (historyKeys.length >= MAX_HISTORY_SIZE) {
+        const keysToRemove = historyKeys.slice(0, historyKeys.length - MAX_HISTORY_SIZE + 1);
+        keysToRemove.forEach(key => {
+          delete newHistory[key];
+        });
+      }
+      
       return {
         ...state,
         currentQueueStates: action.payload,
         queueStatesHistory: {
-          ...state.queueStatesHistory,
+          ...newHistory,
           [action.payload.step]: action.payload
         }
       };

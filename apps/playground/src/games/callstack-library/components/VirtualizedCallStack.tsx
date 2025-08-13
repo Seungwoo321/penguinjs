@@ -7,11 +7,11 @@ import React, { useState, useEffect, useMemo, useRef, useCallback, memo } from '
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronUp, ChevronDown, MoreHorizontal, Book, AlertTriangle } from 'lucide-react'
 import { cn } from '@penguinjs/ui'
-import { useCallStackLibraryTheme } from '../hooks/useCallStackLibraryTheme'
-import { useResponsiveLayout } from '../hooks/useResponsiveLayout'
-import { useOptimizedAnimations, getGPUAcceleratedStyles } from '../hooks/useOptimizedAnimations'
-import { usePerformanceOptimization, useListVirtualization } from '../hooks/usePerformanceOptimization'
-import { useMemoryManagement, useLeakDetection } from '../hooks/useMemoryManagement'
+import { useDarkModeDetection } from '@/games/callstack-library/hooks/useCSSThemeSync'
+import { useResponsiveLayout } from '@/games/callstack-library/hooks/useResponsiveLayout'
+import { useOptimizedAnimations, getGPUAcceleratedStyles } from '@/games/callstack-library/hooks/useOptimizedAnimations'
+import { usePerformanceOptimization, useListVirtualization } from '@/games/callstack-library/hooks/usePerformanceOptimization'
+import { useLeakDetection } from '@/games/callstack-library/hooks/useMemoryManagement'
 
 export interface CallStackItem {
   id: string
@@ -50,7 +50,7 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = memo(({
   current,
   onScrollToIndex
 }) => {
-  const libraryTheme = useCallStackLibraryTheme()
+  const isDarkMode = useDarkModeDetection()
   const responsiveLayout = useResponsiveLayout()
   
   // 성능 최적화
@@ -78,7 +78,7 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = memo(({
       aria-label="콜스택 스크롤 네비게이션"
       style={{
         fontSize: '10px',
-        color: libraryTheme.getQueueText('callstack', 'contrast')
+        color: 'rgb(var(--game-callstack-queue-contrast))'
       }}
     >
       {/* 상단 스크롤 버튼 */}
@@ -88,7 +88,7 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = memo(({
         className="rounded transition-all"
         aria-label={`이전 페이지로 스크롤 ${scrollState.canScrollUp ? '' : '(첫 번째 페이지)'}`}
         style={{
-          backgroundColor: scrollState.canScrollUp ? libraryTheme.getQueueColor('callstack', 'light') : 'rgba(0,0,0,0.2)',
+          backgroundColor: scrollState.canScrollUp ? 'rgb(var(--game-callstack-queue-light))' : 'rgba(0,0,0,0.2)',
           opacity: scrollState.canScrollUp ? 1 : 0.5,
           minWidth: responsiveLayout.config.buttonSize.minWidth,
           minHeight: responsiveLayout.config.buttonSize.minHeight,
@@ -133,7 +133,7 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = memo(({
         className="rounded transition-all"
         aria-label={`다음 페이지로 스크롤 ${scrollState.canScrollDown ? '' : '(마지막 페이지)'}`}
         style={{
-          backgroundColor: scrollState.canScrollDown ? libraryTheme.getQueueColor('callstack', 'light') : 'rgba(0,0,0,0.2)',
+          backgroundColor: scrollState.canScrollDown ? 'rgb(var(--game-callstack-queue-light))' : 'rgba(0,0,0,0.2)',
           opacity: scrollState.canScrollDown ? 1 : 0.5,
           minWidth: responsiveLayout.config.buttonSize.minWidth,
           minHeight: responsiveLayout.config.buttonSize.minHeight,
@@ -155,7 +155,7 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = memo(({
  * 메모이제이션된 스택 오버플로우 경고 컴포넌트
  */
 const StackOverflowWarning: React.FC<{ count: number }> = memo(({ count }) => {
-  const libraryTheme = useCallStackLibraryTheme()
+  const isDarkMode = useDarkModeDetection()
 
   return (
     <motion.div
@@ -205,14 +205,14 @@ const StackBook: React.FC<StackBookProps> = memo(({
   bookDimensions,
   onClick
 }) => {
-  const libraryTheme = useCallStackLibraryTheme()
+  const isDarkMode = useDarkModeDetection()
   const responsiveLayout = useResponsiveLayout()
   const optimizedAnimations = useOptimizedAnimations()
 
   // 책 색상 결정 (메모이제이션)
   const bookColor = useMemo(() => 
-    item.color || libraryTheme.getQueueColor('callstack', 'button'),
-    [item.color, libraryTheme]
+    item.color || 'rgb(var(--game-callstack-queue-button))',
+    [item.color]
   )
 
   // GPU 가속 스타일
@@ -256,9 +256,8 @@ const StackBook: React.FC<StackBookProps> = memo(({
         className="h-full rounded-lg shadow-xl flex items-center px-4 relative overflow-hidden transform transition-all duration-300 hover:scale-105"
         style={{ 
           backgroundColor: bookColor,
-          backgroundImage: libraryTheme.theme.library.textures.bookSpine,
-          boxShadow: libraryTheme.theme.shadows.book,
-          borderRadius: libraryTheme.theme.borderRadius.book
+          boxShadow: 'var(--game-callstack-library-shadow-card)',
+          borderRadius: 'var(--game-callstack-library-radius-card)'
         }}
       >
         {/* 책 제본 효과 */}
@@ -270,7 +269,7 @@ const StackBook: React.FC<StackBookProps> = memo(({
         <div 
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: libraryTheme.theme.library.textures.paper
+            backgroundColor: 'rgb(var(--game-callstack-library-paper))'
           }}
         />
         
@@ -329,7 +328,7 @@ export const VirtualizedCallStack: React.FC<VirtualizedCallStackProps> = memo(({
   const [startIndex, setStartIndex] = useState(0)
   const [containerHeight, setContainerHeight] = useState(0)
   
-  const libraryTheme = useCallStackLibraryTheme()
+  const isDarkMode = useDarkModeDetection()
   const responsiveLayout = useResponsiveLayout()
 
   // 컨테이너 크기 감지
@@ -479,12 +478,12 @@ export const VirtualizedCallStack: React.FC<VirtualizedCallStackProps> = memo(({
 
   // GPU 가속 스타일
   const containerStyles = useMemo(() => ({
-    background: libraryTheme.getQueueColor('callstack', 'main'),
-    borderRadius: libraryTheme.theme.borderRadius.shelf,
-    border: `2px solid ${libraryTheme.getQueueBorder('callstack')}`,
-    boxShadow: libraryTheme.theme.shadows.shelf,
+    background: 'rgb(var(--game-callstack-queue-main))',
+    borderRadius: 'var(--game-callstack-library-radius-panel)',
+    border: '2px solid rgb(var(--game-callstack-queue-border))',
+    boxShadow: 'var(--game-callstack-library-shadow-elevated)',
     ...getGPUAcceleratedStyles()
-  }), [libraryTheme])
+  }), [])
 
   return (
     <div 
@@ -550,7 +549,7 @@ export const VirtualizedCallStack: React.FC<VirtualizedCallStackProps> = memo(({
               style={{
                 backgroundColor: 'rgba(254, 243, 199, 0.2)',
                 borderColor: 'rgba(217, 119, 6, 0.3)',
-                color: libraryTheme.getQueueText('callstack', 'contrast')
+                color: 'rgb(var(--game-callstack-queue-contrast))'
               }}
             >
               <div className="text-4xl mb-2">📚</div>

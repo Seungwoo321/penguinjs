@@ -3,23 +3,536 @@
     "slogan": "Cool Code, Warm Learning",
     "description": "Learn JavaScript core concepts through fun and interactive games. Start your coding adventure with our friendly penguin!",
     "viewAllGames": "View All Games",
+    "subtitle": "A new way to learn JavaScript through games",
+    "detailedDescription": "An educational platform that transforms complex JavaScript concepts into interactive games for intuitive learning",
+    "availableGames": "Available Games",
+    "gameProgress": " completed (about 11% of 18 games)",
+    "portfolioHighlights": {
+      "completedGames": "Completed Games",
+      "aiCollaboration": "AI Collaboration",
+      "dualInput": "Dual",
+      "touchMouse": "Touch/Mouse",
+      "realtimeFeedback": "Real-time",
+      "codeFeedback": "Code Feedback"
+    },
+    "tryNow": "Try it now",
+    "tryNowSubtitle": "Experience the new way to learn JavaScript",
+    "navigation": {
+      "projectStory": "Project Story",
+      "techStack": "Tech Stack",
+      "allGames": "All Games"
+    },
+    "cta": {
+      "playGame": "🎮 Play Game",
+      "learnMore": "📝 Learn More"
+    },
     "games": {
       "closureCave": {
         "title": "Closure Cave",
-        "description": "Explore the mysterious world of closures and understand scope and environment."
+        "description": "Explore the mysterious world of closures and understand scope and environment",
+        "concepts": "Closure,Scope,Lexical Environment",
+        "difficulty": "Intermediate"
       },
-      "promisePlanet": {
-        "title": "Promise Planet",
-        "description": "Master Promises and callbacks in the universe of asynchronous programming."
-      },
-      "asyncAdventure": {
-        "title": "Async Adventure",
-        "description": "Conquer complex asynchronous tasks with the power of async/await."
+      "callstackLibrary": {
+        "title": "Callstack Library",
+        "description": "Visually understand function call stack and execution order",
+        "concepts": "Call Stack,Execution Context,Function Call",
+        "difficulty": "Advanced"
       }
+    },
+    "gameCard": {
+      "stages": " stages",
+      "difficulties": "Beginner·Intermediate·Advanced",
+      "startGame": "Start Game",
+      "new": "NEW",
+      "locked": "🔒 Locked",
+      "recommended": "Recommended"
     }
   },
   "GamesPage": {
     "title": "All JavaScript Learning Games",
-    "description": "Master JavaScript core concepts through 18 interactive games"
+    "description": "Master JavaScript core concepts through 18 interactive games",
+    "gameCollection": "Game Collection",
+    "masterJavaScript": "Master JavaScript with 18 interactive games",
+    "homeTitle": "Home",
+    "progress": {
+      "overallProgress": "Overall Progress",
+      "completed": "Completed",
+      "completionEstimate": "Estimated completion in {months} months at current pace",
+      "startFirstGame": "Start your first game!",
+      "completedGames": "Completed Games",
+      "completedStages": "Completed Stages",
+      "studyTime": "Study Time",
+      "studyTimeHours": "About {hours} hours",
+      "remainingGames": "Remaining Games",
+      "awaitingChallenge": "Awaiting Challenge"
+    },
+    "categories": {
+      "title": "Browse by Category",
+      "viewAll": "View All",
+      "completed": "completed",
+      "basicConcepts": {
+        "name": "Basic Concepts",
+        "description": "Core fundamental concepts of JavaScript"
+      },
+      "functionsExecution": {
+        "name": "Functions & Execution",
+        "description": "Function calls and execution mechanisms"
+      },
+      "asyncProcessing": {
+        "name": "Async Processing",
+        "description": "Asynchronous programming and Promises"
+      },
+      "advancedFeatures": {
+        "name": "Advanced Features",
+        "description": "Metaprogramming and advanced techniques"
+      },
+      "practicalSkills": {
+        "name": "Practical Skills",
+        "description": "Frequently used techniques in practice"
+      },
+      "domEvents": {
+        "name": "DOM & Events",
+        "description": "DOM manipulation and event handling"
+      }
+    },
+    "gameCard": {
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "recommended": "Recommended",
+      "comingSoon": "Coming Soon",
+      "stages": " stages",
+      "difficulties": "Beginner·Intermediate·Advanced",
+      "minutes": "min",
+      "prerequisiteRequired": "Complete prerequisite first",
+      "nextRecommended": "Since you completed the previous game, this one is recommended!",
+      "playAgain": "Play Again",
+      "continueGame": "Continue Game",
+      "startGame": "Start Game",
+      "difficulty": {
+        "beginner": "Beginner",
+        "basic": "Basic",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "expert": "Expert"
+      }
+    },
+    "games": {
+      "closureCave": {
+        "title": "Closure Cave",
+        "description": "Explore the mysterious world of closures and understand scope and environment",
+        "concepts": "Closure, Scope, Lexical Environment",
+        "type": "Flexbox Froggy Style"
+      },
+      "callstackLibrary": {
+        "title": "Callstack Library",
+        "description": "Visually understand function call stack and execution order",
+        "concepts": "Call Stack, Execution Context, Function Call",
+        "type": "Drag & Drop"
+      },
+      "promiseBattle": {
+        "title": "Promise Battle",
+        "description": "Learn Promise states and async processing through turn-based card game",
+        "concepts": "Promise, then/catch, Async Processing",
+        "type": "Turn-based Card Game"
+      },
+      "asyncAirways": {
+        "title": "Async Airways",
+        "description": "Learn async/await and asynchronous programming through airline schedule management",
+        "concepts": "async/await, Concurrency, Error Handling",
+        "type": "Real-time Schedule Management"
+      },
+      "proxyLaboratory": {
+        "title": "Proxy Laboratory",
+        "description": "Explore Proxy objects and metaprogramming through experiments",
+        "concepts": "Proxy, Reflect, Metaprogramming",
+        "type": "Puzzle/Experiment"
+      },
+      "eventTarget": {
+        "title": "Event Target",
+        "description": "Master event handling and bubbling through target games",
+        "concepts": "Events, Bubbling, Capturing",
+        "type": "Flexbox Froggy Style"
+      },
+      "prototypeChain": {
+        "title": "Prototype Chain",
+        "description": "Understand prototype inheritance and chain through connection puzzles",
+        "concepts": "Prototype, Inheritance, __proto__",
+        "type": "Connection Puzzle"
+      },
+      "eventloopCinema": {
+        "title": "Event Loop Cinema",
+        "description": "Watch event loop and async execution order like a movie",
+        "concepts": "Event Loop, Task Queue, Microtask",
+        "type": "Timing-based"
+      },
+      "memoryMuseum": {
+        "title": "Memory Museum",
+        "description": "Learn garbage collection and memory optimization in a museum",
+        "concepts": "Garbage Collection, Memory Leak, Optimization",
+        "type": "Management Simulation"
+      },
+      "scopeForest": {
+        "title": "Scope Forest",
+        "description": "Understand scope chain and variable access through forest exploration",
+        "concepts": "Scope, Lexical Scope, Block Scope",
+        "type": "Exploration/Puzzle"
+      },
+      "hoistingHelicopter": {
+        "title": "Hoisting Helicopter",
+        "description": "Experience hoisting and variable declaration through helicopter flight",
+        "concepts": "Hoisting, var/let/const, TDZ",
+        "type": "Physics Simulation"
+      },
+      "thisBinding": {
+        "title": "this Binding Target",
+        "description": "Master this keyword and binding through target shooting",
+        "concepts": "this, bind/call/apply, Arrow Functions",
+        "type": "Target Shooting"
+      },
+      "destructuringCircus": {
+        "title": "Destructuring Circus",
+        "description": "Learn destructuring assignment through circus performances",
+        "concepts": "Destructuring, Spread Operator, Default Values",
+        "type": "Puzzle/Pattern Matching"
+      },
+      "arrayMethodsRacing": {
+        "title": "Array Methods Racing",
+        "description": "Learn array methods and functional programming through racing",
+        "concepts": "map/filter/reduce, Chaining, Immutability",
+        "type": "Racing/Competition"
+      },
+      "modulesMarketplace": {
+        "title": "Modules Marketplace",
+        "description": "Operate module system and import/export in a marketplace",
+        "concepts": "ES6 Modules, import/export, Circular Dependency",
+        "type": "Business Simulation"
+      },
+      "templateLiteralArt": {
+        "title": "Template Literal Art",
+        "description": "Learn template literals and string processing through artistic creation",
+        "concepts": "Template Literals, Tagged Templates, String Interpolation",
+        "type": "Creative/Art"
+      },
+      "errorHandlingHospital": {
+        "title": "Error Handling Hospital",
+        "description": "Learn error handling and debugging in a hospital emergency room",
+        "concepts": "try/catch, Custom Errors, Debugging",
+        "type": "Medical Simulation"
+      },
+      "weakmapVault": {
+        "title": "WeakMap Vault",
+        "description": "Learn WeakMap/WeakSet and memory management in a security vault",
+        "concepts": "WeakMap, WeakSet, Garbage Collection",
+        "type": "Security/Spy"
+      }
+    },
+    "footer": {
+      "title": "🎯 Journey to JavaScript Mastery",
+      "description": "You can perfectly master all core concepts of JavaScript with 18 games.",
+      "encouragement": "Conquer them one by one with the penguin!"
+    }
+  },
+  "AboutPage": {
+    "title": "Project Story",
+    "backToHome": "Home",
+    "subtitle": "The development story of a JavaScript learning game platform inspired by FlexboxFroggy",
+    "inspiration": {
+      "title": "The Beginning of Inspiration",
+      "content1": "Learning CSS Flex with FlexboxFroggy was an impressive experience. Rather than simply reading documentation, the concepts of Flexbox naturally became ingrained through writing code and moving the frog.",
+      "content2": "Having focused only on admin pages and dashboard development, I needed a completely new challenge.",
+      "content3": "\"Could JavaScript's complex concepts also be gamified like this?\" This thought sparked the beginning of the PenguinJS project.",
+      "flexboxInspiration": "FlexboxFroggy Inspiration",
+      "flexboxExample": "\"Move the frog onto the lily pad with justify-content: center\"",
+      "penguinExample": "\"Find your way through Closure Cave to rescue the penguin\""
+    },
+    "vibreCoding": {
+      "title": "Vibe Coding with Claude Code",
+      "ideation": {
+        "title": "Ideation",
+        "content": "\"How can we visualize the call stack?\" Materializing ideas through conversations with Claude"
+      },
+      "wireframe": {
+        "title": "Wireframing",
+        "content": "Sketching layouts in HTML and requesting Claude to implement. Rapidly experimenting with various layouts"
+      },
+      "iteration": {
+        "title": "Trial and Error",
+        "content": "Refactored the layout system over 6 times. Realized the importance of design even without coding directly"
+      },
+      "insights": "Key Insights",
+      "aiAdvantages": {
+        "title": "Advantages of AI Collaboration",
+        "item1": "Rapid prototyping",
+        "item2": "Trying diverse approaches",
+        "item3": "Real-time feedback and improvement"
+      },
+      "stillImportant": {
+        "title": "Still Important",
+        "item1": "Clear requirement definition",
+        "item2": "User experience design",
+        "item3": "Architecture understanding"
+      }
+    },
+    "currentAndFuture": {
+      "title": "Present and Future",
+      "currentStatus": {
+        "title": "Current Progress",
+        "completedGames": "Completed Games",
+        "implementedStages": "Implemented Stages",
+        "overallProgress": "Overall Progress"
+      },
+      "futurePlans": {
+        "title": "Future Plans",
+        "item1": "Sequential development of remaining 16 games",
+        "item2": "Collecting user feedback and improvements",
+        "item3": "Measuring and optimizing learning effectiveness",
+        "item4": "Expanding to other languages (Python, Go, etc.)"
+      }
+    },
+    "personalReflection": {
+      "title": "Reflections from Development",
+      "content1": "I gained confidence that \"I can actually create what I imagine.\" I realized that time spent thinking about what to build and how users will learn is more important than technical implementation.",
+      "content2": "While the developer's role is changing with AI tools advancement, the ability to define problems and suggest solutions remains core.",
+      "quote": "\"Even without coding, developers are still needed\" 🚀"
+    },
+    "cta": {
+      "playGames": "Play Games",
+      "viewTechStack": "View Tech Stack"
+    }
+  },
+  "TechPage": {
+    "title": "Tech Stack",
+    "homeLink": "Home",
+    "hero": {
+      "title": "Tech Stack & Architecture",
+      "description": "Explore the technical composition and design decisions of our interactive learning platform built with modern technologies"
+    },
+    "coreStack": {
+      "title": "🚀 Core Tech Stack",
+      "frontend": {
+        "title": "Frontend",
+        "react": {
+          "name": "React 19",
+          "description": "Latest Hooks & Concurrent Features"
+        },
+        "nextjs": {
+          "name": "Next.js 15",
+          "description": "App Router & Server Components"
+        },
+        "typescript": {
+          "name": "TypeScript",
+          "description": "Strict Type Safety"
+        },
+        "framerMotion": {
+          "name": "Framer Motion",
+          "description": "Smooth Animations"
+        },
+        "tailwind": {
+          "name": "Tailwind CSS",
+          "description": "Utility-First Styling"
+        }
+      },
+      "architecture": {
+        "title": "Architecture",
+        "monorepo": {
+          "name": "Monorepo Structure",
+          "description": "Efficient Code Sharing"
+        },
+        "singleton": {
+          "name": "Singleton Pattern",
+          "description": "Memory Monitoring Optimization"
+        },
+        "stateManagement": {
+          "name": "State Management Optimization",
+          "description": "React Ref-based Performance"
+        },
+        "componentSeparation": {
+          "name": "Component Separation",
+          "description": "Reusable UI Components"
+        },
+        "customHooks": {
+          "name": "Custom Hooks",
+          "description": "Logic Abstraction & Reuse"
+        }
+      },
+      "features": {
+        "title": "Features",
+        "interactiveGames": {
+          "name": "Interactive Games",
+          "description": "Drag & Drop, Code Editor"
+        },
+        "realtimeVisualization": {
+          "name": "Real-time Visualization",
+          "description": "Call Stack, Closure Visualization"
+        },
+        "multiLanguage": {
+          "name": "Multi-language Support",
+          "description": "Korean/English with next-intl"
+        },
+        "responsiveDesign": {
+          "name": "Responsive Design",
+          "description": "Mobile/Desktop Optimization"
+        },
+        "darkMode": {
+          "name": "Dark Mode",
+          "description": "System Settings Integration"
+        }
+      }
+    },
+    "architecture": {
+      "title": "🏛️ System Architecture",
+      "presentationLayer": {
+        "title": "🎨 Presentation Layer",
+        "description": "UI/UX & Animation",
+        "components": {
+          "reactComponents": "React Components",
+          "framerMotion": "Framer Motion",
+          "tailwindCSS": "Tailwind CSS"
+        }
+      },
+      "businessLogic": {
+        "title": "🧠 Business Logic",
+        "description": "Game Logic & State Management",
+        "components": {
+          "gameEngine": "Game Engine",
+          "stateManagement": "State Management",
+          "memoryMonitor": "Memory Monitor"
+        }
+      },
+      "dataLayer": {
+        "title": "💾 Data Layer",
+        "description": "Data Storage & Internationalization",
+        "components": {
+          "levelConfigurations": "Level Configurations",
+          "userProgress": "User Progress",
+          "i18nResources": "i18n Resources"
+        }
+      },
+      "dataFlow": {
+        "title": "Data Flow",
+        "userInput": "User Input",
+        "gameLogic": "Game Logic Processing",
+        "stateUpdate": "State Update",
+        "uiRendering": "UI Rendering",
+        "arrow": "→"
+      }
+    },
+    "devTools": {
+      "title": "🛠️ Development Environment & Tools",
+      "devTools": {
+        "title": "Development Tools",
+        "tools": {
+          "claudeCode": {
+            "name": "Claude Code",
+            "description": "AI Collaborative Development"
+          },
+          "git": {
+            "name": "Git",
+            "description": "Version Control"
+          },
+          "pnpm": {
+            "name": "pnpm",
+            "description": "Package Management"
+          },
+          "vsCode": {
+            "name": "VS Code",
+            "description": "Code Review"
+          }
+        }
+      },
+      "performance": {
+        "title": "Performance Optimization",
+        "memoryMonitoring": {
+          "name": "Memory Monitoring",
+          "description": "Chrome DevTools API Integration"
+        },
+        "bundleOptimization": {
+          "name": "Bundle Optimization",
+          "description": "Next.js Automatic Code Splitting"
+        },
+        "imageOptimization": {
+          "name": "Image Optimization",
+          "description": "Next.js Image Component"
+        },
+        "animationOptimization": {
+          "name": "Animation Optimization",
+          "description": "GPU Acceleration Utilization"
+        }
+      }
+    },
+    "challenges": {
+      "title": "🎯 Technical Challenges & Solutions",
+      "challenges": {
+        "title": "🚨 Key Challenges",
+        "memoryLeak": {
+          "title": "Memory Leak Issues",
+          "description": "Memory leaks in game state management increased usage to 234MB"
+        },
+        "complexAnimation": {
+          "title": "Complex Animation",
+          "description": "Performance issues handling drag & drop and visualization simultaneously"
+        },
+        "layoutSystem": {
+          "title": "Layout System",
+          "description": "Designing flexible layout applicable to various game screens"
+        }
+      },
+      "solutions": {
+        "title": "✅ Solutions",
+        "singletonPattern": {
+          "title": "Singleton Pattern Implementation",
+          "description": "Optimized memory monitor as singleton reducing to 156MB"
+        },
+        "reactRef": {
+          "title": "React Ref Utilization",
+          "description": "Using refs instead of state to prevent unnecessary re-renders"
+        },
+        "componentAbstraction": {
+          "title": "Component Abstraction",
+          "description": "Ensuring consistency with reusable layout components"
+        }
+      }
+    },
+    "performance": {
+      "title": "📊 Implemented Performance Monitoring",
+      "memoryMonitoring": {
+        "title": "🧠 Real-time Memory Monitoring",
+        "chromeApi": {
+          "title": "Chrome Memory API Integration",
+          "description": "Real-time heap memory tracking via performance.memory"
+        },
+        "singletonImplementation": {
+          "title": "Singleton Pattern Implementation",
+          "description": "Maximizing memory efficiency with global single instance"
+        },
+        "autoCleanup": {
+          "title": "Automatic Cleanup System",
+          "description": "Auto cleanup of old components every 30 seconds (5-minute threshold)"
+        },
+        "thresholdAlerts": {
+          "title": "Threshold Alerts",
+          "description": "Warning at 80MB+ usage, critical alert at 120MB+"
+        }
+      },
+      "metrics": {
+        "optimizedMemory": {
+          "value": "156MB",
+          "label": "Optimized Memory",
+          "change": "234MB → 156MB (-33%)"
+        },
+        "realtimeMonitoring": {
+          "value": "Real-time",
+          "label": "Monitoring Cycle",
+          "description": "Component Lifecycle Tracking"
+        }
+      },
+      "note": "* Real-time monitoring via MemoryMonitor service (dev environment only)"
+    },
+    "cta": {
+      "tryTech": "🎮 Try the Tech",
+      "projectStory": "📖 Project Story",
+      "arrow": "→"
+    }
   }
 }

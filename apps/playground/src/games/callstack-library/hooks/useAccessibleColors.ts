@@ -12,7 +12,7 @@ import {
   WCAGLevels,
   getColorDebugInfo,
   type AccessibleColorPair
-} from '../utils/colorUtils';
+} from '@/games/callstack-library/utils/colorUtils';
 
 interface AccessibleColorConfig {
   enforceWCAG?: boolean;

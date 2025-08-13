@@ -17,10 +17,9 @@ import {
   VolumeX
 } from 'lucide-react';
 import { cn } from '@penguinjs/ui';
-import { useCallStackLibraryTheme } from '../../hooks/useCallStackLibraryTheme';
-import { AccessibleButton, AccessibleButtonGroup } from '../ui/AccessibleButton';
-import { useLiveRegion } from '../../hooks/useKeyboardNavigation';
-import { CALLSTACK_LIBRARY_ARIA_LABELS } from '../../utils/ariaUtils';
+import { AccessibleButton, AccessibleButtonGroup } from '@/games/callstack-library/components/ui/AccessibleButton';
+import { useLiveRegion } from '@/games/callstack-library/hooks/useKeyboardNavigation';
+import { CALLSTACK_LIBRARY_ARIA_LABELS } from '@/games/callstack-library/utils/ariaUtils';
 
 // 실행 속도 옵션
 export const EXECUTION_SPEEDS = [
@@ -85,7 +84,6 @@ export const ExecutionController = memo<ExecutionControllerProps>(({
   disabled = false,
   className
 }) => {
-  const libraryTheme = useCallStackLibraryTheme();
   const announce = useLiveRegion('polite');
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   
@@ -177,8 +175,8 @@ export const ExecutionController = memo<ExecutionControllerProps>(({
         className
       )}
       style={{
-        backgroundColor: libraryTheme.getLibraryBackground(),
-        borderColor: libraryTheme.getQueueBorder('callstack')
+        backgroundColor: 'rgb(var(--card))',
+        borderColor: 'rgb(var(--border))'
       }}
     >
       {/* 진행률 표시 */}
@@ -192,7 +190,7 @@ export const ExecutionController = memo<ExecutionControllerProps>(({
           </div>
           <div 
             className="h-2 rounded-full overflow-hidden"
-            style={{ backgroundColor: libraryTheme.getQueueColor('callstack', 'light') }}
+            style={{ backgroundColor: 'rgb(var(--game-callstack-queue-callstack-light))' }}
             role="progressbar"
             aria-valuenow={currentStep}
             aria-valuemin={0}
@@ -200,7 +198,7 @@ export const ExecutionController = memo<ExecutionControllerProps>(({
           >
             <motion.div
               className="h-full"
-              style={{ backgroundColor: libraryTheme.getQueueColor('callstack', 'button') }}
+              style={{ backgroundColor: 'rgb(var(--game-callstack-button-primary))' }}
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.3 }}
@@ -300,8 +298,8 @@ export const ExecutionController = memo<ExecutionControllerProps>(({
                   exit={{ opacity: 0, y: -10 }}
                   className="absolute bottom-full mb-2 left-0 z-10"
                   style={{
-                    backgroundColor: libraryTheme.getLibraryBackground(),
-                    border: `1px solid ${libraryTheme.getQueueBorder('callstack')}`,
+                    backgroundColor: 'rgb(var(--card))',
+                    border: '1px solid rgb(var(--game-callstack-queue-callstack))',
                     borderRadius: '8px',
                     boxShadow: '0 4px 6px rgba(var(--foreground), 0.1)'
                   }}
@@ -381,8 +379,6 @@ export const StepNavigator: React.FC<StepNavigatorProps> = ({
   disabled = false,
   className
 }) => {
-  const libraryTheme = useCallStackLibraryTheme();
-  
   return (
     <div 
       className={cn('flex items-center gap-2 overflow-x-auto', className)}
@@ -405,14 +401,14 @@ export const StepNavigator: React.FC<StepNavigatorProps> = ({
             )}
             style={{
               backgroundColor: isActive
-                ? libraryTheme.getQueueColor('callstack', 'button')
+                ? 'rgb(var(--game-callstack-button-primary))'
                 : isPast
-                ? libraryTheme.getQueueTheme('callstack').secondary
-                : libraryTheme.getQueueColor('callstack', 'light'),
+                ? 'rgb(var(--game-callstack-queue-callstack))'
+                : 'rgb(var(--game-callstack-queue-callstack-light))',
               color: isActive || isPast
-                ? libraryTheme.getQueueText('callstack', 'contrast')
-                : libraryTheme.getQueueText('callstack', 'primary'),
-              ['--tw-ring-color' as any]: libraryTheme.getQueueColor('callstack', 'button')
+                ? 'rgb(var(--primary-foreground))'
+                : 'rgb(var(--text-primary))',
+              ['--tw-ring-color' as any]: 'rgb(var(--game-callstack-button-primary))'
             }}
             onClick={() => onStepSelect(index)}
             disabled={disabled}

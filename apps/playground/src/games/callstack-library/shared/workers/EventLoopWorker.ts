@@ -5,8 +5,8 @@
  * 메인 스레드를 차단하지 않고 이벤트 루프 시뮬레이션을 수행
  */
 
-import { CQRSEventLoopService, createCQRSEventLoopService } from '../lib/cqrs';
-import { EventLoopConfig } from '../../entities/event-loop';
+import { CQRSEventLoopService, createCQRSEventLoopService } from '@/games/callstack-library/shared/lib/cqrs';
+import { EventLoopConfig } from '@/games/callstack-library/entities/event-loop';
 
 // Worker 메시지 타입 정의
 export interface WorkerMessage {
