@@ -9,7 +9,7 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { GameData, GameHandlers } from '../../../entities/game-state';
+import { GameData, GameHandlers } from '@/games/callstack-library/entities/game-state';
 
 // 스테이지 정보
 export interface StageInfo {

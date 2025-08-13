@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useCallStackLibraryTheme } from './useCallStackLibraryTheme'
+import { useCallStackLibraryGameTheme } from './useCallStackLibraryGameTheme'
 
 export interface ResponsiveLayoutConfig {
   // 콜스택 관련 설정
@@ -88,7 +88,7 @@ export const useResponsiveLayout = (
     customBreakpoints
   } = options
 
-  const libraryTheme = useCallStackLibraryTheme()
+  const libraryTheme = useCallStackLibraryGameTheme()
   
   // 화면 크기 상태
   const [screenDimensions, setScreenDimensions] = useState(() => {
@@ -128,14 +128,20 @@ export const useResponsiveLayout = (
 
   // 브레이크포인트 계산
   const breakpoint = useMemo(() => {
-    const breakpoints = customBreakpoints || libraryTheme.theme.breakpoints
+    const breakpoints = customBreakpoints || {
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      '2xl': 1536
+    }
     const { width } = screenDimensions
     
     if (width >= breakpoints.xl) return 'xl'
     if (width >= breakpoints.lg) return 'lg'
     if (width >= breakpoints.md) return 'md'
     return 'sm'
-  }, [screenDimensions.width, customBreakpoints, libraryTheme.theme.breakpoints])
+  }, [screenDimensions.width, customBreakpoints])
 
   // 디바이스 타입 및 방향
   const deviceInfo = useMemo(() => {

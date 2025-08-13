@@ -21,7 +21,7 @@ import {
   deepMerge,
   safeTry,
   createValidator
-} from '../validation';
+} from '@/games/callstack-library/validation';
 
 describe('validation utilities', () => {
   describe('isValidLayoutType', () => {

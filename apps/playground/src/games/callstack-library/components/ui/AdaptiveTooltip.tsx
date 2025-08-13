@@ -6,6 +6,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCallStackLibraryGameTheme } from '@/games/callstack-library/hooks/useCallStackLibraryGameTheme';
 
 interface AdaptiveTooltipProps {
   content: string;
@@ -40,6 +41,7 @@ export const AdaptiveTooltip: React.FC<AdaptiveTooltipProps> = ({
   const triggerRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const theme = useCallStackLibraryGameTheme();
 
   // 툴팁 위치 계산
   const calculatePosition = (): TooltipPosition => {
@@ -176,16 +178,17 @@ export const AdaptiveTooltip: React.FC<AdaptiveTooltipProps> = ({
               id="adaptive-tooltip"
               role="tooltip"
               className={`
-                fixed z-50 px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-lg
+                fixed z-50 px-3 py-2 text-sm font-medium rounded-lg shadow-lg
                 pointer-events-none select-none
-                dark:bg-gray-700 dark:text-gray-200
                 ${className}
               `}
               style={{
                 top: position.top,
                 left: position.left,
                 maxWidth: `${maxWidth}px`,
-                wordWrap: 'break-word'
+                wordWrap: 'break-word',
+                backgroundColor: theme.isDarkMode ? 'rgb(24, 24, 27)' : 'rgb(24, 24, 27)', // zinc-900
+                color: 'rgb(255, 255, 255)'
               }}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -200,12 +203,13 @@ export const AdaptiveTooltip: React.FC<AdaptiveTooltipProps> = ({
               {/* 화살표 */}
               <div
                 className={`
-                  absolute w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45
+                  absolute w-2 h-2 rotate-45
                   ${position.placement === 'top' ? '-bottom-1 left-1/2 -translate-x-1/2' : ''}
                   ${position.placement === 'bottom' ? '-top-1 left-1/2 -translate-x-1/2' : ''}
                   ${position.placement === 'left' ? '-right-1 top-1/2 -translate-y-1/2' : ''}
                   ${position.placement === 'right' ? '-left-1 top-1/2 -translate-y-1/2' : ''}
                 `}
+                style={{ backgroundColor: theme.isDarkMode ? 'rgb(24, 24, 27)' : 'rgb(24, 24, 27)' }}
               />
             </motion.div>
           )}

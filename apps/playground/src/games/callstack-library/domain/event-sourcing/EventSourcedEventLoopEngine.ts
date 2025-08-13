@@ -20,7 +20,7 @@ import {
   MacrotaskItem,
   ExecutionResult,
   Task
-} from '../event-loop/types';
+} from '@/games/callstack-library/domain/event-loop/types';
 
 // 이벤트 루프 관련 이벤트 타입들
 export const EventLoopEventTypes = {

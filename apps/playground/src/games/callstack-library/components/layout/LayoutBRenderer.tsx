@@ -1,15 +1,16 @@
 import React, { memo, useMemo } from 'react'
 import { cn, CodeEditor, GamePanel } from '@penguinjs/ui'
-import { getLayoutConfig } from '../../utils/layoutClassifier'
+import { getLayoutConfig } from '@/games/callstack-library/utils/layoutClassifier'
 import { HintPanel } from './panels/HintPanel'
 import { EvaluationPanel } from './panels/EvaluationPanel'
 import { MultiQueueVisualizationPanel } from './panels/MultiQueueVisualizationPanel'
 import { QueueSnapshotBuilderPanel } from './panels/QueueSnapshotBuilderPanel'
-import { useDynamicLayout, usePanelMetrics, createGridStyles, createPanelStyles } from '../../hooks/useDynamicLayout'
-import { useMemoryManagement, useLeakDetection } from '../../hooks/useMemoryManagement'
-import { useCallStackLibraryContext, ActionType } from '../../contexts/CallStackLibraryContext'
-import { gameEvents } from '../../utils/eventSystem'
-import { QueueType } from '../../types'
+import { useDynamicLayout, usePanelMetrics, createGridStyles, createPanelStyles } from '@/games/callstack-library/hooks/useDynamicLayout'
+import { useMemoryManagement, useLeakDetection } from '@/games/callstack-library/hooks/useMemoryManagement'
+import { useCallStackLibraryContext, ActionType } from '@/games/callstack-library/contexts/CallStackLibraryContext'
+import { gameEvents } from '@/games/callstack-library/utils/eventSystem'
+import { QueueType } from '@/games/callstack-library/types'
+import { useDarkModeDetection } from '@/games/callstack-library/hooks/useCSSThemeSync'
 
 /**
  * Layout B 전용 동적 레이아웃 렌더러
@@ -23,6 +24,9 @@ interface LayoutBRendererProps {
 export const LayoutBRenderer: React.FC<LayoutBRendererProps> = memo(({ gameData, gameHandlers, className }) => {
   // Context API 사용으로 prop drilling 해결
   const { state, dispatch } = useCallStackLibraryContext();
+  
+  // 다크모드 감지 사용
+  const isDarkMode = useDarkModeDetection()
   
   // 성능 최적화 및 메모리 관리
   const { isMemoryPressure } = useMemoryManagement({
@@ -156,23 +160,35 @@ export const LayoutBRenderer: React.FC<LayoutBRendererProps> = memo(({ gameData,
       
       {/* 성능 대시보드 (개발 모드) */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="p-3 rounded-lg text-xs font-mono bg-gray-100 dark:bg-gray-800">
+        <div 
+          className="p-3 rounded-lg text-xs font-mono"
+          style={{
+            background: 'rgb(var(--game-callstack-library-bg-secondary))',
+            border: '1px solid rgb(var(--game-callstack-library-border-default))',
+            color: 'rgb(var(--game-callstack-library-text-primary))'
+          }}
+        >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <span className="text-gray-600 dark:text-gray-400">레이아웃:</span>
+              <span style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>레이아웃:</span>
               <span className="ml-2 font-bold">{dynamicLayout.currentBreakpoint}</span>
             </div>
             <div>
-              <span className="text-gray-600 dark:text-gray-400">아이템:</span>
+              <span style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>아이템:</span>
               <span className="ml-2 font-bold">{dashboardData.totalItems}</span>
             </div>
             <div>
-              <span className="text-gray-600 dark:text-gray-400">단계:</span>
+              <span style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>단계:</span>
               <span className="ml-2 font-bold">{dashboardData.currentStep}/{dashboardData.totalSteps}</span>
             </div>
             <div>
-              <span className="text-gray-600 dark:text-gray-400">메모리:</span>
-              <span className={cn("ml-2 font-bold", dashboardData.memoryPressure ? 'text-red-500' : 'text-green-500')}>
+              <span style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>메모리:</span>
+              <span 
+                className="ml-2 font-bold"
+                style={{ 
+                  color: dashboardData.memoryPressure ? 'rgb(var(--game-callstack-library-error))' : 'rgb(var(--game-callstack-library-success))'
+                }}
+              >
                 {dashboardData.memoryPressure ? 'HIGH' : 'OK'}
               </span>
             </div>

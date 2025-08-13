@@ -2,9 +2,8 @@
 
 import React from 'react'
 import { cn } from '@penguinjs/ui'
-import { EvaluationPanelProps } from '../../../types/layout'
-import { useCallStackLibraryTheme, useCallStackLibraryCSSVariables } from '../../../hooks/useCallStackLibraryTheme'
-import { useResponsiveLayout } from '../../../hooks/useResponsiveLayout'
+import { EvaluationPanelProps } from '@/games/callstack-library/types/layout'
+import { useResponsiveLayout } from '@/games/callstack-library/hooks/useResponsiveLayout'
 
 /**
  * 평가 패널
@@ -23,9 +22,11 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
   validationResults,
   className
 }) => {
-  // 도서관 테마 적용
-  const libraryTheme = useCallStackLibraryTheme()
-  const cssVariables = useCallStackLibraryCSSVariables()
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
+  
   const responsiveLayout = useResponsiveLayout()
   
   // Layout E의 경우 스냅샷 검증 결과로 제출 가능 여부 판단
@@ -37,11 +38,8 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
     <div 
       className={cn("rounded-lg border p-4", className)}
       style={{
-        ...cssVariables,
-        background: libraryTheme.getQueueColor('callstack', 'light'),
-        backgroundImage: libraryTheme.theme.library.textures.wood,
-        backgroundBlendMode: 'overlay',
-        borderColor: libraryTheme.getQueueBorder('callstack', 'light')
+        backgroundColor: 'rgb(var(--card))',
+        borderColor: 'rgb(var(--border))'
       }}
     >
       
@@ -51,7 +49,7 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
           className="font-semibold flex items-center gap-2"
           style={{
             fontSize: responsiveLayout.config.fontSize.subtitle,
-            color: libraryTheme.getQueueText('callstack', 'primary')
+            color: 'rgb(var(--text-primary))'
           }}
         >
           📋 도서관 기록 평가
@@ -59,7 +57,7 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
         <div 
           style={{
             fontSize: responsiveLayout.config.fontSize.caption,
-            color: libraryTheme.getQueueText('callstack', 'secondary')
+            color: 'rgb(var(--muted-foreground))'
           }}
         >
           {getEvaluationTypeDescription(evaluation)}
@@ -100,13 +98,23 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
       {/* 하단 컨트롤 */}
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-editor-border">
         <div className="flex items-center gap-4">
-          <div className="text-sm text-game-text-secondary">
+          <div className="text-sm" style={{ color: 'rgb(var(--muted-foreground))' }}>
             완성도: <span className="font-medium">{getCompletionRate(userAnswer, expectedCount)}%</span>
           </div>
           {userAnswer.length > 0 && onReset && (
             <button 
               onClick={onReset}
-              className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-xs transition-colors"
+              style={{
+                color: 'rgb(var(--muted-foreground))',
+                textDecoration: 'underline'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'rgb(var(--text-primary))'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'rgb(var(--muted-foreground))'
+              }}
             >
               초기화
             </button>
@@ -117,11 +125,13 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
           {onHint && (
             <button
               onClick={onHint}
-              className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                "border border-gray-300 text-gray-700 bg-white hover:bg-gray-50",
-                "dark:border-slate-600 dark:text-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
-              )}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all border"
+              style={{
+                backgroundColor: 'rgb(var(--warning))',
+                color: 'rgb(var(--warning-foreground))',
+                borderColor: 'rgb(var(--warning))',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
             >
               힌트
             </button>
@@ -130,12 +140,20 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
             <button
               onClick={onSimulate}
               disabled={userAnswer.length === 0}
-              className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center",
-                userAnswer.length > 0
-                  ? "border border-green-500 text-green-700 bg-white hover:bg-green-50 dark:border-green-600 dark:text-green-400 dark:bg-slate-800 dark:hover:bg-slate-700"
-                  : "border border-gray-300 text-gray-500 bg-gray-100 cursor-not-allowed dark:border-slate-600 dark:text-slate-400 dark:bg-slate-700"
-              )}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center border"
+              style={{
+                backgroundColor: userAnswer.length === 0 
+                  ? 'rgb(var(--muted))' 
+                  : 'rgb(var(--card))',
+                color: userAnswer.length === 0 
+                  ? 'rgb(var(--muted-foreground))' 
+                  : 'rgb(var(--success))',
+                borderColor: userAnswer.length === 0 
+                  ? 'rgb(var(--border))' 
+                  : 'rgb(var(--success))',
+                cursor: userAnswer.length === 0 ? 'not-allowed' : 'pointer',
+                boxShadow: userAnswer.length > 0 ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+              }}
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -147,12 +165,17 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
           <button
             onClick={onSubmit}
             disabled={!canSubmit}
-            className={cn(
-              "px-6 py-2 rounded-lg text-sm font-medium transition-all",
-              canSubmit
-                ? "bg-blue-500 text-white hover:bg-blue-600 shadow-sm"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-slate-600 dark:text-slate-400"
-            )}
+            className="px-6 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              backgroundColor: !canSubmit
+                ? 'rgb(var(--muted))'
+                : layoutType === 'E'
+                  ? 'rgb(var(--game-callstack-button-primary))'
+                  : 'rgb(var(--primary))',
+              color: !canSubmit ? 'rgb(var(--muted-foreground))' : 'white',
+              cursor: !canSubmit ? 'not-allowed' : 'pointer',
+              boxShadow: canSubmit ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+            }}
           >
             {layoutType === 'E' ? '전체 검증' : '제출하기'}
           </button>
@@ -168,18 +191,28 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
 const OrderPredictionDisplay: React.FC<{
   userAnswer: string[]
 }> = ({ userAnswer }) => {
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
   
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-medium text-game-text">예상 실행 순서</h4>
       
       <div className={cn(
-        "min-h-[80px] border-2 border-dashed border-gray-300 rounded-lg",
-        "bg-gray-50 dark:bg-slate-800 dark:border-slate-600",
+        "min-h-[80px] border-2 border-dashed rounded-lg",
         "p-4 flex flex-wrap gap-2 items-start"
-      )}>
+      )}
+      style={{
+        borderColor: '1px solid rgb(var(--game-callstack-queue-microtask-light))',
+        backgroundColor: 'rgba(var(--game-callstack-queue-microtask-light), 0.1)'
+      }}>
         {userAnswer.length === 0 ? (
-          <div className="text-sm text-gray-400 italic w-full text-center py-4">
+          <div 
+            className="text-sm italic w-full text-center py-4"
+            style={{ color: 'rgb(var(--muted-foreground))' }}
+          >
             함수를 선택하여 실행 순서를 예측하세요
           </div>
         ) : (
@@ -188,11 +221,15 @@ const OrderPredictionDisplay: React.FC<{
               key={index}
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-lg",
-                "bg-white border border-gray-200 shadow-sm",
-                "dark:bg-slate-700 dark:border-slate-600"
+                "border shadow-sm"
               )}
+              style={{
+                backgroundColor: 'rgb(var(--card))',
+                borderColor: '1px solid rgb(var(--game-callstack-queue-microtask))'
+              }}
             >
-              <span className="bg-blue-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs w-5 h-5 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: 'rgb(var(--game-callstack-queue-microtask))' }}>
                 {index + 1}
               </span>
               <span className="font-mono text-sm">{func}</span>
@@ -210,19 +247,28 @@ const OrderPredictionDisplay: React.FC<{
 const LifoPrincipleDisplay: React.FC<{
   userAnswer: string[]
 }> = ({ userAnswer }) => {
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
   
   const isLifoValid = validateLifoPrinciple(userAnswer)
   
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-game-text">LIFO 원칙 검증</h4>
-        <div className={cn(
-          "px-2 py-1 text-xs rounded",
-          isLifoValid
-            ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
-        )}>
+        <h4 className="text-sm font-medium" style={{ color: 'rgb(var(--text-primary))' }}>LIFO 원칙 검증</h4>
+        <div 
+          className="px-2 py-1 text-xs rounded"
+          style={{
+            background: isLifoValid 
+              ? 'rgb(var(--success))'
+              : 'rgb(var(--warning))',
+            color: isLifoValid
+              ? 'rgb(var(--success-foreground))'
+              : 'rgb(var(--warning-foreground))'
+          }}
+        >
           {isLifoValid ? '✓ 유효' : '⚠ 확인 필요'}
         </div>
       </div>
@@ -230,14 +276,25 @@ const LifoPrincipleDisplay: React.FC<{
       <div className="grid grid-cols-2 gap-4">
         {/* Push 순서 */}
         <div>
-          <h5 className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2">
+          <h5 
+            className="text-xs font-semibold mb-2"
+            style={{ color: 'rgb(var(--game-callstack-queue-microtask))' }}
+          >
             📥 Push (시작)
           </h5>
           <div className="space-y-1">
             {userAnswer
               .filter(item => !item.includes('종료'))
               .map((item, index) => (
-                <div key={index} className="text-xs p-2 bg-blue-50 border border-blue-200 rounded dark:bg-blue-900/20 dark:border-blue-700">
+                <div 
+                  key={index} 
+                  className="text-xs p-2 rounded"
+                  style={{
+                    background: 'rgb(var(--game-callstack-queue-microtask-light))',
+                    border: '1px solid rgb(var(--game-callstack-queue-microtask-light))',
+                    color: 'rgb(var(--text-primary))'
+                  }}
+                >
                   {index + 1}. {item}
                 </div>
               ))
@@ -247,14 +304,25 @@ const LifoPrincipleDisplay: React.FC<{
         
         {/* Pop 순서 */}
         <div>
-          <h5 className="text-xs font-semibold text-red-600 dark:text-red-400 mb-2">
+          <h5 
+            className="text-xs font-semibold mb-2"
+            style={{ color: 'rgb(var(--destructive))' }}
+          >
             📤 Pop (종료)
           </h5>
           <div className="space-y-1">
             {userAnswer
               .filter(item => item.includes('종료'))
               .map((item, index) => (
-                <div key={index} className="text-xs p-2 bg-red-50 border border-red-200 rounded dark:bg-red-900/20 dark:border-red-700">
+                <div 
+                  key={index} 
+                  className="text-xs p-2 rounded"
+                  style={{
+                    background: 'rgb(var(--game-callstack-pop-bg))',
+                    border: `1px solid rgb(var(--game-callstack-pop-border))`,
+                    color: 'rgb(var(--text-primary))'
+                  }}
+                >
                   {index + 1}. {item}
                 </div>
               ))
@@ -273,8 +341,36 @@ const SnapshotDisplay: React.FC<{
   snapshotCheckpoints?: number[]
   validationResults?: Record<number, boolean>
 }> = ({ snapshotCheckpoints = [], validationResults = {} }) => {
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
   const completedCount = Object.values(validationResults).filter(v => v === true).length
   const totalCount = snapshotCheckpoints.length
+  
+  const getButtonStyle = (checkpoint: number) => {
+    if (validationResults[checkpoint] === true) {
+      return {
+        backgroundColor: 'rgb(var(--success))',
+        borderColor: 'rgb(var(--success))',
+        color: 'white'
+      }
+    }
+    
+    if (validationResults[checkpoint] === false) {
+      return {
+        backgroundColor: 'rgb(var(--destructive))',
+        borderColor: 'rgb(var(--destructive))',
+        color: 'white'
+      }
+    }
+    
+    return {
+      backgroundColor: 'rgb(var(--muted))',
+      borderColor: 'rgb(var(--border))',
+      color: 'rgb(var(--muted-foreground))'
+    }
+  }
   
   return (
     <div className="space-y-2">
@@ -284,14 +380,8 @@ const SnapshotDisplay: React.FC<{
         {snapshotCheckpoints.map((checkpoint, index) => (
           <div
             key={checkpoint}
-            className={cn(
-              "h-8 rounded border flex items-center justify-center text-xs font-mono",
-              validationResults[checkpoint] === true
-                ? "bg-green-100 border-green-300 text-green-800 dark:bg-green-900/20 dark:border-green-600"
-                : validationResults[checkpoint] === false
-                  ? "bg-red-100 border-red-300 text-red-800 dark:bg-red-900/20 dark:border-red-600"
-                  : "bg-gray-100 border-gray-300 text-gray-500 dark:bg-slate-700 dark:border-slate-600"
-            )}
+            className="h-8 rounded border flex items-center justify-center text-xs font-mono"
+            style={getButtonStyle(checkpoint)}
           >
             {validationResults[checkpoint] === true ? '✓' : validationResults[checkpoint] === false ? '✗' : checkpoint}
           </div>
@@ -312,6 +402,10 @@ const QueueStatesDisplay: React.FC<{
   validationResults?: Record<number, any>
   layoutType?: string
 }> = ({ validationResults = {}, layoutType }) => {
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
   
   // Layout B의 경우 큐 검증 결과 표시
   if (layoutType === 'B') {
@@ -329,33 +423,56 @@ const QueueStatesDisplay: React.FC<{
     return (
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-medium text-game-text">큐 상태 검증 결과</h4>
-          <span className={cn(
-            "text-xs px-2 py-1 rounded",
-            validSteps === totalSteps && totalSteps > 0
-              ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
-              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
-          )}>
+          <h4 className="text-sm font-medium" style={{ color: 'rgb(var(--text-primary))' }}>큐 상태 검증 결과</h4>
+          <span 
+            className="text-xs px-2 py-1 rounded"
+            style={{
+              background: validSteps === totalSteps && totalSteps > 0
+                ? 'rgb(var(--success))'
+                : 'rgb(var(--warning))',
+              color: validSteps === totalSteps && totalSteps > 0
+                ? 'rgb(var(--success-foreground))'
+                : 'rgb(var(--warning-foreground))'
+            }}
+          >
             {validSteps}/{totalSteps} 단계 완료
           </span>
         </div>
         
         <div className="grid grid-cols-3 gap-2 text-xs">
-          <div className="p-2 bg-blue-50 border border-blue-200 rounded dark:bg-blue-900/20 dark:border-blue-600">
-            <div className="font-semibold text-blue-800 dark:text-blue-400">📥 Call Stack</div>
-            <div className="text-blue-600 dark:text-blue-300">
+          <div 
+            className="p-2 rounded"
+            style={{
+              background: 'rgb(var(--game-callstack-queue-callstack-light))',
+              border: '2px solid rgb(var(--game-callstack-queue-callstack-light))'
+            }}
+          >
+            <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-callstack))' }}>📥 Call Stack</div>
+            <div style={{ color: 'rgb(var(--text-primary))' }}>
               {totalSteps > 0 ? `${callstackAccuracy}/${totalSteps} 정답` : '미완료'}
             </div>
           </div>
-          <div className="p-2 bg-green-50 border border-green-200 rounded dark:bg-green-900/20 dark:border-green-600">
-            <div className="font-semibold text-green-800 dark:text-green-400">⚡ Microtask</div>
-            <div className="text-green-600 dark:text-green-300">
+          <div 
+            className="p-2 rounded"
+            style={{
+              background: 'rgb(var(--game-callstack-queue-microtask-light))',
+              border: '1px solid rgb(var(--game-callstack-queue-microtask-light))'
+            }}
+          >
+            <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-microtask))' }}>⚡ Microtask</div>
+            <div style={{ color: 'rgb(var(--text-primary))' }}>
               {totalSteps > 0 ? `${microtaskAccuracy}/${totalSteps} 정답` : '미완료'}
             </div>
           </div>
-          <div className="p-2 bg-yellow-50 border border-yellow-200 rounded dark:bg-yellow-900/20 dark:border-yellow-600">
-            <div className="font-semibold text-yellow-800 dark:text-yellow-400">⏰ Macrotask</div>
-            <div className="text-yellow-600 dark:text-yellow-300">
+          <div 
+            className="p-2 rounded"
+            style={{
+              background: 'rgb(var(--game-callstack-queue-macrotask-light))',
+              border: '1px solid rgb(var(--game-callstack-queue-macrotask-light))'
+            }}
+          >
+            <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-macrotask))' }}>⏰ Macrotask</div>
+            <div style={{ color: 'rgb(var(--text-primary))' }}>
               {totalSteps > 0 ? `${macrotaskAccuracy}/${totalSteps} 정답` : '미완료'}
             </div>
           </div>
@@ -373,20 +490,38 @@ const QueueStatesDisplay: React.FC<{
   // 다른 레이아웃의 경우 기본 표시
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-medium text-game-text">큐 상태 예측</h4>
+      <h4 className="text-sm font-medium" style={{ color: 'rgb(var(--text-primary))' }}>큐 상태 예측</h4>
       
       <div className="grid grid-cols-3 gap-2 text-xs">
-        <div className="p-2 bg-blue-50 border border-blue-200 rounded dark:bg-blue-900/20 dark:border-blue-600">
-          <div className="font-semibold text-blue-800 dark:text-blue-400">콜스택</div>
-          <div className="text-blue-600 dark:text-blue-300">예측 대기</div>
+        <div 
+          className="p-2 rounded"
+          style={{
+            background: 'rgb(var(--game-callstack-queue-callstack-light))',
+            border: '2px solid rgb(var(--game-callstack-queue-callstack-light))'
+          }}
+        >
+          <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-callstack))' }}>콜스택</div>
+          <div style={{ color: 'rgb(var(--muted-foreground))' }}>예측 대기</div>
         </div>
-        <div className="p-2 bg-green-50 border border-green-200 rounded dark:bg-green-900/20 dark:border-green-600">
-          <div className="font-semibold text-green-800 dark:text-green-400">마이크로태스크</div>
-          <div className="text-green-600 dark:text-green-300">예측 대기</div>
+        <div 
+          className="p-2 rounded"
+          style={{
+            background: 'rgb(var(--game-callstack-queue-microtask-light))',
+            border: '1px solid rgb(var(--game-callstack-queue-microtask-light))'
+          }}
+        >
+          <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-microtask))' }}>마이크로태스크</div>
+          <div style={{ color: 'rgb(var(--muted-foreground))' }}>예측 대기</div>
         </div>
-        <div className="p-2 bg-yellow-50 border border-yellow-200 rounded dark:bg-yellow-900/20 dark:border-yellow-600">
-          <div className="font-semibold text-yellow-800 dark:text-yellow-400">매크로태스크</div>
-          <div className="text-yellow-600 dark:text-yellow-300">예측 대기</div>
+        <div 
+          className="p-2 rounded"
+          style={{
+            background: 'rgb(var(--game-callstack-queue-macrotask-light))',
+            border: '1px solid rgb(var(--game-callstack-queue-macrotask-light))'
+          }}
+        >
+          <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-macrotask))' }}>매크로태스크</div>
+          <div style={{ color: 'rgb(var(--muted-foreground))' }}>예측 대기</div>
         </div>
       </div>
     </div>

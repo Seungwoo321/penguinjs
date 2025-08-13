@@ -17,6 +17,11 @@ export const HintPanel: React.FC<HintPanelProps> = ({
   hintsUsed,
   className
 }) => {
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
+  
   // Hook 규칙 준수: early return 대신 조건부 렌더링
   if (!hints || hints.length === 0) {
     return null;
@@ -25,10 +30,10 @@ export const HintPanel: React.FC<HintPanelProps> = ({
   return (
     <div className={cn("mb-4", className)}>
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-sm font-semibold text-game-text">
+        <span className="text-sm font-semibold" style={{ color: 'rgb(var(--text-primary))' }}>
           💡 힌트
         </span>
-        <span className="text-xs text-game-text-secondary">
+        <span className="text-xs" style={{ color: 'rgb(var(--muted-foreground))' }}>
           {hintsUsed}개 사용됨
         </span>
       </div>
@@ -44,9 +49,15 @@ export const HintPanel: React.FC<HintPanelProps> = ({
             {hints.map((hint, index) => (
               <div
                 key={`hint-${index}-${hint.substring(0, 10)}`}
-                className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3"
+                className="rounded-lg p-3 border"
+                style={{
+                  backgroundColor: 'rgb(var(--game-callstack-hint-bg))',
+                  borderColor: `rgb(var(--game-callstack-hint-border))`
+                }}
               >
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                <p className="text-sm" style={{ 
+                  color: 'rgb(var(--game-callstack-hint-text))'
+                }}>
                   💡 힌트 {index + 1}: {hint}
                 </p>
               </div>

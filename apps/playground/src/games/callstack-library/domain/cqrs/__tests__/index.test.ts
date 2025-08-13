@@ -5,12 +5,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import * as CQRSIndex from '../index';
-import * as Commands from '../Commands';
-import * as CommandHandler from '../CommandHandler';
-import * as Queries from '../Queries';
-import * as QueryHandler from '../QueryHandler';
-import { CQRSEventLoopService } from '../CQRSEventLoopService';
+import * as CQRSIndex from '@/games/callstack-library/index';
+import * as Commands from '@/games/callstack-library/Commands';
+import * as CommandHandler from '@/games/callstack-library/CommandHandler';
+import * as Queries from '@/games/callstack-library/Queries';
+import * as QueryHandler from '@/games/callstack-library/QueryHandler';
+import { CQRSEventLoopService } from '@/games/callstack-library/CQRSEventLoopService';
 
 describe('CQRS index', () => {
   it('모든 모듈이 올바르게 내보내졌는지 확인해야 한다', () => {

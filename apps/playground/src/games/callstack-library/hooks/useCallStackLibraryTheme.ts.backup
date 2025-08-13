@@ -86,11 +86,12 @@ export const useCallStackLibraryTheme = (
     debugColors = false
   } = options
 
-  // 다크 모드 감지 - 항상 실행되도록 보장
+  // next-themes와 연동한 다크 모드 감지
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (forceDarkMode !== undefined) return forceDarkMode
     if (typeof window === 'undefined') return false
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
+    // next-themes가 설정한 class="dark" 확인
+    return document.documentElement.classList.contains('dark')
   })
   
   // 접근성 색상 시스템 - 항상 실행되도록 보장
@@ -104,11 +105,22 @@ export const useCallStackLibraryTheme = (
     
     if (typeof window === 'undefined') return
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches)
+    // next-themes의 class 변경을 감지하는 MutationObserver
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const isDark = document.documentElement.classList.contains('dark')
+          setIsDarkMode(isDark)
+        }
+      })
+    })
 
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => observer.disconnect()
   }, [forceDarkMode])
 
   // 반응형 상태 관리
@@ -210,105 +222,76 @@ export const useCallStackLibraryTheme = (
     return isBackground ? 'rgb(23, 23, 23)' : 'rgb(240, 240, 240)'
   }, [isDarkMode])
 
-  // 테마 게터 함수들 메모이제이션 (접근성 강화)
+  // 테마 게터 함수들 메모이제이션 - 글로벌 CSS 변수 우선 사용
   const themeGetters = useMemo(() => ({
     getQueueTheme: (queueType: CallStackQueueType) => {
-      const baseTheme = getCallStackQueueTheme(queueType)
+      // 글로벌 CSS 변수 기반 테마 생성
+      const varPrefix = queueType === 'callstack' ? 'queue' : 
+                       queueType === 'microtask' ? 'urgent' : 'scheduled'
       
-      // baseTheme이 null이거나 undefined인 경우 방어 처리
-      if (!baseTheme || !baseTheme.background) {
-        // console.warn(`Invalid theme for queue type: ${queueType}`)
-        return {
-          primary: '#000000',
-          secondary: '#333333',
-          accent: '#666666',
-          background: {
-            light: '#ffffff',
-            main: '#f8f8f8',
-            dark: '#f0f0f0'
-          },
-          text: {
-            primary: '#000000',
-            secondary: '#333333',
-            contrast: '#ffffff'
-          },
-          gradients: {
-            main: 'linear-gradient(to bottom, #000000, #333333)',
-            light: 'linear-gradient(to right, #ffffff, #f8f8f8)',
-            button: 'linear-gradient(to right, #333333, #666666)',
-            hover: 'linear-gradient(to right, #000000, #333333)'
-          },
-          border: {
-            main: '#666666',
-            light: '#999999',
-            focus: '#333333'
-          }
-        }
-      }
-      
-      if (enforceAccessibility && accessibleColors?.libraryColors?.[queueType]) {
-        const accessibleTheme = accessibleColors.libraryColors[queueType]
-        return {
-          ...baseTheme,
-          background: {
-            light: accessibleTheme.background,
-            main: accessibleTheme.background,
-            dark: accessibleTheme.background
-          },
-          text: {
-            primary: accessibleTheme.text,
-            secondary: accessibleColors.theme.text.secondary,
-            contrast: accessibleColors.theme.text.inverse
-          },
-          border: {
-            main: accessibleTheme.border,
-            light: accessibleTheme.border,
-            focus: accessibleTheme.accent
-          }
-        }
-      }
-      
-      if (!isDarkMode) return baseTheme
-      
-      // 다크 모드용 색상 조정
       return {
-        ...baseTheme,
+        primary: `rgb(var(--game-callstack-${varPrefix}-primary))`,
+        secondary: `rgb(var(--game-callstack-${varPrefix}-secondary))`,
+        accent: `rgb(var(--game-callstack-${varPrefix}-accent))`,
         background: {
-          light: adjustColorForMode(baseTheme.background.light, true),
-          main: adjustColorForMode(baseTheme.background.main, true),
-          dark: adjustColorForMode(baseTheme.background.dark, true)
+          light: `rgb(var(--game-callstack-${varPrefix}-bg-light))`,
+          main: `rgb(var(--game-callstack-${varPrefix}-bg-main))`,
+          dark: `rgb(var(--game-callstack-${varPrefix}-bg-dark))`
         },
         text: {
-          primary: adjustColorForMode(baseTheme.text.primary),
-          secondary: adjustColorForMode(baseTheme.text.secondary),
-          contrast: isDarkMode ? 'rgb(240, 240, 240)' : baseTheme.text.contrast
+          primary: `rgb(var(--game-callstack-${varPrefix}-primary))`,
+          secondary: `rgb(var(--game-callstack-${varPrefix}-secondary))`,
+          contrast: `rgb(var(--text-primary))`
+        },
+        gradients: {
+          main: `linear-gradient(to bottom, rgb(var(--game-callstack-${varPrefix}-primary)), rgb(var(--game-callstack-${varPrefix}-secondary)))`,
+          light: `linear-gradient(to right, rgb(var(--game-callstack-${varPrefix}-bg-light)), rgb(var(--game-callstack-${varPrefix}-bg-main)))`,
+          button: `linear-gradient(to right, rgb(var(--game-callstack-${varPrefix}-primary)), rgb(var(--game-callstack-${varPrefix}-accent)))`,
+          hover: `linear-gradient(to right, rgb(var(--game-callstack-${varPrefix}-accent)), rgb(var(--game-callstack-${varPrefix}-primary)))`
+        },
+        border: {
+          main: `rgb(var(--border-primary))`,
+          light: `rgb(var(--border-secondary))`,
+          focus: `rgb(var(--ring))`
         }
       }
     },
     getQueueColor: (queueType: CallStackQueueType, variant?: keyof CallStackQueueTheme['gradients']) => {
-      if (enforceAccessibility && accessibleColors?.libraryColors?.[queueType]) {
-        return accessibleColors.libraryColors[queueType].background
+      const varPrefix = queueType === 'callstack' ? 'queue' : 
+                       queueType === 'microtask' ? 'urgent' : 'scheduled'
+      
+      if (variant === 'light') {
+        return `rgb(var(--game-callstack-${varPrefix}-bg-light))`
+      } else if (variant === 'main') {
+        return `rgb(var(--game-callstack-${varPrefix}-bg-main))`
+      } else if (variant === 'dark') {
+        return `rgb(var(--game-callstack-${varPrefix}-bg-dark))`
       }
-      const color = getCallStackQueueColor(queueType, variant)
-      return adjustColorForMode(color, variant === 'light' || variant === 'main')
+      
+      return `rgb(var(--game-callstack-${varPrefix}-primary))`
     },
     getQueueBorder: (queueType: CallStackQueueType, variant?: keyof CallStackQueueTheme['border']) => {
-      if (enforceAccessibility && accessibleColors?.libraryColors?.[queueType]) {
-        return accessibleColors.libraryColors[queueType].border
+      if (variant === 'light') {
+        return `rgb(var(--border-secondary))`
+      } else if (variant === 'focus') {
+        return `rgb(var(--ring))`
       }
-      const color = getCallStackQueueBorder(queueType, variant)
-      return adjustColorForMode(color)
+      
+      return `rgb(var(--border-primary))`
     },
     getQueueText: (queueType: CallStackQueueType, variant?: keyof CallStackQueueTheme['text']) => {
-      if (enforceAccessibility && accessibleColors?.libraryColors?.[queueType]) {
-        return variant === 'secondary' 
-          ? accessibleColors.theme.text.secondary
-          : accessibleColors.libraryColors[queueType].text
+      const varPrefix = queueType === 'callstack' ? 'queue' : 
+                       queueType === 'microtask' ? 'urgent' : 'scheduled'
+      
+      if (variant === 'secondary') {
+        return `rgb(var(--game-callstack-${varPrefix}-secondary))`
+      } else if (variant === 'contrast') {
+        return `rgb(var(--text-primary))`
       }
-      const color = getCallStackQueueText(queueType, variant)
-      return adjustColorForMode(color, false)
+      
+      return `rgb(var(--game-callstack-${varPrefix}-primary))`
     }
-  }), [isDarkMode, adjustColorForMode, enforceAccessibility, accessibleColors])
+  }), [isDarkMode])
 
   // 스타일 생성 함수들
   const styleCreators = useMemo(() => ({
@@ -349,11 +332,11 @@ export const useCallStackLibraryTheme = (
     }
   }, [enableAnimations])
 
-  // 라이브러리 배경 조정 - 실제 화면 배경과 동일하게
+  // 라이브러리 배경 조정 - 글로벌 CSS 변수 사용
   const getLibraryBackground = useCallback(() => {
-    // 라이트/다크 모드 관계없이 실제 화면 배경 사용
+    // 글로벌 테마의 배경 변수 사용
     return 'rgb(var(--background))'
-  }, [isDarkMode])
+  }, [])
 
   // 아이콘 헬퍼
   const getQueueIcon = useCallback((queueType: CallStackQueueType) => {

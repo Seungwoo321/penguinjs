@@ -1,8 +1,8 @@
 // 이벤트 루프 시뮬레이션 엔진
 // Layout B (고급 21-22단계)를 위한 큐 상태 시뮬레이션
 
-import { QueueType, QueueItem, CallStackLevel } from '../types'
-import { QueueStatesSnapshot, EventLoopStep } from '../types/layout'
+import { QueueType, QueueItem, CallStackLevel } from '@/games/callstack-library/types'
+import { QueueStatesSnapshot, EventLoopStep } from '@/games/callstack-library/types/layout'
 import { getFunctionColor } from './executionSimulator'
 
 export interface QueueSimulatorConfig {

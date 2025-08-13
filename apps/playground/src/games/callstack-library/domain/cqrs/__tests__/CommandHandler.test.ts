@@ -14,7 +14,7 @@ import {
   CommandContext,
   CommandHandlerResult,
   CommandMiddleware
-} from '../CommandHandler';
+} from '@/games/callstack-library/CommandHandler';
 import { 
   PushFunctionCommand,
   PopFunctionCommand,
@@ -22,10 +22,10 @@ import {
   ExecuteTickCommand,
   ResetEngineCommand,
   GameCommand
-} from '../Commands';
-import { EventSourcedEventLoopEngine } from '../../event-sourcing/EventSourcedEventLoopEngine';
-import { InMemoryEventStore } from '../../event-sourcing/EventStore';
-import { EventLoopConfig } from '../../event-loop/types';
+} from '@/games/callstack-library/Commands';
+import { EventSourcedEventLoopEngine } from '@/games/callstack-library/domain/event-sourcing/EventSourcedEventLoopEngine';
+import { InMemoryEventStore } from '@/games/callstack-library/domain/event-sourcing/EventStore';
+import { EventLoopConfig } from '@/games/callstack-library/domain/event-loop/types';
 
 describe('CommandHandler', () => {
   let dispatcher: CommandDispatcher;

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Map, Target, Layers, ArrowRight, Code, Play, Zap } from 'lucide-react'
+import { useClosureCaveTheme } from '@/games/closure-cave/hooks/useClosureCaveTheme'
 
 interface GameGuideModalProps {
   isOpen: boolean
@@ -13,6 +14,7 @@ interface GameGuideModalProps {
 }
 
 export function GameGuideModal({ isOpen, onClose, onStart, difficulty = 'beginner', currentLevel = 1 }: GameGuideModalProps) {
+  const theme = useClosureCaveTheme()
   const [currentStep, setCurrentStep] = useState(0)
 
   // 난이도별 동적 컨텐츠
@@ -131,23 +133,91 @@ export function GameGuideModal({ isOpen, onClose, onStart, difficulty = 'beginne
       content: difficultyContent.theory,
       visual: (
         <div className="space-y-4">
-          <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-            <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">핵심 개념</h4>
+          <div 
+            className="p-4 rounded-lg border"
+            style={{
+              backgroundColor: theme.isDarkMode
+                ? `rgba(251, 191, 36, 0.2)`
+                : theme.getSpecialColor('guide-bg-light'),
+              borderColor: theme.isDarkMode
+                ? theme.getSpecialColor('guide-accent-dark')
+                : theme.getSpecialColor('guide-border-light')
+            }}
+          >
+            <h4 
+              className="font-semibold mb-2"
+              style={{
+                color: theme.isDarkMode
+                  ? theme.getSpecialColor('guide-accent-dark')
+                  : theme.getSpecialColor('guide-text-light')
+              }}
+            >
+              핵심 개념
+            </h4>
             <div className="flex flex-wrap gap-2">
               {difficultyContent.concepts.map((concept, index) => (
-                <span key={index} className="px-3 py-1 bg-amber-100 dark:bg-amber-800 text-amber-800 dark:text-amber-200 rounded-full text-sm font-medium">
+                <span 
+                  key={index} 
+                  className="px-3 py-1 rounded-full text-sm font-medium"
+                  style={{
+                    backgroundColor: theme.isDarkMode
+                      ? theme.getSpecialColor('guide-accent-dark')
+                      : theme.getSpecialColor('guide-bg-light-secondary'),
+                    color: theme.isDarkMode
+                      ? 'white'
+                      : theme.getSpecialColor('guide-text-light')
+                  }}
+                >
                   {concept}
                 </span>
               ))}
             </div>
           </div>
           {difficultyContent.examples.length > 0 && (
-            <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-              <h4 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">예시: {difficultyContent.examples[0].concept}</h4>
-              <div className="bg-slate-900 rounded p-3 text-xs font-mono text-green-400 mb-2">
+            <div 
+              className="p-4 rounded-lg border"
+              style={{
+                backgroundColor: theme.isDarkMode
+                  ? theme.getBackgroundColor('elevated')
+                  : theme.getSpecialColor('guide-bg-light'),
+                borderColor: theme.isDarkMode
+                  ? theme.getBorderColor('light')
+                  : theme.getSpecialColor('guide-border-light-secondary')
+              }}
+            >
+              <h4 
+                className="font-semibold mb-2"
+                style={{
+                  color: theme.isDarkMode
+                    ? theme.getTextColor('primary')
+                    : theme.getSpecialColor('guide-text-light')
+                }}
+              >
+                예시: {difficultyContent.examples[0].concept}
+              </h4>
+              <div 
+                className="rounded p-3 text-xs font-mono mb-2"
+                style={{
+                  backgroundColor: theme.isDarkMode
+                    ? theme.getSpecialColor('code-bg-dark')
+                    : theme.getSpecialColor('code-bg-light'),
+                  color: theme.isDarkMode
+                    ? theme.getSpecialColor('code-text-dark')
+                    : theme.getSpecialColor('code-text-light')
+                }}
+              >
                 <pre>{difficultyContent.examples[0].code}</pre>
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">{difficultyContent.examples[0].explanation}</p>
+              <p 
+                className="text-sm"
+                style={{
+                  color: theme.isDarkMode
+                    ? theme.getTextColor('secondary')
+                    : theme.getSpecialColor('guide-text-light-tertiary')
+                }}
+              >
+                {difficultyContent.examples[0].explanation}
+              </p>
             </div>
           )}
         </div>
@@ -223,7 +293,14 @@ export function GameGuideModal({ isOpen, onClose, onStart, difficulty = 'beginne
           >
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
               {/* 헤더 */}
-              <div className="relative bg-gradient-to-r from-amber-600 to-orange-600 p-6 text-white">
+              <div 
+                className="relative p-6 text-white"
+                style={{
+                  background: theme.isDarkMode
+                    ? `linear-gradient(to right, ${theme.getSpecialColor('guide-header')}, ${theme.getSpecialColor('guide-header-end')})`
+                    : `linear-gradient(to right, ${theme.getSpecialColor('guide-accent-light-secondary')}, ${theme.getSpecialColor('guide-header-end')})`
+                }}
+              >
                 <button
                   onClick={onClose}
                   className="absolute top-4 right-4 p-2 rounded-lg hover:bg-white/20 transition-colors"
@@ -242,22 +319,42 @@ export function GameGuideModal({ isOpen, onClose, onStart, difficulty = 'beginne
               </div>
               
               {/* 진행 표시 */}
-              <div className="flex justify-center gap-2 p-4 bg-slate-50 dark:bg-slate-800">
+              <div 
+                className="flex justify-center gap-2 p-4"
+                style={{
+                  backgroundColor: theme.isDarkMode
+                    ? theme.getBackgroundColor('elevated')
+                    : theme.getSpecialColor('guide-bg-light')
+                }}
+              >
                 {guideSteps.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentStep(index)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      index === currentStep 
-                        ? 'w-8 bg-amber-500' 
-                        : 'bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
-                    }`}
+                    className="w-2 h-2 rounded-full transition-all"
+                    style={{
+                      width: index === currentStep ? '32px' : '8px',
+                      backgroundColor: index === currentStep
+                        ? theme.isDarkMode
+                          ? theme.getSpecialColor('guide-accent-dark')
+                          : theme.getSpecialColor('guide-accent-light')
+                        : theme.isDarkMode
+                          ? theme.getBorderColor('light')
+                          : theme.getSpecialColor('guide-dot-inactive-light')
+                    }}
                   />
                 ))}
               </div>
               
               {/* 콘텐츠 */}
-              <div className="p-6">
+              <div 
+                className="p-6"
+                style={{
+                  backgroundColor: theme.isDarkMode 
+                    ? theme.getBackgroundColor('main')
+                    : theme.getSpecialColor('guide-bg-light-tertiary')
+                }}
+              >
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentStep}
@@ -267,19 +364,49 @@ export function GameGuideModal({ isOpen, onClose, onStart, difficulty = 'beginne
                     className="space-y-6"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-3 bg-amber-100 dark:bg-amber-900/20 rounded-xl text-amber-600 dark:text-amber-400">
+                      <div 
+                        className="p-3 rounded-xl"
+                        style={{
+                          backgroundColor: theme.isDarkMode
+                            ? `rgba(251, 191, 36, 0.2)`
+                            : theme.getSpecialColor('guide-bg-light-secondary'),
+                          color: theme.isDarkMode
+                            ? theme.getSpecialColor('guide-accent-dark')
+                            : theme.getSpecialColor('guide-accent-light')
+                        }}
+                      >
                         {guideSteps[currentStep].icon}
                       </div>
-                      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                      <h3 
+                        className="text-xl font-bold"
+                        style={{
+                          color: theme.isDarkMode
+                            ? theme.getTextColor('primary')
+                            : theme.getSpecialColor('guide-text-light')
+                        }}
+                      >
                         {guideSteps[currentStep].title}
                       </h3>
                     </div>
                     
-                    <p className="text-slate-800 dark:text-slate-300">
+                    <p 
+                      style={{
+                        color: theme.isDarkMode
+                          ? theme.getTextColor('secondary')
+                          : theme.getSpecialColor('guide-text-light-secondary')
+                      }}
+                    >
                       {guideSteps[currentStep].content}
                     </p>
                     
-                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
+                    <div 
+                      className="rounded-xl p-4"
+                      style={{
+                        backgroundColor: theme.isDarkMode
+                          ? theme.getBackgroundColor('elevated')
+                          : theme.getSpecialColor('guide-bg-light')
+                      }}
+                    >
                       {guideSteps[currentStep].visual}
                     </div>
                   </motion.div>
@@ -287,15 +414,42 @@ export function GameGuideModal({ isOpen, onClose, onStart, difficulty = 'beginne
               </div>
               
               {/* 버튼 - 라이트 테마에서도 명확하게 보이도록 개선 */}
-              <div className="flex justify-between gap-4 p-6 bg-slate-50 dark:bg-slate-800">
+              <div 
+                className="flex justify-between gap-4 p-6"
+                style={{
+                  backgroundColor: theme.isDarkMode
+                    ? theme.getBackgroundColor('elevated')
+                    : theme.getSpecialColor('guide-bg-light')
+                }}
+              >
                 <button
                   onClick={handlePrev}
                   disabled={currentStep === 0}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-medium transition-all ${
-                    currentStep === 0 
-                      ? 'border-slate-300 text-slate-400 bg-slate-100 cursor-not-allowed dark:border-slate-600 dark:text-slate-500 dark:bg-slate-700' 
-                      : 'border-slate-400 text-slate-700 bg-white hover:border-slate-500 hover:bg-slate-50 dark:border-slate-500 dark:text-slate-300 dark:bg-slate-800 dark:hover:border-slate-400 dark:hover:bg-slate-700'
-                  }`}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-medium transition-all"
+                  style={{
+                    borderColor: currentStep === 0
+                      ? theme.isDarkMode
+                        ? theme.getBorderColor('light')
+                        : theme.getSpecialColor('guide-border-light-secondary')
+                      : theme.isDarkMode
+                        ? theme.getBorderColor('default')
+                        : theme.getSpecialColor('guide-border-light'),
+                    color: currentStep === 0
+                      ? theme.isDarkMode
+                        ? theme.getTextColor('muted')
+                        : theme.getSpecialColor('guide-text-light-tertiary')
+                      : theme.isDarkMode
+                        ? theme.getTextColor('secondary')
+                        : theme.getSpecialColor('guide-text-light'),
+                    backgroundColor: currentStep === 0
+                      ? theme.isDarkMode
+                        ? theme.getBackgroundColor('secondary')
+                        : theme.getSpecialColor('guide-bg-light-secondary')
+                      : theme.isDarkMode
+                        ? theme.getBackgroundColor('elevated')
+                        : 'white',
+                    cursor: currentStep === 0 ? 'not-allowed' : 'pointer'
+                  }}
                 >
                   <ArrowRight className="h-4 w-4 rotate-180" />
                   이전
@@ -304,13 +458,30 @@ export function GameGuideModal({ isOpen, onClose, onStart, difficulty = 'beginne
                 <div className="flex gap-2">
                   <button
                     onClick={onClose}
-                    className="px-4 py-2 rounded-lg border-2 border-slate-400 text-slate-700 bg-white hover:border-slate-500 hover:bg-slate-50 font-medium transition-all dark:border-slate-500 dark:text-slate-300 dark:bg-slate-800 dark:hover:border-slate-400 dark:hover:bg-slate-700"
+                    className="px-4 py-2 rounded-lg border-2 font-medium transition-all"
+                    style={{
+                      borderColor: theme.isDarkMode
+                        ? theme.getBorderColor('default')
+                        : theme.getSpecialColor('guide-border-light'),
+                      color: theme.isDarkMode
+                        ? theme.getTextColor('secondary')
+                        : theme.getSpecialColor('guide-text-light'),
+                      backgroundColor: theme.isDarkMode
+                        ? theme.getBackgroundColor('elevated')
+                        : 'white'
+                    }}
                   >
                     나중에 하기
                   </button>
                   <button
                     onClick={handleNext}
-                    className="flex items-center gap-2 px-6 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold hover:from-amber-700 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                    className="flex items-center gap-2 px-6 py-2 rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                    style={{
+                      background: theme.isDarkMode
+                        ? `linear-gradient(to right, ${theme.getSpecialColor('guide-header')}, ${theme.getSpecialColor('guide-header-end')})`
+                        : `linear-gradient(to right, ${theme.getSpecialColor('guide-accent-light-secondary')}, ${theme.getSpecialColor('guide-header-end')})`,
+                      color: 'white'
+                    }}
                   >
                     {currentStep === guideSteps.length - 1 ? '게임 시작' : '다음'}
                     <ArrowRight className="h-4 w-4" />

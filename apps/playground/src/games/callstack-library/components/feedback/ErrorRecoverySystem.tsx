@@ -18,10 +18,10 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { cn } from '@penguinjs/ui';
-import { useDesignTokens } from '../ui/DesignSystemProvider';
-import { useCallStackLibraryContext, ActionType } from '../../contexts/CallStackLibraryContext';
-import { gameEvents } from '../../utils/eventSystem';
-import { AccessibleButton } from '../ui/AccessibleButton';
+import { useDesignTokens } from '@/games/callstack-library/components/ui/DesignSystemProvider';
+import { useCallStackLibraryContext, ActionType } from '@/games/callstack-library/contexts/CallStackLibraryContext';
+import { gameEvents } from '@/games/callstack-library/utils/eventSystem';
+import { AccessibleButton } from '@/games/callstack-library/components/ui/AccessibleButton';
 
 // 실행 취소 가능한 액션 타입
 export type UndoableActionType = 

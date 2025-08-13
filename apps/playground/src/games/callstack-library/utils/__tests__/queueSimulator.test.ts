@@ -11,8 +11,8 @@ import {
   createEmptyQueueSnapshot,
   compareQueueSnapshots,
   QueueSimulatorConfig
-} from '../queueSimulator';
-import { CallStackLevel } from '../../types';
+} from '@/games/callstack-library/queueSimulator';
+import { CallStackLevel } from '@/games/callstack-library/types';
 
 describe('queueSimulator', () => {
   describe('EventLoopSimulator', () => {

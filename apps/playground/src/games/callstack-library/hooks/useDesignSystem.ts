@@ -4,7 +4,7 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { designSystem, type ColorToken, type SpacingToken, type TypographyToken } from '../theme/designSystem';
+import { designSystem, type ColorToken, type SpacingToken, type TypographyToken } from '@/games/callstack-library/theme/designSystem';
 
 // 현재 테마 컨텍스트 (라이트/다크 모드)
 interface ThemeContext {

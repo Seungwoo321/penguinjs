@@ -11,8 +11,8 @@ import {
   getFunctionColor,
   generateStepMapping,
   SimulatorConfig 
-} from '../executionSimulator';
-import { CallStackLevel, StackItem } from '../../types';
+} from '@/games/callstack-library/executionSimulator';
+import { CallStackLevel, StackItem } from '@/games/callstack-library/types';
 
 describe('executionSimulator', () => {
   describe('getFunctionColor', () => {

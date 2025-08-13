@@ -7,8 +7,7 @@ import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Circle, Lock, ChevronRight } from 'lucide-react';
 import { cn } from '@penguinjs/ui';
-import { useCallStackLibraryTheme } from '../../hooks/useCallStackLibraryTheme';
-import { createProgressAttributes } from '../../utils/ariaUtils';
+import { createProgressAttributes } from '@/games/callstack-library/utils/ariaUtils';
 
 // 진행 상태 타입
 export type ProgressStatus = 'locked' | 'available' | 'current' | 'completed';
@@ -54,15 +53,14 @@ export const ProgressIndicator = memo<ProgressIndicatorProps>(({
   size = 'md',
   className
 }) => {
-  const libraryTheme = useCallStackLibraryTheme();
   const percentage = Math.round((current / total) * 100);
   
-  // 색상 매핑
+  // 색상 매핑 (CSS 변수 기반)
   const colorMap = {
-    primary: libraryTheme.getQueueColor('callstack', 'button'),
-    success: '#10b981',
-    warning: '#f59e0b',
-    danger: '#ef4444'
+    primary: 'rgb(var(--game-callstack-button-primary))',
+    success: 'rgb(var(--game-callstack-animation-success))',
+    warning: 'rgb(var(--destructive))',
+    danger: 'rgb(var(--game-callstack-animation-error))'
   };
   
   const progressColor = colorMap[color];
@@ -94,7 +92,7 @@ export const ProgressIndicator = memo<ProgressIndicatorProps>(({
                 {showSteps && (
                   <span 
                     className="text-sm"
-                    style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+                    style={{ color: 'rgb(var(--text-secondary))' }}
                   >
                     {current}/{total}
                   </span>
@@ -115,7 +113,7 @@ export const ProgressIndicator = memo<ProgressIndicatorProps>(({
             className="w-full rounded-full overflow-hidden"
             style={{ 
               height: currentSize.height,
-              backgroundColor: libraryTheme.getQueueColor('callstack', 'light') 
+              backgroundColor: 'rgb(var(--game-callstack-queue-callstack-light))' 
             }}
             {...createProgressAttributes(current, total, label)}
           >
@@ -152,7 +150,7 @@ export const ProgressIndicator = memo<ProgressIndicatorProps>(({
               cy={radius + strokeWidth}
               r={radius}
               strokeWidth={strokeWidth}
-              stroke={libraryTheme.getQueueColor('callstack', 'light')}
+              stroke={'rgb(var(--game-callstack-queue-callstack-light))'}
               fill="none"
             />
             {/* 진행 원 */}
@@ -203,7 +201,7 @@ export const ProgressIndicator = memo<ProgressIndicatorProps>(({
               style={{
                 backgroundColor: index < current
                   ? progressColor
-                  : libraryTheme.getQueueColor('callstack', 'light')
+                  : 'rgb(var(--game-callstack-queue-callstack-light))'
               }}
               initial={animated ? { scale: 0 } : { scale: 1 }}
               animate={{ scale: 1 }}
@@ -242,8 +240,6 @@ export const StepProgressIndicator: React.FC<StepProgressIndicatorProps> = ({
   onStepClick,
   className
 }) => {
-  const libraryTheme = useCallStackLibraryTheme();
-  
   const getStepIcon = (status: ProgressStatus) => {
     switch (status) {
       case 'completed':
@@ -258,13 +254,13 @@ export const StepProgressIndicator: React.FC<StepProgressIndicatorProps> = ({
   const getStepColor = (status: ProgressStatus) => {
     switch (status) {
       case 'completed':
-        return 'rgb(var(--game-callstack-library-success))';
+        return 'rgb(var(--game-callstack-animation-success))';
       case 'current':
-        return libraryTheme.getQueueColor('callstack', 'button');
+        return 'rgb(var(--game-callstack-button-primary))';
       case 'available':
-        return libraryTheme.getQueueColor('callstack', 'main');
+        return 'rgb(var(--game-callstack-queue-callstack))';
       default:
-        return libraryTheme.getQueueColor('callstack', 'light');
+        return 'rgb(var(--game-callstack-queue-callstack-light))';
     }
   };
 
@@ -317,7 +313,7 @@ export const StepProgressIndicator: React.FC<StepProgressIndicatorProps> = ({
                   className="w-5 h-5"
                   style={{ 
                     color: step.status === 'completed' 
-                      ? 'rgb(255, 255, 255)' 
+                      ? 'rgb(var(--primary-foreground))' 
                       : color 
                   }}
                 />
@@ -340,7 +336,7 @@ export const StepProgressIndicator: React.FC<StepProgressIndicatorProps> = ({
                   <div 
                     className="text-xs mt-1"
                     style={{ 
-                      color: libraryTheme.getQueueText('callstack', 'secondary') 
+                      color: 'rgb(var(--text-secondary))' 
                     }}
                   >
                     {step.description}
@@ -365,7 +361,7 @@ export const StepProgressIndicator: React.FC<StepProgressIndicatorProps> = ({
                 style={{
                   backgroundColor: steps[index + 1].status !== 'locked'
                     ? color
-                    : libraryTheme.getQueueColor('callstack', 'light')
+                    : 'rgb(var(--game-callstack-queue-callstack-light))'
                 }}
               />
             )}
@@ -398,7 +394,6 @@ export const AchievementIndicator: React.FC<AchievementIndicatorProps> = ({
   variant = 'default',
   className
 }) => {
-  const libraryTheme = useCallStackLibraryTheme();
   const percentage = (current / total) * 100;
   const isComplete = current >= total;
   
@@ -411,8 +406,8 @@ export const AchievementIndicator: React.FC<AchievementIndicatorProps> = ({
         className
       )}
       style={{
-        backgroundColor: libraryTheme.getQueueColor('callstack', 'light'),
-        borderColor: libraryTheme.getQueueBorder('callstack')
+        backgroundColor: 'rgb(var(--game-callstack-queue-callstack-light))',
+        borderColor: '1px solid rgb(var(--game-callstack-queue-callstack))'
       }}
     >
       {/* 아이콘 */}
@@ -435,7 +430,10 @@ export const AchievementIndicator: React.FC<AchievementIndicatorProps> = ({
             {title}
           </h4>
           {showBadge && isComplete && (
-            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
+            <span className="px-2 py-0.5 text-xs rounded-full" style={{
+              backgroundColor: 'rgba(var(--game-callstack-animation-success), 0.1)',
+              color: 'rgb(var(--game-callstack-animation-success))'
+            }}>
               완료
             </span>
           )}

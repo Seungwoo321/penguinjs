@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, BookOpen, Lightbulb, Target, Trophy, ArrowRight, Layers, Play, Activity } from 'lucide-react'
+import { ThemeAwarePortal } from '@/components/ThemeAwarePortal'
 
 interface GameGuideModalProps {
   isOpen: boolean
@@ -13,6 +14,7 @@ interface GameGuideModalProps {
 }
 
 export function GameGuideModal({ isOpen, onClose, onStart, layoutType = 'A', currentStage = 1 }: GameGuideModalProps) {
+  
   const [currentStep, setCurrentStep] = useState(0)
   const [showTheory, setShowTheory] = useState(false)
 
@@ -239,13 +241,25 @@ console.log('Sync');`,
     const difficulty = getDifficulty()
     switch (difficulty) {
       case 'beginner':
-        return 'bg-gradient-to-r from-green-500 to-emerald-600'
+        return {
+          background: `linear-gradient(to right, rgb(var(--game-callstack-guide-beginner-bg-start)), rgb(var(--game-callstack-guide-beginner-bg-end)))`,
+          color: `rgb(var(--game-callstack-guide-beginner-text))`
+        }
       case 'intermediate': 
-        return 'bg-gradient-to-r from-blue-500 to-indigo-600'
+        return {
+          background: `linear-gradient(to right, rgb(var(--game-callstack-guide-intermediate-bg-start)), rgb(var(--game-callstack-guide-intermediate-bg-end)))`,
+          color: `rgb(var(--game-callstack-guide-intermediate-text))`
+        }
       case 'advanced':
-        return 'bg-gradient-to-r from-purple-500 to-violet-600'
+        return {
+          background: `linear-gradient(to right, rgb(var(--game-callstack-guide-advanced-bg-start)), rgb(var(--game-callstack-guide-advanced-bg-end)))`,
+          color: `rgb(var(--game-callstack-guide-advanced-text))`
+        }
       default:
-        return 'bg-gradient-to-r from-amber-600 to-orange-600'
+        return {
+          background: `linear-gradient(to right, rgb(var(--game-callstack-guide-library-bg-light)), rgb(var(--game-callstack-guide-library-bg-dark)))`,
+          color: `rgb(var(--game-callstack-guide-library-text))`
+        }
     }
   }
 
@@ -254,13 +268,26 @@ console.log('Sync');`,
     const difficulty = getDifficulty()
     switch (difficulty) {
       case 'beginner':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-      case 'intermediate': 
-        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+        return {
+          backgroundColor: 'rgb(var(--game-callstack-stage-beginner-bg))',
+          color: 'var(--game-callstack-stage-beginner)',
+          fontWeight: '500'
+        }
+      case 'intermediate':
+        return {
+          backgroundColor: 'rgb(var(--game-callstack-stage-intermediate-bg))',
+          color: 'var(--game-callstack-stage-intermediate)'
+        }
       case 'advanced':
-        return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+        return {
+          backgroundColor: 'rgb(var(--game-callstack-stage-advanced-bg))',
+          color: 'var(--game-callstack-stage-advanced)'
+        }
       default:
-        return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+        return {
+          backgroundColor: 'rgb(var(--game-callstack-stage-default-bg))',
+          color: 'rgb(var(--game-callstack-stage-default))'
+        }
     }
   }
 
@@ -268,25 +295,46 @@ console.log('Sync');`,
   const getDifficultyProgressStyle = (isActive: boolean, isCompleted: boolean) => {
     const difficulty = getDifficulty()
     const baseColors = {
-      beginner: isActive ? 'bg-green-500' : isCompleted ? 'bg-green-300' : 'bg-slate-300 dark:bg-slate-600',
-      intermediate: isActive ? 'bg-blue-500' : isCompleted ? 'bg-blue-300' : 'bg-slate-300 dark:bg-slate-600',
-      advanced: isActive ? 'bg-purple-500' : isCompleted ? 'bg-purple-300' : 'bg-slate-300 dark:bg-slate-600'
+      beginner: isActive ? 'bg-green-500' : isCompleted ? 'bg-green-300' : 'bg-[rgb(var(--muted))]',
+      intermediate: isActive ? 'bg-blue-500' : isCompleted ? 'bg-blue-300' : 'bg-[rgb(var(--muted))]',
+      advanced: isActive ? 'bg-purple-500' : isCompleted ? 'bg-purple-300' : 'bg-[rgb(var(--muted))]'
     }
-    return baseColors[difficulty] || (isActive ? 'bg-amber-500' : isCompleted ? 'bg-amber-300' : 'bg-slate-300 dark:bg-slate-600')
+    return baseColors[difficulty] || (isActive ? 'bg-amber-500' : isCompleted ? 'bg-amber-300' : 'bg-[rgb(var(--muted))]')
   }
 
   // 난이도별 버튼 색상
   const getDifficultyButtonStyle = () => {
     const difficulty = getDifficulty()
+    
     switch (difficulty) {
       case 'beginner':
-        return 'bg-green-500 hover:bg-green-600'
-      case 'intermediate': 
-        return 'bg-blue-500 hover:bg-blue-600'
+        return {
+          backgroundColor: 'var(--game-callstack-stage-beginner)',
+          color: 'white',
+          border: '2px solid var(--game-callstack-stage-beginner)',
+          fontWeight: '600'
+        }
+      case 'intermediate':
+        return {
+          backgroundColor: 'var(--game-callstack-stage-intermediate)',
+          color: 'white',
+          border: '2px solid var(--game-callstack-stage-intermediate)',
+          fontWeight: '600'
+        }
       case 'advanced':
-        return 'bg-purple-500 hover:bg-purple-600'
+        return {
+          backgroundColor: 'var(--game-callstack-stage-advanced)',
+          color: 'white',
+          border: '2px solid var(--game-callstack-stage-advanced)',
+          fontWeight: '600'
+        }
       default:
-        return 'bg-amber-500 hover:bg-amber-600'
+        return {
+          backgroundColor: 'rgb(var(--game-callstack-stage-default))',
+          color: 'white',
+          border: '2px solid rgb(var(--game-callstack-stage-default))',
+          fontWeight: '600'
+        }
     }
   }
 
@@ -376,40 +424,43 @@ console.log('Sync');`,
     // 토큰을 스타일이 적용된 span으로 변환
     const renderToken = (token: { type: string; value: string }, index: number) => {
       const styles = {
-        comment: 'text-slate-400',
-        string: 'text-yellow-400',
-        number: 'text-orange-400',
-        keyword: 'text-purple-400',
-        builtin: 'text-blue-400',
-        method: 'text-cyan-400',
-        literal: 'text-red-400',
-        identifier: 'text-slate-300',
-        plain: 'text-slate-300'
+        comment: `rgb(var(--game-callstack-guide-code-comment))`,
+        string: `rgb(var(--game-callstack-guide-code-string))`,
+        number: `rgb(var(--game-callstack-guide-code-number))`,
+        keyword: `rgb(var(--game-callstack-guide-code-keyword))`,
+        builtin: `rgb(var(--game-callstack-guide-code-function))`,
+        method: `rgb(var(--game-callstack-guide-code-function))`,
+        literal: `rgb(var(--game-callstack-guide-code-operator))`,
+        identifier: `rgb(var(--foreground))`,
+        plain: `rgb(var(--foreground))`
       }
       
       return (
-        <span key={index} className={styles[token.type] || 'text-slate-300'}>
+        <span 
+          key={index} 
+          style={{ color: styles[token.type] || `rgb(var(--foreground))` }}
+        >
           {token.value}
         </span>
       )
     }
     
     return (
-      <div className="bg-slate-900 rounded-lg overflow-hidden border border-slate-700">
-        <div className="bg-slate-800 px-4 py-2 flex items-center gap-2 border-b border-slate-700">
+      <div className="bg-[rgb(var(--card))] rounded-lg overflow-hidden border border-[rgb(var(--border))]">
+        <div className="bg-[rgb(var(--muted))] px-4 py-2 flex items-center gap-2 border-b border-[rgb(var(--border))]">
           <div className="flex gap-1.5">
             <span className="w-3 h-3 bg-red-500 rounded-full"></span>
             <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
             <span className="w-3 h-3 bg-green-500 rounded-full"></span>
           </div>
-          <span className="text-xs text-slate-400 font-medium ml-2">{language}</span>
+          <span className="text-xs text-[rgb(var(--muted-foreground))] font-medium ml-2">{language}</span>
         </div>
         <div className="p-4 overflow-x-auto">
           <pre className="text-sm font-mono">
             <code>
               {code.split('\n').map((line, index) => (
-                <div key={index} className="flex hover:bg-slate-800/50">
-                  <span className="text-slate-500 select-none pr-4 text-right inline-block w-10">
+                <div key={index} className="flex hover:bg-[rgb(var(--muted))]/50">
+                  <span className="text-[rgb(var(--muted-foreground))] select-none pr-4 text-right inline-block w-10">
                     {index + 1}
                   </span>
                   <span className="flex-1">
@@ -433,15 +484,32 @@ console.log('Sync');`,
       visual: (
         <div className="space-y-4">
           {/* 게임 컨셉 설명 */}
-          <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-            <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-3">🏛️ 도서관 시스템 이해하기</h4>
+          <div 
+            className="p-4 rounded-lg border"
+            style={{
+              background: 'linear-gradient(to right, rgb(var(--game-callstack-guide-concept-bg-start)), rgb(var(--game-callstack-guide-concept-bg-end)))',
+              borderColor: 'rgb(var(--game-callstack-guide-concept-border))'
+            }}
+          >
+            <h4 
+              className="font-semibold mb-3"
+              style={{
+                color: 'rgb(var(--game-callstack-guide-concept-title))'
+              }}
+            >
+              🏛️ 도서관 시스템 이해하기
+            </h4>
             <div className="space-y-3 text-sm">
               {difficultyContent.gameContext.librarian && (
                 <div className="flex items-start gap-3">
                   <span className="text-lg">👩‍🏫</span>
                   <div>
-                    <strong className="text-amber-700 dark:text-amber-300">사서 (JavaScript 엔진):</strong>
-                    <p className="text-amber-600 dark:text-amber-400">{difficultyContent.gameContext.librarian}</p>
+                    <strong 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-label))', fontWeight: '600' }}
+                    >사서 (JavaScript 엔진):</strong>
+                    <p 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-text))' }}
+                    >{difficultyContent.gameContext.librarian}</p>
                   </div>
                 </div>
               )}
@@ -449,8 +517,12 @@ console.log('Sync');`,
                 <div className="flex items-start gap-3">
                   <span className="text-lg">📚</span>
                   <div>
-                    <strong className="text-amber-700 dark:text-amber-300">메인 서가 (콜스택):</strong>
-                    <p className="text-amber-600 dark:text-amber-400">{difficultyContent.gameContext.mainShelf}</p>
+                    <strong 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-label))', fontWeight: '600' }}
+                    >메인 서가 (콜스택):</strong>
+                    <p 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-text))' }}
+                    >{difficultyContent.gameContext.mainShelf}</p>
                   </div>
                 </div>
               )}
@@ -458,8 +530,12 @@ console.log('Sync');`,
                 <div className="flex items-start gap-3">
                   <span className="text-lg">📖</span>
                   <div>
-                    <strong className="text-amber-700 dark:text-amber-300">책 (함수 호출):</strong>
-                    <p className="text-amber-600 dark:text-amber-400">{difficultyContent.gameContext.books}</p>
+                    <strong 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-label))', fontWeight: '600' }}
+                    >책 (함수 호출):</strong>
+                    <p 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-text))' }}
+                    >{difficultyContent.gameContext.books}</p>
                   </div>
                 </div>
               )}
@@ -467,8 +543,12 @@ console.log('Sync');`,
                 <div className="flex items-start gap-3">
                   <span className="text-lg">🔍</span>
                   <div>
-                    <strong className="text-amber-700 dark:text-amber-300">실행 추적:</strong>
-                    <p className="text-amber-600 dark:text-amber-400">{difficultyContent.gameContext.tracking}</p>
+                    <strong 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-label))', fontWeight: '600' }}
+                    >실행 추적:</strong>
+                    <p 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-text))' }}
+                    >{difficultyContent.gameContext.tracking}</p>
                   </div>
                 </div>
               )}
@@ -476,8 +556,12 @@ console.log('Sync');`,
                 <div className="flex items-start gap-3">
                   <span className="text-lg">⚡</span>
                   <div>
-                    <strong className="text-amber-700 dark:text-amber-300">긴급 처리대 (마이크로태스크 큐):</strong>
-                    <p className="text-amber-600 dark:text-amber-400">{difficultyContent.gameContext.urgentDesk}</p>
+                    <strong 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-label))', fontWeight: '600' }}
+                    >긴급 처리대 (마이크로태스크 큐):</strong>
+                    <p 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-text))' }}
+                    >{difficultyContent.gameContext.urgentDesk}</p>
                   </div>
                 </div>
               )}
@@ -485,35 +569,51 @@ console.log('Sync');`,
                 <div className="flex items-start gap-3">
                   <span className="text-lg">📅</span>
                   <div>
-                    <strong className="text-amber-700 dark:text-amber-300">일반 처리대 (매크로태스크 큐):</strong>
-                    <p className="text-amber-600 dark:text-amber-400">{difficultyContent.gameContext.normalDesk}</p>
+                    <strong 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-label))', fontWeight: '600' }}
+                    >일반 처리대 (매크로태스크 큐):</strong>
+                    <p 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-text))' }}
+                    >{difficultyContent.gameContext.normalDesk}</p>
                   </div>
                 </div>
               )}
-              {difficultyContent.gameContext.animationDesk && (
+              {(difficultyContent.gameContext as any).animationDesk && (
                 <div className="flex items-start gap-3">
                   <span className="text-lg">🎨</span>
                   <div>
-                    <strong className="text-amber-700 dark:text-amber-300">애니메이션 처리대:</strong>
-                    <p className="text-amber-600 dark:text-amber-400">{difficultyContent.gameContext.animationDesk}</p>
+                    <strong 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-label))', fontWeight: '600' }}
+                    >애니메이션 처리대:</strong>
+                    <p 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-text))' }}
+                    >{(difficultyContent.gameContext as any).animationDesk}</p>
                   </div>
                 </div>
               )}
-              {difficultyContent.gameContext.ioDesk && (
+              {'ioDesk' in difficultyContent.gameContext && difficultyContent.gameContext.ioDesk && (
                 <div className="flex items-start gap-3">
                   <span className="text-lg">💾</span>
                   <div>
-                    <strong className="text-amber-700 dark:text-amber-300">I/O 처리대:</strong>
-                    <p className="text-amber-600 dark:text-amber-400">{difficultyContent.gameContext.ioDesk}</p>
+                    <strong 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-label))', fontWeight: '600' }}
+                    >I/O 처리대:</strong>
+                    <p 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-text))' }}
+                    >{(difficultyContent.gameContext as any).ioDesk}</p>
                   </div>
                 </div>
               )}
-              {difficultyContent.gameContext.workerDesk && (
+              {'workerDesk' in difficultyContent.gameContext && difficultyContent.gameContext.workerDesk && (
                 <div className="flex items-start gap-3">
                   <span className="text-lg">⚙️</span>
                   <div>
-                    <strong className="text-amber-700 dark:text-amber-300">워커 처리대:</strong>
-                    <p className="text-amber-600 dark:text-amber-400">{difficultyContent.gameContext.workerDesk}</p>
+                    <strong 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-label))', fontWeight: '600' }}
+                    >워커 처리대:</strong>
+                    <p 
+                      style={{ color: 'rgb(var(--game-callstack-guide-concept-text))' }}
+                    >{(difficultyContent.gameContext as any).workerDesk}</p>
                   </div>
                 </div>
               )}
@@ -521,17 +621,39 @@ console.log('Sync');`,
           </div>
 
           {/* 이론 설명 */}
-          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-3">📖 핵심 이론</h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">{difficultyContent.theory}</p>
+          <div 
+            className="p-4 rounded-lg border"
+            style={{
+              backgroundColor: 'rgb(var(--game-callstack-guide-theory-bg))',
+              borderColor: 'rgb(var(--game-callstack-guide-theory-border))',
+              borderWidth: '2px'
+            }}
+          >
+            <h4 
+              className="font-semibold mb-3"
+              style={{
+                color: 'rgb(var(--game-callstack-guide-theory-title))',
+                fontWeight: 'bold'
+              }}
+            >
+              📖 핵심 이론
+            </h4>
+            <p 
+              className="text-sm"
+              style={{
+                color: 'rgb(var(--game-callstack-guide-theory-text))'
+              }}
+            >
+              {difficultyContent.theory}
+            </p>
           </div>
 
           {/* 예제 코드 */}
           {difficultyContent.examples.length > 0 && (
             <div>
-              <h4 className="font-semibold text-slate-800 dark:text-slate-200 mb-3">💡 {difficultyContent.examples[0].concept}</h4>
+              <h4 className="font-semibold text-[rgb(var(--foreground))] mb-3">💡 {difficultyContent.examples[0].concept}</h4>
               <CodeBlock code={difficultyContent.examples[0].code} />
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">{difficultyContent.examples[0].explanation}</p>
+              <p className="text-sm text-[rgb(var(--muted-foreground))] mt-2">{difficultyContent.examples[0].explanation}</p>
             </div>
           )}
         </div>
@@ -544,13 +666,29 @@ console.log('Sync');`,
       visual: (
         <div className="space-y-4">
           {/* 게임 시각화 */}
-          <div className="relative h-48 bg-gradient-to-b from-amber-100 to-amber-200 dark:from-amber-900 dark:to-amber-800 rounded-xl p-4 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-200/30 to-amber-600/20 rounded-xl" />
+          <div 
+            className="relative h-48 rounded-xl p-4 overflow-hidden"
+            style={{
+              background: `linear-gradient(to bottom, rgb(var(--game-callstack-guide-library-bg-light)), rgb(var(--game-callstack-guide-library-bg-dark)))`
+            }}
+          >
+            <div 
+              className="absolute inset-0 rounded-xl"
+              style={{
+                background: `linear-gradient(to bottom right, rgba(var(--game-callstack-guide-library-bg-light), 0.3), rgba(var(--game-callstack-guide-library-accent), 0.2))`
+              }}
+            />
             <div className="relative z-10 h-full flex items-center justify-center">
               <div className="text-center space-y-2">
                 <div className="text-6xl">🏛️</div>
-                <div className="font-bold text-amber-800 dark:text-amber-200">{stageContent.stageTitle}</div>
-                <div className="text-sm text-amber-600 dark:text-amber-400">{stageContent.stageDescription}</div>
+                <div 
+                  className="font-bold"
+                  style={{ color: 'rgb(var(--game-callstack-guide-library-title))' }}
+                >{stageContent.stageTitle}</div>
+                <div 
+                  className="text-sm"
+                  style={{ color: 'rgb(var(--game-callstack-guide-library-subtitle))' }}
+                >{stageContent.stageDescription}</div>
               </div>
             </div>
           </div>
@@ -558,8 +696,17 @@ console.log('Sync');`,
           {/* 실제 게임 UI 미리보기 */}
           <div className="space-y-4">
             {/* 도서관 전체 레이아웃 미리보기 */}
-            <div className="bg-gradient-to-b from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
-              <div className="text-sm font-bold text-amber-800 dark:text-amber-200 mb-3 flex items-center gap-2">
+            <div 
+              className="rounded-xl p-4 border"
+              style={{
+                background: 'linear-gradient(to bottom, rgb(var(--game-callstack-guide-preview-bg-start)), rgb(var(--game-callstack-guide-preview-bg-end)))',
+                borderColor: 'rgb(var(--game-callstack-guide-preview-border))'
+              }}
+            >
+              <div 
+                className="text-sm font-bold mb-3 flex items-center gap-2"
+                style={{ color: 'rgb(var(--game-callstack-guide-preview-title))' }}
+              >
                 <span>🏛️</span>
                 도서관 전체 레이아웃
               </div>
@@ -567,12 +714,12 @@ console.log('Sync');`,
               {/* 3패널 레이아웃 시뮬레이션 */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-24">
                 {/* 코드 에디터 패널 */}
-                <div className="bg-slate-900 rounded-lg p-2 border border-slate-700 flex flex-col">
-                  <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                <div className="bg-[rgb(var(--card))] rounded-lg p-2 border border-[rgb(var(--border))] flex flex-col">
+                  <div className="text-xs text-[rgb(var(--muted-foreground))] mb-1 flex items-center gap-1">
                     <span>📝</span>
                     코드 에디터
                   </div>
-                  <div className="flex-1 bg-slate-800 rounded text-xs font-mono p-1 overflow-hidden">
+                  <div className="flex-1 bg-[rgb(var(--muted))] rounded text-xs font-mono p-1 overflow-hidden">
                     <div className="text-purple-400">function</div>
                     <div className="text-blue-400 ml-2">main()</div>
                     <div className="text-slate-500">...</div>
@@ -580,20 +727,41 @@ console.log('Sync');`,
                 </div>
                 
                 {/* 메인 서가 (콜스택) */}
-                <div className="bg-gradient-to-b from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30 rounded-lg p-2 border-2 border-amber-400">
-                  <div className="text-xs text-amber-800 dark:text-amber-200 mb-1 flex items-center gap-1">
+                <div 
+                  className="rounded-lg p-2 border-2"
+                  style={{
+                    background: `linear-gradient(to bottom, rgb(var(--game-callstack-guide-library-bg-light)), rgb(var(--game-callstack-guide-library-bg-dark)))`,
+                    borderColor: `rgb(var(--game-callstack-guide-library-accent))`
+                  }}
+                >
+                  <div 
+                    className="text-xs mb-1 flex items-center gap-1"
+                    style={{ color: `rgb(var(--game-callstack-guide-library-text))` }}
+                  >
                     <span>📚</span>
                     메인 서가 (콜스택)
                   </div>
                   <div className="space-y-1">
-                    <div className="bg-blue-200 dark:bg-blue-800 rounded px-2 py-1 text-xs">main()</div>
-                    <div className="bg-green-200 dark:bg-green-800 rounded px-2 py-1 text-xs">calculate()</div>
+                    <div 
+                      className="rounded px-2 py-1 text-xs"
+                      style={{
+                        backgroundColor: `rgb(var(--game-callstack-guide-func-blue-bg))`,
+                        color: `rgb(var(--game-callstack-guide-func-blue-text))`
+                      }}
+                    >main()</div>
+                    <div 
+                      className="rounded px-2 py-1 text-xs"
+                      style={{
+                        backgroundColor: `rgb(var(--game-callstack-guide-func-green-bg))`,
+                        color: `rgb(var(--game-callstack-guide-func-green-text))`
+                      }}
+                    >calculate()</div>
                   </div>
                 </div>
                 
                 {/* 함수 선택기 / 스냅샷 빌더 */}
-                <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-2 border border-slate-300 dark:border-slate-600">
-                  <div className="text-xs text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                <div className="bg-[rgb(var(--muted))] rounded-lg p-2 border border-[rgb(var(--border))]">
+                  <div className="text-xs text-[rgb(var(--foreground))] mb-1 flex items-center gap-1">
                     {layoutType === 'E' ? (
                       <>
                         <span>📸</span>
@@ -609,18 +777,54 @@ console.log('Sync');`,
                   <div className="space-y-1">
                     {layoutType === 'E' ? (
                       <>
-                        <div className="bg-pink-200 dark:bg-pink-800 rounded px-2 py-1 text-xs">Step 1</div>
-                        <div className="bg-pink-200 dark:bg-pink-800 rounded px-2 py-1 text-xs">Step 2</div>
+                        <div 
+                          className="rounded px-2 py-1 text-xs"
+                          style={{
+                            backgroundColor: `rgb(var(--game-callstack-guide-func-pink-bg))`,
+                            color: `rgb(var(--game-callstack-guide-func-pink-text))`
+                          }}
+                        >Step 1</div>
+                        <div 
+                          className="rounded px-2 py-1 text-xs"
+                          style={{
+                            backgroundColor: `rgb(var(--game-callstack-guide-func-pink-bg))`,
+                            color: `rgb(var(--game-callstack-guide-func-pink-text))`
+                          }}
+                        >Step 2</div>
                       </>
                     ) : layoutType === 'A+' ? (
                       <>
-                        <div className="bg-blue-200 dark:bg-blue-800 rounded px-2 py-1 text-xs">시작: main()</div>
-                        <div className="bg-red-200 dark:bg-red-800 rounded px-2 py-1 text-xs">종료: calc()</div>
+                        <div 
+                          className="rounded px-2 py-1 text-xs"
+                          style={{
+                            backgroundColor: `rgb(var(--game-callstack-guide-func-blue-bg))`,
+                            color: `rgb(var(--game-callstack-guide-func-blue-text))`
+                          }}
+                        >시작: main()</div>
+                        <div 
+                          className="rounded px-2 py-1 text-xs"
+                          style={{
+                            backgroundColor: `rgb(var(--game-callstack-guide-func-red-bg))`,
+                            color: `rgb(var(--game-callstack-guide-func-red-text))`
+                          }}
+                        >종료: calc()</div>
                       </>
                     ) : (
                       <>
-                        <div className="bg-gray-200 dark:bg-gray-700 rounded px-2 py-1 text-xs">first()</div>
-                        <div className="bg-gray-200 dark:bg-gray-700 rounded px-2 py-1 text-xs">second()</div>
+                        <div 
+                          className="rounded px-2 py-1 text-xs"
+                          style={{
+                            backgroundColor: `rgb(var(--game-callstack-guide-func-gray-bg))`,
+                            color: `rgb(var(--game-callstack-guide-func-gray-text))`
+                          }}
+                        >first()</div>
+                        <div 
+                          className="rounded px-2 py-1 text-xs"
+                          style={{
+                            backgroundColor: `rgb(var(--game-callstack-guide-func-gray-bg))`,
+                            color: `rgb(var(--game-callstack-guide-func-gray-text))`
+                          }}
+                        >second()</div>
                       </>
                     )}
                   </div>
@@ -629,20 +833,62 @@ console.log('Sync');`,
               
               {/* 다중 큐 시스템 (고급 단계용) */}
               {(layoutType === 'B' || layoutType === 'C' || layoutType === 'D') && (
-                <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-700">
-                  <div className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-2">처리대 시스템</div>
+                <div 
+                  className="mt-3 pt-3 border-t"
+                  style={{ borderColor: 'rgb(var(--game-callstack-guide-queue-border))' }}
+                >
+                  <div 
+                    className="text-xs font-medium mb-2"
+                    style={{ color: 'rgb(var(--game-callstack-guide-queue-title))' }}
+                  >처리대 시스템</div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    <div className="bg-blue-100 dark:bg-blue-900/30 rounded p-2 border border-blue-300 dark:border-blue-700">
-                      <div className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">📚 메인 서가</div>
-                      <div className="text-xs text-blue-600 dark:text-blue-400">콜스택</div>
+                    <div 
+                      className="rounded p-2 border"
+                      style={{
+                        backgroundColor: 'rgb(var(--game-callstack-guide-queue-main-bg))',
+                        borderColor: 'rgb(var(--game-callstack-guide-queue-main-border))'
+                      }}
+                    >
+                      <div 
+                        className="text-xs font-medium mb-1"
+                        style={{ color: 'rgb(var(--game-callstack-guide-queue-main-title))' }}
+                      >📚 메인 서가</div>
+                      <div 
+                        className="text-xs"
+                        style={{ color: 'rgb(var(--game-callstack-guide-queue-main-text))' }}
+                      >콜스택</div>
                     </div>
-                    <div className="bg-green-100 dark:bg-green-900/30 rounded p-2 border border-green-300 dark:border-green-700">
-                      <div className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">⚡ 긴급 처리대</div>
-                      <div className="text-xs text-green-600 dark:text-green-400">마이크로태스크</div>
+                    <div 
+                      className="rounded p-2 border"
+                      style={{
+                        backgroundColor: 'rgb(var(--game-callstack-guide-queue-urgent-bg))',
+                        borderColor: 'rgb(var(--game-callstack-guide-queue-urgent-border))'
+                      }}
+                    >
+                      <div 
+                        className="text-xs font-medium mb-1"
+                        style={{ color: 'rgb(var(--game-callstack-guide-queue-urgent-title))' }}
+                      >⚡ 긴급 처리대</div>
+                      <div 
+                        className="text-xs"
+                        style={{ color: 'rgb(var(--game-callstack-guide-queue-urgent-text))' }}
+                      >마이크로태스크</div>
                     </div>
-                    <div className="bg-yellow-100 dark:bg-yellow-900/30 rounded p-2 border border-yellow-300 dark:border-yellow-700">
-                      <div className="text-xs font-medium text-yellow-700 dark:text-yellow-300 mb-1">📅 일반 처리대</div>
-                      <div className="text-xs text-yellow-600 dark:text-yellow-400">매크로태스크</div>
+                    <div 
+                      className="rounded p-2 border"
+                      style={{
+                        backgroundColor: 'rgb(var(--game-callstack-guide-queue-normal-bg))',
+                        borderColor: 'rgb(var(--game-callstack-guide-queue-normal-border))'
+                      }}
+                    >
+                      <div 
+                        className="text-xs font-medium mb-1"
+                        style={{ color: 'rgb(var(--game-callstack-guide-queue-normal-title))', fontWeight: '600' }}
+                      >📅 일반 처리대</div>
+                      <div 
+                        className="text-xs"
+                        style={{ color: 'rgb(var(--game-callstack-guide-queue-normal-text))' }}
+                      >매크로태스크</div>
                     </div>
                   </div>
                 </div>
@@ -650,44 +896,44 @@ console.log('Sync');`,
             </div>
             
             {/* 인터랙션 방식 안내 */}
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <div className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
+            <div className="bg-[rgb(var(--muted))] rounded-lg p-4 border border-[rgb(var(--border))]">
+              <div className="text-sm font-bold text-[rgb(var(--foreground))] mb-3 flex items-center gap-2">
                 <span>🎮</span>
                 게임 조작 방법
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
+                    <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
                       <span className="text-xs">🖱️</span>
                     </div>
-                    <span className="text-xs text-slate-700 dark:text-slate-300">
+                    <span className="text-xs text-[rgb(var(--foreground))]">
                       드래그앤드롭으로 함수 순서 조정
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-green-100 dark:bg-green-900 rounded flex items-center justify-center">
+                    <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
                       <span className="text-xs">👆</span>
                     </div>
-                    <span className="text-xs text-slate-700 dark:text-slate-300">
+                    <span className="text-xs text-[rgb(var(--foreground))]">
                       클릭으로 함수 선택/해제
                     </span>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-purple-100 dark:bg-purple-900 rounded flex items-center justify-center">
+                    <div className="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
                       <span className="text-xs">✅</span>
                     </div>
-                    <span className="text-xs text-slate-700 dark:text-slate-300">
+                    <span className="text-xs text-[rgb(var(--foreground))]">
                       검증 버튼으로 답안 확인
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900 rounded flex items-center justify-center">
+                    <div className="w-6 h-6 bg-orange-100 rounded flex items-center justify-center">
                       <span className="text-xs">💡</span>
                     </div>
-                    <span className="text-xs text-slate-700 dark:text-slate-300">
+                    <span className="text-xs text-[rgb(var(--foreground))]">
                       힌트 버튼으로 도움 받기
                     </span>
                   </div>
@@ -705,47 +951,84 @@ console.log('Sync');`,
       visual: (
         <div className="space-y-4">
           {/* 목표 설명 */}
-          <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800">
-            <h4 className="font-semibold text-green-800 dark:text-green-200 mb-3">🎯 달성해야 할 목표</h4>
-            <ul className="space-y-2 text-sm text-green-700 dark:text-green-300">
+          <div 
+            className="p-4 rounded-lg border"
+            style={{
+              background: 'linear-gradient(to right, rgb(var(--game-callstack-guide-goal-bg-start)), rgb(var(--game-callstack-guide-goal-bg-end)))',
+              borderColor: 'rgb(var(--game-callstack-guide-goal-border))'
+            }}
+          >
+            <h4 
+              className="font-semibold mb-3"
+              style={{ color: 'rgb(var(--game-callstack-guide-goal-title))' }}
+            >🎯 달성해야 할 목표</h4>
+            <ul 
+              className="space-y-2 text-sm"
+              style={{ color: 'rgb(var(--game-callstack-guide-goal-text))' }}
+            >
               <li className="flex items-start gap-2">
-                <span className="text-green-500">✓</span>
+                <span 
+                  style={{ color: 'rgb(var(--game-callstack-guide-goal-check))' }}
+                >✓</span>
                 <span>주어진 코드의 실행 순서를 정확히 예측하기</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-green-500">✓</span>
+                <span 
+                  style={{ color: 'rgb(var(--game-callstack-guide-goal-check))' }}
+                >✓</span>
                 <span>각 큐의 우선순위와 처리 방식 이해하기</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-green-500">✓</span>
+                <span 
+                  style={{ color: 'rgb(var(--game-callstack-guide-goal-check))' }}
+                >✓</span>
                 <span>이벤트 루프의 동작 원리 체득하기</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-green-500">✓</span>
+                <span 
+                  style={{ color: 'rgb(var(--game-callstack-guide-goal-check))' }}
+                >✓</span>
                 <span>실제 개발에서 활용할 수 있는 지식 습득하기</span>
               </li>
             </ul>
           </div>
 
           {/* 조작 방법 */}
-          <div className="p-4 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-            <h4 className="font-semibold text-purple-800 dark:text-purple-200 mb-3">🕹️ 게임 조작법</h4>
+          <div 
+            className="p-4 rounded-lg border"
+            style={{
+              background: 'linear-gradient(to right, rgb(var(--game-callstack-guide-controls-bg-start)), rgb(var(--game-callstack-guide-controls-bg-end)))',
+              borderColor: 'rgb(var(--game-callstack-guide-controls-border))'
+            }}
+          >
+            <h4 
+              className="font-semibold mb-3"
+              style={{ color: 'rgb(var(--game-callstack-guide-controls-title))' }}
+            >🕹️ 게임 조작법</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white dark:bg-slate-800 rounded border shadow text-xs">클릭</kbd>
-                <span className="text-purple-700 dark:text-purple-300">함수 블록 선택/이동</span>
+                <kbd className="px-2 py-1 bg-[rgb(var(--card))] rounded border shadow text-xs">클릭</kbd>
+                <span 
+                  style={{ color: 'rgb(var(--game-callstack-guide-controls-text))' }}
+                >함수 블록 선택/이동</span>
               </div>
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white dark:bg-slate-800 rounded border shadow text-xs">드래그</kbd>
-                <span className="text-purple-700 dark:text-purple-300">실행 순서 배치</span>
+                <kbd className="px-2 py-1 bg-[rgb(var(--card))] rounded border shadow text-xs">드래그</kbd>
+                <span 
+                  style={{ color: 'rgb(var(--game-callstack-guide-controls-text))' }}
+                >실행 순서 배치</span>
               </div>
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white dark:bg-slate-800 rounded border shadow text-xs">확인</kbd>
-                <span className="text-purple-700 dark:text-purple-300">답안 제출 및 검증</span>
+                <kbd className="px-2 py-1 bg-[rgb(var(--card))] rounded border shadow text-xs">확인</kbd>
+                <span 
+                  style={{ color: 'rgb(var(--game-callstack-guide-controls-text))' }}
+                >답안 제출 및 검증</span>
               </div>
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white dark:bg-slate-800 rounded border shadow text-xs">힌트</kbd>
-                <span className="text-purple-700 dark:text-purple-300">막힐 때 도움받기</span>
+                <kbd className="px-2 py-1 bg-[rgb(var(--card))] rounded border shadow text-xs">힌트</kbd>
+                <span 
+                  style={{ color: 'rgb(var(--game-callstack-guide-controls-text))' }}
+                >막힐 때 도움받기</span>
               </div>
             </div>
           </div>
@@ -767,35 +1050,44 @@ console.log('Sync');`,
         content: "실행 중인 프로그램의 각 순간을 정확히 기록하고 분석하는 스냅샷 시스템을 학습합니다. 디버깅의 핵심 기술입니다.",
         visual: (
           <div className="space-y-4">
-            <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
-              <h4 className="font-semibold text-emerald-800 dark:text-emerald-200 mb-3">스택 스냅샷의 특징</h4>
+            <div 
+              className="p-4 rounded-lg border"
+              style={{
+                background: `linear-gradient(to right, rgb(var(--game-callstack-guide-func-green-bg)), rgb(var(--game-callstack-guide-library-bg-light)))`,
+                borderColor: `rgb(var(--game-callstack-guide-func-green-bg))`
+              }}
+            >
+              <h4 
+                className="font-semibold mb-3"
+                style={{ color: `rgb(var(--game-callstack-guide-func-green-text))` }}
+              >스택 스냅샷의 특징</h4>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <span className="text-lg">📸</span>
                   <div>
-                    <strong className="text-emerald-700 dark:text-emerald-300">스냅샷 카메라:</strong>
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400">특정 시점의 콜스택 상태를 사진처럼 기록합니다.</p>
+                    <strong className="text-emerald-700">스냅샷 카메라:</strong>
+                    <p className="text-sm text-emerald-600">특정 시점의 콜스택 상태를 사진처럼 기록합니다.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-lg">⏱️</span>
                   <div>
-                    <strong className="text-emerald-700 dark:text-emerald-300">타임라인 추적:</strong>
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400">코드 실행의 각 단계별 상태 변화를 순서대로 기록합니다.</p>
+                    <strong className="text-emerald-700">타임라인 추적:</strong>
+                    <p className="text-sm text-emerald-600">코드 실행의 각 단계별 상태 변화를 순서대로 기록합니다.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-lg">🔍</span>
                   <div>
-                    <strong className="text-emerald-700 dark:text-emerald-300">디버깅 도구:</strong>
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400">실제 개발에서 버그를 찾을 때 사용하는 핵심 기술입니다.</p>
+                    <strong className="text-emerald-700">디버깅 도구:</strong>
+                    <p className="text-sm text-emerald-600">실제 개발에서 버그를 찾을 때 사용하는 핵심 기술입니다.</p>
                   </div>
                 </div>
               </div>
             </div>
             
             {/* 실제 스냅샷 UI 미리보기 */}
-            <div className="bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="bg-gradient-to-b from-slate-50 to-slate-100 rounded-lg border border-[rgb(var(--border))] overflow-hidden">
               <div className="bg-emerald-600 text-white px-4 py-2 text-sm font-bold flex items-center gap-2">
                 <span>📸</span>
                 스택 스냅샷 시스템 미리보기
@@ -805,8 +1097,8 @@ console.log('Sync');`,
               <div className="p-4">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-32">
                   {/* 향상된 코드 에디터 (브레이크포인트 포함) */}
-                  <div className="bg-slate-900 rounded-lg border border-slate-700 flex flex-col">
-                    <div className="px-3 py-2 bg-slate-800 text-xs text-slate-300 font-medium border-b border-slate-700">
+                  <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] flex flex-col">
+                    <div className="px-3 py-2 bg-[rgb(var(--muted))] text-xs text-[rgb(var(--foreground))] font-medium border-b border-[rgb(var(--border))]">
                       📝 코드 에디터 (브레이크포인트)
                     </div>
                     <div className="flex-1 p-2">
@@ -828,16 +1120,41 @@ console.log('Sync');`,
                   </div>
                   
                   {/* 타임라인 콜스택 */}
-                  <div className="bg-gradient-to-b from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-lg border-2 border-amber-400">
-                    <div className="px-3 py-2 bg-amber-100 dark:bg-amber-900/30 text-xs text-amber-800 dark:text-amber-200 font-medium border-b border-amber-300 dark:border-amber-700">
+                  <div 
+                    className="rounded-lg border-2"
+                    style={{
+                      background: 'linear-gradient(to bottom, rgb(var(--game-callstack-guide-timeline-bg-start)), rgb(var(--game-callstack-guide-timeline-bg-end)))',
+                      borderColor: 'rgb(var(--game-callstack-guide-timeline-border))'
+                    }}
+                  >
+                    <div 
+                      className="px-3 py-2 text-xs font-medium border-b"
+                      style={{
+                        backgroundColor: 'rgb(var(--game-callstack-guide-timeline-header-bg))',
+                        color: 'rgb(var(--game-callstack-guide-timeline-header-text))',
+                        borderColor: 'rgb(var(--game-callstack-guide-timeline-header-border))'
+                      }}
+                    >
                       📚 타임라인 콜스택
                     </div>
                     <div className="p-2 space-y-1">
-                      <div className="bg-amber-200 dark:bg-amber-800 rounded px-2 py-1 text-xs text-amber-900 dark:text-amber-100 flex items-center justify-between">
+                      <div 
+                        className="rounded px-2 py-1 text-xs flex items-center justify-between"
+                        style={{
+                          backgroundColor: 'rgb(var(--game-callstack-guide-timeline-item1-bg))',
+                          color: 'rgb(var(--game-callstack-guide-timeline-item1-text))'
+                        }}
+                      >
                         <span>main()</span>
                         <span className="text-xs opacity-60">#2</span>
                       </div>
-                      <div className="bg-amber-300 dark:bg-amber-700 rounded px-2 py-1 text-xs text-amber-900 dark:text-amber-100 flex items-center justify-between">
+                      <div 
+                        className="rounded px-2 py-1 text-xs flex items-center justify-between"
+                        style={{
+                          backgroundColor: 'rgb(var(--game-callstack-guide-timeline-item2-bg))',
+                          color: 'rgb(var(--game-callstack-guide-timeline-item2-text))'
+                        }}
+                      >
                         <span>calculate()</span>
                         <span className="text-xs opacity-60">#1</span>
                       </div>
@@ -853,8 +1170,8 @@ console.log('Sync');`,
                   </div>
                   
                   {/* 스택 스냅샷 빌더 */}
-                  <div className="bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600">
-                    <div className="px-3 py-2 bg-slate-200 dark:bg-slate-700 text-xs text-slate-700 dark:text-slate-300 font-medium border-b border-slate-300 dark:border-slate-600">
+                  <div className="bg-[rgb(var(--muted))] rounded-lg border border-[rgb(var(--border))]">
+                    <div className="px-3 py-2 bg-[rgb(var(--muted))] text-xs text-[rgb(var(--foreground))] font-medium border-b border-[rgb(var(--border))]">
                       📸 스냅샷 빌더
                     </div>
                     <div className="p-2">
@@ -867,8 +1184,8 @@ console.log('Sync');`,
                       </div>
                       {/* 함수 선택 영역 */}
                       <div className="space-y-1">
-                        <div className="bg-blue-200 dark:bg-blue-800 rounded px-2 py-1 text-xs">main()</div>
-                        <div className="bg-green-200 dark:bg-green-800 rounded px-2 py-1 text-xs">calculate()</div>
+                        <div className="bg-blue-200 rounded px-2 py-1 text-xs">main()</div>
+                        <div className="bg-green-200 rounded px-2 py-1 text-xs">calculate()</div>
                       </div>
                       {/* 검증 버튼 */}
                       <div className="mt-2">
@@ -881,24 +1198,24 @@ console.log('Sync');`,
                 </div>
                 
                 {/* 하단 범례 */}
-                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                  <div className="text-xs text-slate-600 dark:text-slate-400 mb-2 font-medium">범례:</div>
+                <div className="mt-3 pt-3 border-t border-[rgb(var(--border))]">
+                  <div className="text-xs text-[rgb(var(--muted-foreground))] mb-2 font-medium">범례:</div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                      <span className="text-slate-600 dark:text-slate-400">브레이크포인트</span>
+                      <span className="text-[rgb(var(--muted-foreground))]">브레이크포인트</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
-                      <span className="text-slate-600 dark:text-slate-400">현재 실행중</span>
+                      <span className="text-[rgb(var(--muted-foreground))]">현재 실행중</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      <span className="text-slate-600 dark:text-slate-400">실행 완료</span>
+                      <span className="text-[rgb(var(--muted-foreground))]">실행 완료</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 bg-pink-400 rounded"></span>
-                      <span className="text-slate-600 dark:text-slate-400">체크포인트</span>
+                      <span className="text-[rgb(var(--muted-foreground))]">체크포인트</span>
                     </div>
                   </div>
                 </div>
@@ -937,28 +1254,52 @@ main();
         content: "이제 5개의 큐가 동시에 작동하는 복잡한 시스템을 다룹니다. 각 큐의 특성과 우선순위를 정확히 파악해야 합니다.",
         visual: (
           <div className="space-y-4">
-            <div className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
-              <h4 className="font-semibold text-indigo-800 dark:text-indigo-200 mb-3">다중 큐 시스템의 특징</h4>
+            <div 
+              className="p-4 rounded-lg border"
+              style={{
+                background: `linear-gradient(to right, rgb(var(--game-callstack-guide-indigo-bg-start)), rgb(var(--game-callstack-guide-indigo-bg-end)))`,
+                borderColor: `rgb(var(--game-callstack-guide-indigo-border))`
+              }}
+            >
+              <h4 
+                className="font-semibold mb-3"
+                style={{ color: `rgb(var(--game-callstack-guide-indigo-text))` }}
+              >다중 큐 시스템의 특징</h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 bg-amber-500 rounded-full"></span>
-                  <span className="text-sm text-indigo-700 dark:text-indigo-300">콜스택 (최우선)</span>
+                  <span 
+                    className="text-sm"
+                    style={{ color: `rgb(var(--game-callstack-guide-indigo-text))` }}
+                  >콜스택 (최우선)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-                  <span className="text-sm text-indigo-700 dark:text-indigo-300">마이크로태스크 큐 (Promise)</span>
+                  <span 
+                    className="text-sm"
+                    style={{ color: `rgb(var(--game-callstack-guide-indigo-text))` }}
+                  >마이크로태스크 큐 (Promise)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
-                  <span className="text-sm text-indigo-700 dark:text-indigo-300">애니메이션 프레임 큐</span>
+                  <span 
+                    className="text-sm"
+                    style={{ color: `rgb(var(--game-callstack-guide-indigo-text))` }}
+                  >애니메이션 프레임 큐</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                  <span className="text-sm text-indigo-700 dark:text-indigo-300">제너레이터 큐</span>
+                  <span 
+                    className="text-sm"
+                    style={{ color: `rgb(var(--game-callstack-guide-indigo-text))` }}
+                  >제너레이터 큐</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                  <span className="text-sm text-indigo-700 dark:text-indigo-300">매크로태스크 큐 (setTimeout)</span>
+                  <span 
+                    className="text-sm"
+                    style={{ color: `rgb(var(--game-callstack-guide-indigo-text))` }}
+                  >매크로태스크 큐 (setTimeout)</span>
                 </div>
               </div>
             </div>
@@ -989,17 +1330,35 @@ console.log('끝');`} />
         content: "5개의 큐가 동시에 작동하는 복잡한 시나리오입니다. 각 큐의 우선순위와 상호작용을 정확히 파악해야 합니다.",
         visual: (
           <div className="space-y-4">
-            <div className="p-4 bg-gradient-to-r from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/20 rounded-lg border border-violet-200 dark:border-violet-800">
-              <h4 className="font-semibold text-violet-800 dark:text-violet-200 mb-3">복잡한 비동기 패턴</h4>
+            <div 
+              className="p-4 rounded-lg border"
+              style={{
+                background: `linear-gradient(to right, rgb(var(--game-callstack-guide-violet-bg-start)), rgb(var(--game-callstack-guide-violet-bg-end)))`,
+                borderColor: `rgb(var(--game-callstack-guide-violet-border))`
+              }}
+            >
+              <h4 
+                className="font-semibold mb-3"
+                style={{ color: `rgb(var(--game-callstack-guide-violet-text))` }}
+              >복잡한 비동기 패턴</h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-violet-700 dark:text-violet-300">💡 실전 개발에서 자주 마주치는 복잡한 상황들</span>
+                  <span 
+                    className="text-sm"
+                    style={{ color: `rgb(var(--game-callstack-guide-violet-text))` }}
+                  >💡 실전 개발에서 자주 마주치는 복잡한 상황들</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-violet-700 dark:text-violet-300">🔄 여러 비동기 작업이 동시에 실행되는 시나리오</span>
+                  <span 
+                    className="text-sm"
+                    style={{ color: `rgb(var(--game-callstack-guide-violet-text))` }}
+                  >🔄 여러 비동기 작업이 동시에 실행되는 시나리오</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-violet-700 dark:text-violet-300">⚖️ 큐 간 우선순위 경쟁과 실행 타이밍</span>
+                  <span 
+                    className="text-sm"
+                    style={{ color: `rgb(var(--game-callstack-guide-violet-text))` }}
+                  >⚖️ 큐 간 우선순위 경쟁과 실행 타이밍</span>
                 </div>
               </div>
             </div>
@@ -1031,32 +1390,41 @@ async function complexScenario() {
         content: "모든 6개의 큐가 작동하는 완전한 이벤트 루프 시스템입니다. JavaScript의 비동기 처리를 완벽하게 이해하게 됩니다.",
         visual: (
           <div className="space-y-4">
-            <div className="p-4 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-lg border border-rose-200 dark:border-rose-800">
-              <h4 className="font-semibold text-rose-800 dark:text-rose-200 mb-3">완전한 이벤트 루프 시스템</h4>
+            <div 
+              className="p-4 rounded-lg border"
+              style={{
+                background: `linear-gradient(to right, rgb(var(--game-callstack-guide-rose-bg-start)), rgb(var(--game-callstack-guide-rose-bg-end)))`,
+                borderColor: `rgb(var(--game-callstack-guide-rose-border))`
+              }}
+            >
+              <h4 
+                className="font-semibold mb-3"
+                style={{ color: `rgb(var(--game-callstack-guide-rose-text))` }}
+              >완전한 이벤트 루프 시스템</h4>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
-                  <span className="text-rose-700 dark:text-rose-300">콜스택</span>
+                  <span style={{ color: `rgb(var(--game-callstack-guide-rose-text))` }}>콜스택</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  <span className="text-rose-700 dark:text-rose-300">마이크로태스크</span>
+                  <span style={{ color: `rgb(var(--game-callstack-guide-rose-text))` }}>마이크로태스크</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                  <span className="text-rose-700 dark:text-rose-300">애니메이션</span>
+                  <span style={{ color: `rgb(var(--game-callstack-guide-rose-text))` }}>애니메이션</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span className="text-rose-700 dark:text-rose-300">제너레이터</span>
+                  <span style={{ color: `rgb(var(--game-callstack-guide-rose-text))` }}>제너레이터</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
-                  <span className="text-rose-700 dark:text-rose-300">I/O 큐</span>
+                  <span style={{ color: `rgb(var(--game-callstack-guide-rose-text))` }}>I/O 큐</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                  <span className="text-rose-700 dark:text-rose-300">워커 큐</span>
+                  <span style={{ color: `rgb(var(--game-callstack-guide-rose-text))` }}>워커 큐</span>
                 </div>
               </div>
             </div>
@@ -1092,7 +1460,15 @@ console.log('끝');`} />
   }
 
   // 모든 스텝 합치기
-  const allSteps = [...guideSteps, ...getAdvancedSteps()]
+  const allSteps = [...(guideSteps || []), ...(getAdvancedSteps() || [])]
+
+  // 유효성 검사
+  if (!allSteps || allSteps.length === 0) {
+    return null // 로딩 또는 오류 상태
+  }
+
+  // currentStep 유효성 검사
+  const safeCurrentStep = Math.max(0, Math.min(currentStep, allSteps.length - 1))
 
   const handleNext = () => {
     if (currentStep < allSteps.length - 1) {
@@ -1111,13 +1487,13 @@ console.log('끝');`} />
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <ThemeAwarePortal>
           {/* 배경 오버레이 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50"
+            className="fixed inset-0 bg-black/60 z-50"
             onClick={onClose}
           />
           
@@ -1128,17 +1504,23 @@ console.log('끝');`} />
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border" style={{ backgroundColor: 'rgb(var(--background))', borderColor: 'rgb(var(--border))' }}>
               {/* 헤더 */}
-              <div className={`relative ${getDifficultyHeaderStyle()} p-6 text-white`}>
+              <div 
+                className="relative p-6"
+                style={{
+                  ...getDifficultyHeaderStyle(),
+                  color: getDifficultyHeaderStyle().color
+                }}
+              >
                 <button
                   onClick={onClose}
-                  className="absolute top-4 right-4 p-2 rounded-lg hover:bg-white/20 transition-colors"
+                  className="absolute top-4 right-4 p-2 rounded-lg hover:bg-[rgb(var(--surface-elevated))]/20 transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-white/20 rounded-xl">
+                  <div className="p-3 bg-[rgb(var(--surface-elevated))]/20 rounded-xl">
                     <BookOpen className="h-8 w-8" />
                   </div>
                   <div>
@@ -1149,8 +1531,8 @@ console.log('끝');`} />
               </div>
               
               {/* 진행 표시 */}
-              <div className="flex justify-center gap-2 p-4 bg-slate-50 dark:bg-slate-800">
-                {allSteps.map((_, index) => (
+              <div className="flex justify-center gap-2 p-4 border-b" style={{ backgroundColor: 'rgb(var(--muted))', borderColor: 'rgb(var(--border))' }}>
+                {allSteps?.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentStep(index)}
@@ -1172,59 +1554,76 @@ console.log('끝');`} />
                 >
                   {/* 아이콘과 제목 */}
                   <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-xl ${getDifficultyIconStyle()}`}>
-                      {allSteps[currentStep].icon}
+                    <div 
+                      className="p-3 rounded-xl"
+                      style={getDifficultyIconStyle()}
+                    >
+                      {allSteps[safeCurrentStep]?.icon}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                        {allSteps[currentStep].title}
+                      <h3 className="text-xl font-bold text-[rgb(var(--foreground))]">
+                        {allSteps[safeCurrentStep]?.title}
                       </h3>
-                      <p className="text-slate-600 dark:text-slate-400 mt-1">
-                        {allSteps[currentStep].content}
+                      <p className="text-[rgb(var(--muted-foreground))] mt-1">
+                        {allSteps[safeCurrentStep]?.content}
                       </p>
                     </div>
                   </div>
 
                   {/* 시각적 컨텐츠 */}
-                  {allSteps[currentStep].visual}
+                  {allSteps[safeCurrentStep]?.visual}
                 </motion.div>
               </div>
               
               {/* 하단 버튼 */}
-              <div className="flex justify-between items-center p-6 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex justify-between items-center p-6 border-t" style={{ backgroundColor: 'rgb(var(--muted))', borderColor: 'rgb(var(--border))' }}>
                 <button
                   onClick={handlePrev}
                   disabled={currentStep === 0}
-                  className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-[rgb(var(--muted-foreground))] hover:text-[rgb(var(--foreground))] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <ArrowRight className="h-4 w-4 rotate-180" />
                   이전
                 </button>
                 
-                <span className="text-sm text-slate-500 dark:text-slate-400">
+                <span className="text-sm text-[rgb(var(--muted-foreground))]">
                   {currentStep + 1} / {allSteps.length}
                 </span>
                 
-                <button
-                  onClick={handleNext}
-                  className={`flex items-center gap-2 px-6 py-2 ${getDifficultyButtonStyle()} text-white rounded-lg transition-colors`}
-                >
-                  {currentStep === allSteps.length - 1 ? (
-                    <>
-                      <Play className="h-4 w-4" />
-                      게임 시작
-                    </>
-                  ) : (
-                    <>
-                      다음
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 rounded-lg border font-medium transition-all"
+                    style={{
+                      borderColor: 'rgb(var(--border))',
+                      color: 'rgb(var(--foreground))',
+                      backgroundColor: 'rgb(var(--card))'
+                    }}
+                  >
+                    다음에 하기
+                  </button>
+                  <button
+                    onClick={handleNext}
+                    className="flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-all shadow-md hover:shadow-lg hover:scale-105"
+                    style={getDifficultyButtonStyle()}
+                  >
+                    {currentStep === allSteps.length - 1 ? (
+                      <>
+                        <Play className="h-4 w-4" />
+                        게임 시작
+                      </>
+                    ) : (
+                      <>
+                        다음
+                        <ArrowRight className="h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
-        </>
+        </ThemeAwarePortal>
       )}
     </AnimatePresence>
   )

@@ -22,7 +22,7 @@ import {
   getCommandPriority,
   createCommand,
   CommandMetadata
-} from '../Commands';
+} from '@/games/callstack-library/Commands';
 
 describe('Commands', () => {
   describe('CommandBuilder', () => {

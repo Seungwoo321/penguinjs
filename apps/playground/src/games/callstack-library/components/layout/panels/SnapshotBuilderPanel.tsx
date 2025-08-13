@@ -2,9 +2,8 @@
 
 import React from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
-import { SnapshotBuilderPanelProps } from '../../../types/layout'
-import { useCallStackLibraryTheme } from '../../../hooks/useCallStackLibraryTheme'
-import { useResponsiveLayout } from '../../../hooks/useResponsiveLayout'
+import { SnapshotBuilderPanelProps } from '@/games/callstack-library/types/layout'
+import { useResponsiveLayout } from '@/games/callstack-library/hooks/useResponsiveLayout'
 
 /**
  * 스냅샷 빌더 패널
@@ -16,7 +15,6 @@ export const SnapshotBuilderPanel: React.FC<SnapshotBuilderPanelProps> = ({
   onSnapshotChange,
   className
 }) => {
-  const libraryTheme = useCallStackLibraryTheme()
   const responsiveLayout = useResponsiveLayout()
   return (
     <GamePanel 
@@ -27,17 +25,15 @@ export const SnapshotBuilderPanel: React.FC<SnapshotBuilderPanelProps> = ({
       <div 
         className="px-4 py-2 border-b"
         style={{
-          background: libraryTheme.getQueueColor('callstack', 'light'),
-          backgroundImage: libraryTheme.theme.library.textures.wood,
-          backgroundBlendMode: 'overlay',
-          borderColor: libraryTheme.getQueueBorder('callstack', 'light')
+          background: 'rgb(var(--game-callstack-queue-callstack-light))',
+          borderColor: 'rgb(var(--game-callstack-queue-callstack-light))'
         }}
       >
         <p 
           className="flex items-center gap-2"
           style={{
             fontSize: responsiveLayout.config.fontSize.caption,
-            color: libraryTheme.getQueueText('callstack', 'secondary')
+            color: 'rgb(var(--game-callstack-queue-callstack-text-secondary))'
           }}
         >
           📋 각 단계별 도서관 상태를 기록하세요
@@ -65,8 +61,19 @@ export const SnapshotBuilderPanel: React.FC<SnapshotBuilderPanelProps> = ({
       </div>
       
       {/* 하단 정보 */}
-      <div className="px-4 py-2 border-t border-editor-border bg-surface-secondary">
-        <div className="flex justify-between items-center text-xs text-game-text-secondary">
+      <div 
+        className="px-4 py-2 border-t"
+        style={{
+          backgroundColor: 'rgb(var(--game-callstack-background-elevated))',
+          borderColor: 'rgb(var(--game-callstack-border))'
+        }}
+      >
+        <div 
+          className="flex justify-between items-center text-xs"
+          style={{
+            color: 'rgb(var(--game-callstack-text-secondary))'
+          }}
+        >
           <span>단계: {currentStep + 1} / {executionSteps.length}</span>
           <span>완성도: 75%</span>
         </div>
@@ -83,23 +90,34 @@ const StepSelector: React.FC<{
   currentStep: number
   onStepChange: (step: number) => void
 }> = ({ executionSteps, currentStep, onStepChange }) => {
-  
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-medium text-game-text">실행 단계 선택</h4>
+      <h4 
+        className="text-sm font-medium"
+        style={{
+          color: 'rgb(var(--game-callstack-text-primary))'
+        }}
+      >
+        실행 단계 선택
+      </h4>
       
       <div className="grid grid-cols-4 gap-2">
         {executionSteps.map((_, index) => (
           <button
             key={index}
             onClick={() => onStepChange(index)}
-            className={cn(
-              "h-8 text-xs rounded border transition-all",
-              "flex items-center justify-center",
-              currentStep === index
-                ? "bg-blue-500 text-white border-blue-600"
-                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-300"
-            )}
+            className="h-8 text-xs rounded border transition-all flex items-center justify-center"
+            style={{
+              backgroundColor: currentStep === index 
+                ? 'rgb(var(--game-callstack-primary))'
+                : 'rgb(var(--game-callstack-background-elevated))',
+              color: currentStep === index
+                ? 'white'
+                : 'rgb(var(--game-callstack-text-secondary))',
+              borderColor: currentStep === index
+                ? 'rgb(var(--game-callstack-primary))'
+                : 'rgb(var(--game-callstack-border))'
+            }}
           >
             {index + 1}
           </button>
@@ -116,27 +134,39 @@ const SnapshotBuilder: React.FC<{
   step: number
   onSnapshotChange: (step: number, snapshot: any) => void
 }> = ({ step, onSnapshotChange }) => {
-  
   // 임시 큐 상태 (실제로는 props로 받아올 예정)
   const queues = ['callstack', 'microtask', 'macrotask']
   const availableFunctions = ['main()', 'outer()', 'inner()', 'Promise.then', 'setTimeout']
   
   return (
     <div className="space-y-3">
-      <h4 className="text-sm font-medium text-game-text">
+      <h4 
+        className="text-sm font-medium"
+        style={{
+          color: 'rgb(var(--game-callstack-text-primary))'
+        }}
+      >
         단계 {step + 1}의 큐 상태 구성
       </h4>
       
       {/* 사용 가능한 함수들 */}
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+        <h5 
+          className="text-xs font-semibold" 
+          style={{ color: 'rgb(var(--game-callstack-text-muted))' }}
+        >
           사용 가능한 함수들
         </h5>
         <div className="grid grid-cols-2 gap-1">
           {availableFunctions.map((func, index) => (
             <div
               key={index}
-              className="p-1 text-xs bg-gray-100 border border-gray-200 rounded cursor-pointer hover:bg-gray-200 dark:bg-slate-700 dark:border-slate-600"
+              className="p-1 text-xs rounded cursor-pointer transition-colors"
+              style={{
+                backgroundColor: 'rgb(var(--game-callstack-background-secondary))',
+                borderColor: 'rgb(var(--game-callstack-border))',
+                color: 'rgb(var(--game-callstack-text-secondary))'
+              }}
               draggable
             >
               {func}
@@ -170,7 +200,6 @@ const QueueBuilder: React.FC<{
   step: number
   onQueueChange: (queueState: any[]) => void
 }> = ({ queueType, step, onQueueChange }) => {
-  
   const queueConfig = getQueueConfig(queueType)
   const [items, setItems] = React.useState<string[]>([])
   
@@ -187,42 +216,67 @@ const QueueBuilder: React.FC<{
   }
   
   return (
-    <div className={cn(
-      "border-2 rounded-lg p-3",
-      queueConfig.borderColor
-    )}>
+    <div 
+      className="border-2 rounded-lg p-3"
+      style={{
+        borderColor: queueConfig.borderColor
+      }}
+    >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-sm">{queueConfig.icon}</span>
           <span className="text-sm font-semibold">{queueConfig.name}</span>
         </div>
-        <span className="text-xs text-gray-500">({items.length}개)</span>
+        <span 
+          className="text-xs"
+          style={{
+            color: 'rgb(var(--game-callstack-text-muted))'
+          }}
+        >
+          ({items.length}개)
+        </span>
       </div>
       
       {/* 드롭 영역 */}
-      <div className={cn(
-        "min-h-[60px] border-2 border-dashed rounded p-2",
-        "flex flex-wrap gap-1 items-start",
-        queueConfig.dropZoneBorder
-      )}>
+      <div 
+        className="min-h-[60px] border-2 border-dashed rounded p-2 flex flex-wrap gap-1 items-start"
+        style={{
+          borderColor: queueConfig.dropZoneBorderColor
+        }}
+      >
         {items.length === 0 ? (
-          <div className="text-xs text-gray-400 italic w-full text-center py-2">
+          <div 
+            className="text-xs italic w-full text-center py-2"
+            style={{
+              color: 'rgb(var(--game-callstack-text-muted))'
+            }}
+          >
             함수를 드래그해서 추가하세요
           </div>
         ) : (
           items.map((item, index) => (
             <div
               key={index}
-              className={cn(
-                "px-2 py-1 text-xs rounded border",
-                "flex items-center gap-1",
-                queueConfig.itemStyle
-              )}
+              className="px-2 py-1 text-xs rounded border flex items-center gap-1"
+              style={{
+                backgroundColor: queueConfig.itemBackgroundColor,
+                borderColor: queueConfig.itemBorderColor,
+                color: queueConfig.itemTextColor
+              }}
             >
               <span>{item}</span>
               <button
                 onClick={() => removeItem(index)}
-                className="text-red-500 hover:text-red-700"
+                className="hover:opacity-80 transition-opacity"
+                style={{
+                  color: 'rgb(var(--game-callstack-error))'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgb(var(--game-callstack-error))'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'rgb(var(--game-callstack-error))'
+                }}
               >
                 ×
               </button>
@@ -240,44 +294,56 @@ function getQueueConfig(queueType: string) {
     callstack: {
       name: '콜스택',
       icon: '📥',
-      borderColor: 'border-blue-500',
-      dropZoneBorder: 'border-blue-300',
-      itemStyle: 'bg-blue-100 border-blue-300 text-blue-800'
+      borderColor: 'rgb(var(--game-callstack-queue-callstack-primary))',
+      dropZoneBorderColor: 'rgb(var(--game-callstack-queue-callstack-light))',
+      itemBackgroundColor: 'rgb(var(--game-callstack-queue-callstack-background))',
+      itemBorderColor: 'rgb(var(--game-callstack-queue-callstack-light))',
+      itemTextColor: 'rgb(var(--game-callstack-queue-callstack-text))'
     },
     microtask: {
       name: '마이크로태스크',
       icon: '⚡',
-      borderColor: 'border-green-500',
-      dropZoneBorder: 'border-green-300',
-      itemStyle: 'bg-green-100 border-green-300 text-green-800'
+      borderColor: 'rgb(var(--game-callstack-queue-microtask-primary))',
+      dropZoneBorderColor: 'rgb(var(--game-callstack-queue-microtask-light))',
+      itemBackgroundColor: 'rgb(var(--game-callstack-queue-microtask-background))',
+      itemBorderColor: 'rgb(var(--game-callstack-queue-microtask-light))',
+      itemTextColor: 'rgb(var(--game-callstack-queue-microtask-text))'
     },
     macrotask: {
       name: '매크로태스크',
       icon: '⏰',
-      borderColor: 'border-yellow-500',
-      dropZoneBorder: 'border-yellow-300',
-      itemStyle: 'bg-yellow-100 border-yellow-300 text-yellow-800'
+      borderColor: 'rgb(var(--game-callstack-queue-macrotask-primary))',
+      dropZoneBorderColor: 'rgb(var(--game-callstack-queue-macrotask-light))',
+      itemBackgroundColor: 'rgb(var(--game-callstack-queue-macrotask-background))',
+      itemBorderColor: 'rgb(var(--game-callstack-queue-macrotask-light))',
+      itemTextColor: 'rgb(var(--game-callstack-queue-macrotask-text))'
     },
     animation: {
       name: '애니메이션',
       icon: '🎬',
-      borderColor: 'border-purple-500',
-      dropZoneBorder: 'border-purple-300',
-      itemStyle: 'bg-purple-100 border-purple-300 text-purple-800'
+      borderColor: 'rgb(var(--game-callstack-queue-animation-primary))',
+      dropZoneBorderColor: 'rgb(var(--game-callstack-queue-animation-light))',
+      itemBackgroundColor: 'rgb(var(--game-callstack-queue-animation-background))',
+      itemBorderColor: 'rgb(var(--game-callstack-queue-animation-light))',
+      itemTextColor: 'rgb(var(--game-callstack-queue-animation-text))'
     },
     io: {
       name: 'I/O',
       icon: '💾',
-      borderColor: 'border-red-500',
-      dropZoneBorder: 'border-red-300',
-      itemStyle: 'bg-red-100 border-red-300 text-red-800'
+      borderColor: 'rgb(var(--game-callstack-queue-io-primary))',
+      dropZoneBorderColor: 'rgb(var(--game-callstack-queue-io-light))',
+      itemBackgroundColor: 'rgb(var(--game-callstack-queue-io-background))',
+      itemBorderColor: 'rgb(var(--game-callstack-queue-io-light))',
+      itemTextColor: 'rgb(var(--game-callstack-queue-io-text))'
     },
     worker: {
       name: 'Worker',
       icon: '👷',
-      borderColor: 'border-gray-500',
-      dropZoneBorder: 'border-gray-300',
-      itemStyle: 'bg-gray-100 border-gray-300 text-gray-800'
+      borderColor: 'rgb(var(--game-callstack-queue-worker-primary))',
+      dropZoneBorderColor: 'rgb(var(--game-callstack-queue-worker-light))',
+      itemBackgroundColor: 'rgb(var(--game-callstack-queue-worker-background))',
+      itemBorderColor: 'rgb(var(--game-callstack-queue-worker-light))',
+      itemTextColor: 'rgb(var(--game-callstack-queue-worker-text))'
     }
   }
   

@@ -3,7 +3,7 @@
  * 디자인 시스템과 연동되는 스타일 헬퍼 함수들
  */
 
-import { designSystem } from '../theme/designSystem';
+import { designSystem } from '@/games/callstack-library/theme/designSystem';
 import type { CSSProperties } from 'react';
 
 // 클래스 이름 조합 유틸리티

@@ -18,10 +18,10 @@ export type QueueType =
   | 'macrotask'      // 매크로태스크 큐  
   | 'priority'       // 우선순위 큐
   | 'circular'       // 원형 큐
-  | 'deque'          // 덱 (양방향 큐)
   | 'animation'      // 애니메이션 프레임 큐
-  | 'immediate'      // setImmediate 큐
-  | 'idle'           // requestIdleCallback 큐
+  | 'generator'      // 제너레이터 큐
+  | 'io'             // I/O 처리 큐
+  | 'worker'         // 웹 워커 큐
 
 // 큐 아이템 (다양한 큐 타입을 위한 확장된 인터페이스)
 export interface QueueItem {

@@ -8,9 +8,9 @@ import * as React from 'react';
 import {
   useEventLoopEngine,
   ReactEventLoopAdapterConfig
-} from '../ReactEventLoopAdapter';
-import { EventLoopEngine } from '../../event-loop/EventLoopEngine';
-import { QueueSystem } from '../../queue-system/QueueSystem';
+} from '@/games/callstack-library/ReactEventLoopAdapter';
+import { EventLoopEngine } from '@/games/callstack-library/domain/event-loop/EventLoopEngine';
+import { QueueSystem } from '@/games/callstack-library/domain/queue-system/QueueSystem';
 
 // 타이머 및 상태 관리
 let mockEngineRef: any;

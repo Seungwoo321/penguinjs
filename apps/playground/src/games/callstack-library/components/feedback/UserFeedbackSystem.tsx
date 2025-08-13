@@ -18,11 +18,12 @@ import {
   VolumeX
 } from 'lucide-react';
 import { cn } from '@penguinjs/ui';
-import { useDesignTokens } from '../ui/DesignSystemProvider';
-import { useCallStackLibraryContext } from '../../contexts/CallStackLibraryContext';
-import { gameEvents } from '../../utils/eventSystem';
-import { AccessibleButton } from '../ui/AccessibleButton';
-import { ProgressIndicator } from '../common/ProgressIndicator';
+import { useDesignTokens } from '@/games/callstack-library/components/ui/DesignSystemProvider';
+import { useCallStackLibraryContext } from '@/games/callstack-library/contexts/CallStackLibraryContext';
+import { useDarkModeDetection } from '@/games/callstack-library/hooks/useCSSThemeSync';
+import { gameEvents } from '@/games/callstack-library/utils/eventSystem';
+import { AccessibleButton } from '@/games/callstack-library/components/ui/AccessibleButton';
+import { ProgressIndicator } from '@/games/callstack-library/components/common/ProgressIndicator';
 
 // 피드백 타입
 export type FeedbackType = 'success' | 'error' | 'warning' | 'info' | 'hint' | 'progress';
@@ -68,6 +69,7 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
 }) => {
   const tokens = useDesignTokens();
   const { state } = useCallStackLibraryContext();
+  const isDarkMode = useDarkModeDetection();
   
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(enableSound);
@@ -142,45 +144,45 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
     progress: TrendingUp
   }), []);
 
-  // 피드백 색상 매핑
-  const feedbackColors = useMemo(() => ({
+  // 피드백 색상 매핑 - CSS 변수 사용
+  const feedbackStyles = useMemo(() => ({
     success: {
-      bg: 'bg-green-50 dark:bg-green-950',
-      border: 'border-green-200 dark:border-green-800',
-      icon: 'text-green-600 dark:text-green-400',
-      text: 'text-green-800 dark:text-green-200'
+      bg: isDarkMode ? 'rgba(34, 197, 94, 0.1)' : 'rgb(240, 253, 244)',
+      border: '2px solid rgb(var(--game-callstack-library-success))',
+      icon: 'rgb(var(--game-callstack-library-success))',
+      text: isDarkMode ? 'rgb(var(--game-callstack-library-success))' : 'rgb(22, 101, 52)'
     },
     error: {
-      bg: 'bg-red-50 dark:bg-red-950',
-      border: 'border-red-200 dark:border-red-800',
-      icon: 'text-red-600 dark:text-red-400',
-      text: 'text-red-800 dark:text-red-200'
+      bg: isDarkMode ? 'rgba(239, 68, 68, 0.1)' : 'rgb(254, 242, 242)',
+      border: '2px solid rgb(var(--game-callstack-library-error))',
+      icon: 'rgb(var(--game-callstack-library-error))',
+      text: isDarkMode ? 'rgb(var(--game-callstack-library-error))' : 'rgb(153, 27, 27)'
     },
     warning: {
-      bg: 'bg-yellow-50 dark:bg-yellow-950',
-      border: 'border-yellow-200 dark:border-yellow-800',
-      icon: 'text-yellow-600 dark:text-yellow-400',
-      text: 'text-yellow-800 dark:text-yellow-200'
+      bg: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : 'rgb(254, 243, 199)',
+      border: '2px solid rgb(var(--game-callstack-library-warning))',
+      icon: 'rgb(var(--game-callstack-library-warning))',
+      text: isDarkMode ? 'rgb(var(--game-callstack-library-warning))' : 'rgb(146, 64, 14)'
     },
     info: {
-      bg: 'bg-blue-50 dark:bg-blue-950',
-      border: 'border-blue-200 dark:border-blue-800',
-      icon: 'text-blue-600 dark:text-blue-400',
-      text: 'text-blue-800 dark:text-blue-200'
+      bg: isDarkMode ? 'rgba(59, 130, 246, 0.1)' : 'rgb(219, 234, 254)',
+      border: '2px solid rgb(var(--game-callstack-library-primary))',
+      icon: 'rgb(var(--game-callstack-library-primary))',
+      text: isDarkMode ? 'rgb(var(--game-callstack-library-primary))' : 'rgb(29, 78, 216)'
     },
     hint: {
-      bg: 'bg-purple-50 dark:bg-purple-950',
-      border: 'border-purple-200 dark:border-purple-800',
-      icon: 'text-purple-600 dark:text-purple-400',
-      text: 'text-purple-800 dark:text-purple-200'
+      bg: isDarkMode ? 'rgba(139, 92, 246, 0.1)' : 'rgb(237, 233, 254)',
+      border: '2px solid rgb(var(--game-callstack-library-stage-advanced))',
+      icon: 'rgb(var(--game-callstack-library-stage-advanced))',
+      text: isDarkMode ? 'rgb(var(--game-callstack-library-stage-advanced))' : 'rgb(109, 40, 217)'
     },
     progress: {
-      bg: 'bg-indigo-50 dark:bg-indigo-950',
-      border: 'border-indigo-200 dark:border-indigo-800',
-      icon: 'text-indigo-600 dark:text-indigo-400',
-      text: 'text-indigo-800 dark:text-indigo-200'
+      bg: isDarkMode ? 'rgba(79, 70, 229, 0.1)' : 'rgb(238, 242, 255)',
+      border: '2px solid rgb(79, 70, 229)',
+      icon: 'rgb(79, 70, 229)',
+      text: isDarkMode ? 'rgb(129, 140, 248)' : 'rgb(67, 56, 202)'
     }
-  }), []);
+  }), [isDarkMode]);
 
   // 위치 스타일
   const positionStyles = useMemo(() => {
@@ -203,7 +205,7 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
   // 피드백 항목 렌더링
   const renderFeedbackItem = useCallback((item: FeedbackItem) => {
     const IconComponent = feedbackIcons[item.type];
-    const colors = feedbackColors[item.type];
+    const styles = feedbackStyles[item.type];
     
     return (
       <motion.div
@@ -218,13 +220,13 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
           transition: { duration: 0.2 }
         }}
         className={cn(
-          'pointer-events-auto mb-3 max-w-sm overflow-hidden rounded-lg border shadow-lg backdrop-blur-sm',
-          colors.bg,
-          colors.border,
+          'pointer-events-auto mb-3 max-w-sm overflow-hidden rounded-lg shadow-lg backdrop-blur-sm',
           compactMode ? 'p-3' : 'p-4'
         )}
         style={{
-          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)'
+          backgroundColor: styles.bg,
+          border: styles.border,
+          boxShadow: 'var(--game-callstack-library-shadow-card)'
         }}
       >
         <div className="flex items-start">
@@ -232,9 +234,9 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
           <div className={cn('flex-shrink-0', compactMode ? 'mr-2' : 'mr-3')}>
             <IconComponent 
               className={cn(
-                colors.icon,
                 compactMode ? 'h-4 w-4' : 'h-5 w-5'
-              )} 
+              )}
+              style={{ color: styles.icon }}
             />
           </div>
           
@@ -242,28 +244,37 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h4 className={cn(
-                  'font-medium',
-                  colors.text,
-                  compactMode ? 'text-sm' : 'text-sm'
-                )}>
+                <h4 
+                  className={cn(
+                    'font-medium',
+                    compactMode ? 'text-sm' : 'text-sm'
+                  )}
+                  style={{ color: styles.text }}
+                >
                   {item.title}
                 </h4>
-                <p className={cn(
-                  'mt-1',
-                  colors.text,
-                  compactMode ? 'text-xs' : 'text-sm',
-                  'opacity-90'
-                )}>
+                <p 
+                  className={cn(
+                    'mt-1',
+                    compactMode ? 'text-xs' : 'text-sm'
+                  )}
+                  style={{ 
+                    color: styles.text,
+                    opacity: 0.9
+                  }}
+                >
                   {item.message}
                 </p>
                 
                 {/* 추가 세부사항 */}
                 {item.details && (
-                  <p className={cn(
-                    'mt-1 text-xs opacity-75',
-                    colors.text
-                  )}>
+                  <p 
+                    className="mt-1 text-xs"
+                    style={{ 
+                      color: styles.text,
+                      opacity: 0.75
+                    }}
+                  >
                     {item.details}
                   </p>
                 )}
@@ -276,10 +287,8 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
                   size="sm"
                   label={`${item.title} 피드백 닫기`}
                   onClick={() => removeFeedback(item.id)}
-                  className={cn(
-                    'ml-2 p-1 opacity-60 hover:opacity-100',
-                    colors.text
-                  )}
+                  className="ml-2 p-1 opacity-60 hover:opacity-100"
+                  style={{ color: styles.text }}
                 >
                   <X className="h-3 w-3" />
                 </AccessibleButton>
@@ -294,10 +303,8 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
                   size="sm"
                   label={item.action.label}
                   onClick={item.action.handler}
-                  className={cn(
-                    'text-xs',
-                    colors.text
-                  )}
+                  className="text-xs"
+                  style={{ color: styles.text }}
                 >
                   {item.action.label}
                 </AccessibleButton>
@@ -307,7 +314,7 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
         </div>
       </motion.div>
     );
-  }, [feedbackIcons, feedbackColors, position, compactMode, removeFeedback]);
+  }, [feedbackIcons, feedbackStyles, position, compactMode, removeFeedback]);
 
   return (
     <div 
@@ -324,7 +331,10 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
             size="sm"
             label={soundEnabled ? '사운드 끄기' : '사운드 켜기'}
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-sm"
+            className="p-2 backdrop-blur-sm rounded-lg shadow-sm"
+            style={{ 
+              backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)'
+            }}
           >
             {soundEnabled ? 
               <Volume2 className="h-4 w-4" /> : 
@@ -338,7 +348,10 @@ export const UserFeedbackSystem: React.FC<UserFeedbackSystemProps> = memo(({
             size="sm"
             label="모든 피드백 닫기"
             onClick={clearAllFeedback}
-            className="p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-sm"
+            className="p-2 backdrop-blur-sm rounded-lg shadow-sm"
+            style={{ 
+              backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)'
+            }}
           >
             <Bell className="h-4 w-4" />
           </AccessibleButton>

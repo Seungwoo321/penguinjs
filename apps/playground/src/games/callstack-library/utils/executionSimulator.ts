@@ -1,33 +1,64 @@
-import { CallStackLevel, StackItem } from '../types'
+import { CallStackLevel, StackItem } from '@/games/callstack-library/types'
+import { callstackLibraryThemeConfig } from '@/games/callstack-library/theme/callstackLibraryGameTheme'
 
-// 함수별 색상 매핑 (개선된 대비비 색상)
-const FUNCTION_COLORS: Record<string, string> = {
-  '<global>': 'rgb(92, 51, 23)',      // 진한 브라운 (WCAG AA)
-  'main': 'rgb(92, 51, 23)',          // 진한 브라운
-  'processUser': 'rgb(21, 94, 173)',  // 진한 파랑
-  'greet': 'rgb(21, 128, 61)',        // 진한 초록
-  'calculate': 'rgb(21, 94, 173)',    // 진한 파랑
-  'multiply': 'rgb(21, 128, 61)',     // 진한 초록
-  'add': 'rgb(126, 34, 206)',         // 진한 보라
-  'factorial': 'rgb(21, 94, 173)',    // 진한 파랑
-  'checkNumbers': 'rgb(21, 94, 173)', // 진한 파랑
-  'isEven': 'rgb(21, 128, 61)',       // 진한 초록
-  'processEven': 'rgb(126, 34, 206)', // 진한 보라
-  'console.log': 'rgb(194, 94, 14)',  // 진한 주황
-  'setTimeout': 'rgb(185, 28, 28)',   // 진한 빨강
-  'Promise': 'rgb(190, 24, 93)',      // 진한 핑크
-  'queueMicrotask': 'rgb(2, 132, 199)', // 진한 하늘색
-  'requestAnimationFrame': 'rgb(21, 128, 61)' // 진한 초록
+// 테마 시스템을 사용한 함수별 색상 매핑
+const getFunctionColorFromTheme = (functionName: string): string => {
+  const baseColors = callstackLibraryThemeConfig.specialColors
+  
+  // 함수명에 따른 색상 분류
+  if (functionName.includes('<global>') || functionName.includes('main')) {
+    return `rgb(${baseColors['function-global']})`
+  }
+  if (functionName.includes('processUser') || functionName.includes('calculate') || 
+      functionName.includes('factorial') || functionName.includes('checkNumbers')) {
+    return `rgb(${baseColors['function-primary']})`
+  }
+  if (functionName.includes('greet') || functionName.includes('multiply') || 
+      functionName.includes('isEven') || functionName.includes('requestAnimationFrame')) {
+    return `rgb(${baseColors['function-secondary']})`
+  }
+  if (functionName.includes('add') || functionName.includes('processEven')) {
+    return `rgb(${baseColors['function-tertiary']})`
+  }
+  
+  // 시스템 함수들
+  if (functionName.includes('console.log') || functionName.includes('setTimeout') || 
+      functionName.includes('Promise') || functionName.includes('queueMicrotask')) {
+    return `rgb(${baseColors['function-quaternary']})`
+  }
+  
+  // 기본값
+  return `rgb(${baseColors['function-primary']})`
 }
 
-// 색상 순환 배열 (동적 함수용 - WCAG AA 충족)
+// 함수별 색상 매핑 (테마 시스템 사용)
+const FUNCTION_COLORS: Record<string, string> = {
+  '<global>': getFunctionColorFromTheme('<global>'),
+  'main': getFunctionColorFromTheme('main'),
+  'processUser': getFunctionColorFromTheme('processUser'),
+  'greet': getFunctionColorFromTheme('greet'),
+  'calculate': getFunctionColorFromTheme('calculate'),
+  'multiply': getFunctionColorFromTheme('multiply'),
+  'add': getFunctionColorFromTheme('add'),
+  'factorial': getFunctionColorFromTheme('factorial'),
+  'checkNumbers': getFunctionColorFromTheme('checkNumbers'),
+  'isEven': getFunctionColorFromTheme('isEven'),
+  'processEven': getFunctionColorFromTheme('processEven'),
+  'console.log': getFunctionColorFromTheme('console.log'),
+  'setTimeout': getFunctionColorFromTheme('setTimeout'),
+  'Promise': getFunctionColorFromTheme('Promise'),
+  'queueMicrotask': getFunctionColorFromTheme('queueMicrotask'),
+  'requestAnimationFrame': getFunctionColorFromTheme('requestAnimationFrame')
+}
+
+// 색상 순환 배열 (테마 시스템 사용)
 const COLOR_PALETTE = [
-  'rgb(21, 94, 173)',    // 진한 파랑
-  'rgb(21, 128, 61)',    // 진한 초록
-  'rgb(126, 34, 206)',   // 진한 보라
-  'rgb(194, 94, 14)',    // 진한 주황
-  'rgb(190, 24, 93)',    // 진한 핑크
-  'rgb(2, 132, 199)'     // 진한 하늘색
+  `rgb(${callstackLibraryThemeConfig.specialColors['function-primary']})`,
+  `rgb(${callstackLibraryThemeConfig.specialColors['function-secondary']})`,
+  `rgb(${callstackLibraryThemeConfig.specialColors['function-tertiary']})`,
+  `rgb(${callstackLibraryThemeConfig.specialColors['function-quaternary']})`,
+  `rgb(${callstackLibraryThemeConfig.specialColors['function-global']})`,
+  `rgb(${callstackLibraryThemeConfig.specialColors['function-main']})`
 ]
 
 /**

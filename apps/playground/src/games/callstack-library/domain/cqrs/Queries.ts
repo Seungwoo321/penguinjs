@@ -5,7 +5,7 @@
  * 각 쿼리는 특정 목적에 맞게 최적화된 읽기 모델을 제공
  */
 
-import { CallStackFrame, MicrotaskItem, MacrotaskItem, EventLoopState } from '../event-loop/types';
+import { CallStackFrame, MicrotaskItem, MacrotaskItem, EventLoopState } from '@/games/callstack-library/domain/event-loop/types';
 
 // 기본 쿼리 인터페이스
 export interface Query {

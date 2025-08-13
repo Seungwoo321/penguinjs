@@ -12,7 +12,7 @@ import {
   DomainEvent,
   EventMetadata,
   EventStream
-} from '../EventStore';
+} from '@/games/callstack-library/EventStore';
 
 describe('EventStore', () => {
   let eventStore: InMemoryEventStore;

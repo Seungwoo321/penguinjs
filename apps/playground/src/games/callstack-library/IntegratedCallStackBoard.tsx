@@ -87,7 +87,7 @@ export function IntegratedCallStackBoard({
     return (
       <div className="space-y-6">
         {/* 이벤트 루프 전체 구조 */}
-        <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-6 border-2 border-dashed border-slate-300 dark:border-slate-600">
+        <div className="bg-[rgb(var(--surface-secondary))] rounded-2xl p-6 border-2 border-dashed border-slate-300 dark:border-slate-600">
           <h2 className="text-xl font-bold text-center mb-6 text-slate-800 dark:text-slate-200">
             🔄 JavaScript 이벤트 루프
           </h2>
@@ -105,7 +105,7 @@ export function IntegratedCallStackBoard({
               </div>
               
               {/* 콜스택 책장 - 검은색 배경, 선반 없음 */}
-              <div className="relative bg-black rounded-xl p-6 shadow-xl" style={{ height: `${Math.max(250, (maxStackSize * STACK_CONFIG.SHELF_SPACING) + 100)}px` }}>
+              <div className="relative bg-[rgb(var(--surface-secondary))] rounded-xl p-6 shadow-xl" style={{ height: `${Math.max(250, (maxStackSize * STACK_CONFIG.SHELF_SPACING) + 100)}px` }}>
                 <div className="relative h-full flex flex-col justify-end">
                     
                   {/* 스택 오버플로우 경고 */}
@@ -173,8 +173,8 @@ export function IntegratedCallStackBoard({
                             >
                               {/* 책 제본 효과 */}
                               <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/40 to-black/10" />
-                              <div className="absolute left-1 top-0 bottom-0 w-1 bg-white/50" />
-                              <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-white/30" />
+                              <div className="absolute left-1 top-0 bottom-0 w-1 bg-[rgb(var(--surface-elevated))]/50" />
+                              <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-[rgb(var(--surface-elevated))]/30" />
                               
                               {/* 책 표지 텍스처 */}
                               <div 
@@ -196,7 +196,7 @@ export function IntegratedCallStackBoard({
                               </span>
                               
                               {/* 책 페이지 효과 */}
-                              <div className="absolute right-1 top-1 bottom-1 w-1 bg-white/80 rounded-r-sm shadow-sm" />
+                              <div className="absolute right-1 top-1 bottom-1 w-1 bg-[rgb(var(--surface-elevated))]/80 rounded-r-sm shadow-sm" />
                             </div>
                           </motion.div>
                         ))}
@@ -205,7 +205,7 @@ export function IntegratedCallStackBoard({
                   {/* 빈 스택 메시지 */}
                   {stack.length === 0 && !isExecuting && (
                     <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 100 }}>
-                      <div className="text-center p-6 bg-white/10 dark:bg-white/5 rounded-xl shadow-lg backdrop-blur-sm">
+                      <div className="text-center p-6 bg-[rgb(var(--surface-elevated))]/10 rounded-xl shadow-lg backdrop-blur-sm">
                         <div className="text-4xl mb-2">📚</div>
                         <p className="text-gray-200 text-sm font-medium">
                           코드를 실행하면 여기에<br/>함수가 책처럼 쌓입니다
@@ -226,7 +226,7 @@ export function IntegratedCallStackBoard({
                 {/* 실행 상태 표시 */}
                 {isExecuting && (
                   <div className="bg-green-500 dark:bg-green-600 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 shadow-lg">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                    <div className="w-2 h-2 bg-[rgb(var(--surface-elevated))] rounded-full animate-pulse" />
                     실행 중
                   </div>
                 )}
@@ -245,7 +245,7 @@ export function IntegratedCallStackBoard({
               </div>
               
               {/* 마이크로태스크 큐 - 깔끔한 디자인 */}
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-blue-200 dark:border-blue-700 overflow-hidden">
+              <div className="bg-[rgb(var(--surface-elevated))] rounded-lg shadow-sm border border-blue-200 dark:border-blue-700 overflow-hidden">
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-3 border-b border-blue-200 dark:border-blue-700">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium text-sm text-blue-900 dark:text-blue-100">마이크로태스크 반납대</h4>
@@ -288,7 +288,7 @@ export function IntegratedCallStackBoard({
             
             {/* 3. 매크로태스크 큐 (오른쪽) */}
             <div className="lg:col-span-1">
-              <div className="bg-gray-100 dark:bg-gray-800/20 rounded-xl p-3 mb-3">
+              <div className="bg-[rgb(var(--surface-secondary))] rounded-xl p-3 mb-3">
                 <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300 text-center">
                   🕐 매크로태스크 큐
                 </h3>
@@ -298,7 +298,7 @@ export function IntegratedCallStackBoard({
               </div>
               
               {/* 매크로태스크 큐 - 깔끔한 디자인 */}
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="bg-[rgb(var(--surface-elevated))] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="bg-gray-50 dark:bg-gray-900/20 p-3 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">매크로태스크 반납대</h4>
@@ -356,7 +356,7 @@ export function IntegratedCallStackBoard({
         
         {/* 예상 순서 입력 패널 - prediction 모드에서만 표시 */}
         {mode === 'prediction' && (
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-300 dark:border-slate-600 shadow-lg">
+        <div className="bg-[rgb(var(--surface-elevated))] rounded-xl p-6 border border-slate-300 dark:border-slate-600 shadow-lg">
           <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
             <span>🎯 예상 실행 순서</span>
             <ArrowRight className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -456,7 +456,7 @@ export function IntegratedCallStackBoard({
               </Reorder.Group>
             ) : (
               <div className="h-full flex items-center justify-center text-center">
-                <div className="p-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                <div className="p-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl bg-[rgb(var(--surface-secondary))]">
                   <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">
                     🎮 위의 함수들을 클릭하거나<br/>
                     드래그해서 순서를 만들어보세요!
@@ -650,7 +650,7 @@ export function IntegratedCallStackBoard({
                   {/* 빈 스택 메시지 */}
                   {stack.length === 0 && !isExecuting && (
                     <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 10 }}>
-                      <div className="text-center p-6 bg-white/95 dark:bg-slate-800/95 rounded-xl shadow-lg backdrop-blur-sm">
+                      <div className="text-center p-6 bg-[rgb(var(--surface-elevated))]/95 rounded-xl shadow-lg backdrop-blur-sm">
                         <div className="text-4xl mb-2">📚</div>
                         <p className="text-orange-800 dark:text-orange-200 text-sm font-medium">
                           코드를 실행하면 여기에<br/>함수가 책처럼 쌓입니다
@@ -737,7 +737,7 @@ export function IntegratedCallStackBoard({
         </div>
           
         {/* 오른쪽 50%: 예상 실행 순서 (전체 높이) */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-300 dark:border-slate-700 shadow-lg h-full">
+        <div className="bg-[rgb(var(--surface-elevated))] rounded-xl p-6 border border-slate-300 dark:border-slate-700 shadow-lg h-full">
           <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
             <span>🎯 예상 실행 순서</span>
             <ArrowRight className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -801,7 +801,7 @@ export function IntegratedCallStackBoard({
                   return (
                     <Reorder.Item key={funcName} value={funcName}>
                       <motion.div
-                        className={`flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg shadow-sm hover:shadow-md transition-all ${
+                        className={`flex items-center gap-2 p-3 bg-[rgb(var(--surface-secondary))] rounded-lg shadow-sm hover:shadow-md transition-all ${
                           isExecuting ? 'opacity-50' : 'cursor-move hover:scale-102'
                         }`}
                         whileHover={!isExecuting ? { scale: 1.02 } : {}}
@@ -836,7 +836,7 @@ export function IntegratedCallStackBoard({
               </Reorder.Group>
             ) : (
               <div className="h-full flex items-center justify-center text-center">
-                <div className="p-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                <div className="p-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl bg-[rgb(var(--surface-secondary))]">
                   <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">
                     🎮 위의 함수들을 클릭하거나<br/>
                     드래그해서 순서를 만들어보세요!
@@ -975,8 +975,8 @@ export function IntegratedCallStackBoard({
                         />
                         
                         {/* 책 제본 라인 */}
-                        <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-black/30" />
-                        <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-white/20" />
+                        <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-[rgb(var(--surface-secondary))]/30" />
+                        <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-[rgb(var(--surface-elevated))]/20" />
                         
                         {/* 책 표지 텍스처 */}
                         <div 
@@ -1016,7 +1016,7 @@ export function IntegratedCallStackBoard({
               {/* 빈 스택 메시지 */}
               {stack.length === 0 && !isExecuting && (
                 <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 10 }}>
-                  <div className="text-center p-6 bg-white/90 dark:bg-slate-800/90 rounded-xl shadow-lg backdrop-blur-sm">
+                  <div className="text-center p-6 bg-[rgb(var(--surface-elevated))]/90 rounded-xl shadow-lg backdrop-blur-sm">
                     <div className="text-4xl mb-2">📚</div>
                     <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
                       코드를 실행하면 여기에<br/>함수가 책처럼 쌓입니다
@@ -1056,7 +1056,7 @@ export function IntegratedCallStackBoard({
         {/* 책상 아래 상태 표시 영역 */}
         <div className="mt-4 flex items-center justify-between">
           {/* 스택 크기 표시 */}
-          <div className="bg-white/90 dark:bg-slate-800/90 text-amber-900 dark:text-amber-100 px-4 py-2 rounded-lg text-sm font-medium shadow-md">
+          <div className="bg-[rgb(var(--surface-elevated))]/90 text-amber-900 dark:text-amber-100 px-4 py-2 rounded-lg text-sm font-medium shadow-md">
             스택 크기: {stack.length} / {maxStackSize}
           </div>
           

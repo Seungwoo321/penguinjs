@@ -9,8 +9,8 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { CQRSEventLoopService, createCQRSEventLoopService } from '../../../shared/lib/cqrs';
-import { EventLoopState } from '../../../entities/event-loop';
+import { CQRSEventLoopService, createCQRSEventLoopService } from '@/games/callstack-library/shared/lib/cqrs';
+import { EventLoopState } from '@/games/callstack-library/entities/event-loop';
 
 // 시뮬레이션 상태
 export interface SimulationState {

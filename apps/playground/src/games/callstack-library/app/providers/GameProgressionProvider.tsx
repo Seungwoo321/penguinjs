@@ -9,7 +9,7 @@
 
 import React, { memo, ReactNode, useEffect } from 'react';
 
-import { useGameProgressionStore } from '../../features/game-progression';
+import { useGameProgressionStore } from '@/games/callstack-library/features/game-progression';
 
 // Props 타입
 export interface GameProgressionProviderProps {

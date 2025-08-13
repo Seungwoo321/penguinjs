@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { QueueType, QueueItem } from '../types';
+import { QueueType, QueueItem } from '@/games/callstack-library/types';
 
 // 게임 이벤트 타입 정의
 export interface GameEvent {

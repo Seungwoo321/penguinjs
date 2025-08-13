@@ -5,8 +5,8 @@
 
 import React, { forwardRef, useState } from 'react';
 import { motion, MotionProps } from 'framer-motion';
-import { useTouchFriendly } from '../../hooks/useMobileFirst';
-import { useCallStackLibraryTheme } from '../../hooks/useCallStackLibraryTheme';
+import { useTouchFriendly } from '@/games/callstack-library/hooks/useMobileFirst';
+import { useDarkModeDetection } from '@/games/callstack-library/hooks/useCSSThemeSync';
 
 // 색상 밝기 조정 함수
 const adjustColorBrightness = (color: string, amount: number): string => {
@@ -51,9 +51,8 @@ export const TouchFriendlyButton = forwardRef<HTMLButtonElement, TouchFriendlyBu
   ...props
 }, ref) => {
   const { getTouchStyles, viewport } = useTouchFriendly();
-  const libraryTheme = useCallStackLibraryTheme();
   const [isPressed, setIsPressed] = useState(false);
-  const isDarkMode = libraryTheme.isDarkMode;
+  const isDarkMode = useDarkModeDetection();
 
   // 사이즈별 기본 크기
   const baseSizes = {
@@ -68,23 +67,23 @@ export const TouchFriendlyButton = forwardRef<HTMLButtonElement, TouchFriendlyBu
   // 테마별 색상
   const getVariantStyles = () => {
     const baseColors = {
-      background: libraryTheme.getQueueColor(themeColor, 'main'),
-      text: libraryTheme.getQueueText(themeColor, 'primary'),
-      border: libraryTheme.getQueueBorder(themeColor),
-      hover: libraryTheme.getQueueColor(themeColor, 'hover'),
-      active: libraryTheme.getQueueColor(themeColor, 'button')
+      background: `rgb(var(--game-callstack-${themeColor}-main))`,
+      text: `rgb(var(--game-callstack-${themeColor}-text-primary))`,
+      border: `rgb(var(--game-callstack-${themeColor}-border))`,
+      hover: `rgb(var(--game-callstack-${themeColor}-hover))`,
+      active: `rgb(var(--game-callstack-${themeColor}-button))`
     };
 
     switch (variant) {
       case 'primary':
         return {
           backgroundColor: baseColors.active,
-          color: libraryTheme.getQueueText(themeColor, 'contrast'),
+          color: `rgb(var(--game-callstack-${themeColor}-text-contrast))`,
           border: `1px solid ${baseColors.border}`,
           '&:hover': {
             backgroundColor: baseColors.hover,
             transform: 'translateY(-1px)',
-            boxShadow: libraryTheme.theme.shadows.button
+            boxShadow: 'var(--game-callstack-library-shadow-button)'
           },
           '&:active': {
             backgroundColor: baseColors.active,
@@ -104,7 +103,7 @@ export const TouchFriendlyButton = forwardRef<HTMLButtonElement, TouchFriendlyBu
           },
           '&:active': {
             backgroundColor: baseColors.active,
-            color: libraryTheme.getQueueText(themeColor, 'contrast')
+            color: `rgb(var(--game-callstack-${themeColor}-text-contrast))`
           }
         };
 
@@ -162,7 +161,7 @@ export const TouchFriendlyButton = forwardRef<HTMLButtonElement, TouchFriendlyBu
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    borderRadius: libraryTheme.theme.borderRadius.button,
+    borderRadius: 'var(--game-callstack-library-radius-button)',
     fontWeight: '500',
     fontSize: size === 'sm' ? '14px' : size === 'lg' ? '16px' : '15px',
     lineHeight: '1.2',

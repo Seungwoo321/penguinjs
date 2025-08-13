@@ -3,8 +3,8 @@
  * 15단계 + 난이도별 구분 + 확장 가능한 아키텍처
  */
 
-import { GameLevel, GameDifficulty, GameValidationResult, GameStagePosition } from '../shared/types'
-import { allClosureLevels } from './levels'
+import { GameLevel, GameDifficulty, GameValidationResult, GameStagePosition } from '@/games/shared/types'
+import { allClosureLevels } from '@/games/closure-cave/levels'
 
 export class ClosureCaveEngine {
   private levels: Map<string, GameLevel> = new Map()
@@ -18,8 +18,6 @@ export class ClosureCaveEngine {
     Object.values(allClosureLevels).flat().forEach(level => {
       this.levels.set(level.id, level)
     })
-    console.log('Initialized levels:', this.levels.size, 'levels')
-    console.log('All levels:', Array.from(this.levels.keys()))
   }
 
   // 난이도별 레벨 목록 반환
@@ -34,11 +32,8 @@ export class ClosureCaveEngine {
 
   // 난이도와 스테이지 번호로 레벨 반환
   getLevelByStage(difficulty: GameDifficulty, stageNumber: number): GameLevel | undefined {
-    console.log('getLevelByStage called with:', difficulty, stageNumber)
     const levels = this.getLevelsByDifficulty(difficulty)
-    console.log('Levels found for difficulty:', levels.length)
     const foundLevel = levels.find(level => level.stageNumber === stageNumber)
-    console.log('Found level:', foundLevel)
     return foundLevel
   }
 

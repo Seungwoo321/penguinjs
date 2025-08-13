@@ -1,5 +1,5 @@
-import { GameDifficulty } from '../../shared/types'
-import { LayoutType } from '../types'
+import { GameDifficulty } from '@/games/shared/types'
+import { LayoutType } from '@/games/callstack-library/types'
 
 // LayoutType은 ../types에서 import됨
 

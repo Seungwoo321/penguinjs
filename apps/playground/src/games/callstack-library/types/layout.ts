@@ -1,14 +1,20 @@
 // 레이아웃 시스템 관련 타입 정의
 
 import { ReactNode } from 'react'
-import { PlayMode } from '../utils/layoutClassifier'
-import { QueueType, QueueItem, LayoutType } from '../types'
+import { PlayMode } from '@/games/callstack-library/utils/layoutClassifier'
+import { QueueType, QueueItem, LayoutType } from '@/games/callstack-library/types'
 
 // Layout B 전용 타입들
 export interface QueueStatesSnapshot {
   callstack: QueueItem[]
   microtask: QueueItem[]
   macrotask: QueueItem[]
+  animation?: QueueItem[]
+  generator?: QueueItem[]
+  worker?: QueueItem[]
+  priority?: QueueItem[]
+  io?: QueueItem[]
+  network?: QueueItem[]
   step: number
   timestamp: number
 }

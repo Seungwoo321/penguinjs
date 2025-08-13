@@ -35,9 +35,9 @@ import {
   QueryLoggingMiddleware
 } from './QueryHandler';
 
-import { EventSourcedEventLoopEngine } from '../event-sourcing/EventSourcedEventLoopEngine';
-import { EventLoopConfig } from '../event-loop/types';
-import { IEventStore, InMemoryEventStore } from '../event-sourcing/EventStore';
+import { EventSourcedEventLoopEngine } from '@/games/callstack-library/domain/event-sourcing/EventSourcedEventLoopEngine';
+import { EventLoopConfig } from '@/games/callstack-library/domain/event-loop/types';
+import { IEventStore, InMemoryEventStore } from '@/games/callstack-library/domain/event-sourcing/EventStore';
 
 // 서비스 설정
 export interface CQRSServiceConfig {

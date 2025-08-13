@@ -12,9 +12,9 @@ import {
   ReactEventLoopState,
   type EventLoopCommands,
   type EventLoopQueries
-} from '../ReactEventLoopAdapter';
-import { EventLoopEngine } from '../../event-loop/EventLoopEngine';
-import { QueueSystem } from '../../queue-system/QueueSystem';
+} from '@/games/callstack-library/ReactEventLoopAdapter';
+import { EventLoopEngine } from '@/games/callstack-library/domain/event-loop/EventLoopEngine';
+import { QueueSystem } from '@/games/callstack-library/domain/queue-system/QueueSystem';
 
 // Mock 도메인 모델
 vi.mock('../../event-loop/EventLoopEngine');

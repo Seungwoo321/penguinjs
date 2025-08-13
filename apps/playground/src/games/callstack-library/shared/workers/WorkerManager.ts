@@ -5,7 +5,7 @@
  * Worker와 메인 스레드 간의 통신을 관리하고 추상화
  */
 
-import { EventLoopConfig } from '../../entities/event-loop';
+import { EventLoopConfig } from '@/games/callstack-library/entities/event-loop';
 
 // Worker 메시지와 응답 타입들 (Worker와 동일)
 export interface WorkerMessage {

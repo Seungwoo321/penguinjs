@@ -1,6 +1,6 @@
 /**
- * 메모리 관리 훅
- * 메모리 누수 방지 및 효율적인 리소스 관리
+ * 메모리 관리 훅 - 새로운 접근법
+ * 상태 기반에서 이벤트 기반으로 전환, 의존성 체인 완전 제거
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
@@ -21,28 +21,38 @@ interface UseMemoryManagementOptions {
 }
 
 interface UseMemoryManagementResult {
-  stats: MemoryStats;
-  registerCleanup: (cleanup: () => void) => void;
+  getCurrentMetrics: () => MemoryStats;
+  registerCleanup: (cleanup: () => void) => () => void;
   forceCleanup: () => void;
-  isMemoryPressure: boolean;
+  isMemoryPressure: () => boolean;
   optimizeMemory: () => void;
 }
 
 /**
- * 메모리 관리 훅
+ * 메모리 관리 훅 - 새로운 접근법
+ * 🔑 핵심 변경사항:
+ * 1. 상태 대신 ref 사용하여 리렌더링 방지
+ * 2. 의존성 체인 완전 제거 
+ * 3. 이벤트 기반 알림 시스템
+ * 4. Stale closure 방지
  */
 export const useMemoryManagement = (
   options: UseMemoryManagementOptions = {}
 ): UseMemoryManagementResult => {
   const {
     enableMonitoring = process.env.NODE_ENV === 'development',
-    leakThreshold = 80, // 80MB로 조정
-    cleanupInterval = 30000, // 30초로 단축
-    maxComponentAge = 300000 // 5분
+    leakThreshold = 80,
+    cleanupInterval = 30000,
+    maxComponentAge = 300000
   } = options;
 
-  const [stats, setStats] = useState<MemoryStats>({
-    componentCount: 0
+  // 🔑 핵심 변경: 상태 대신 ref 사용하여 리렌더링 방지
+  const metricsRef = useRef<MemoryStats>({
+    componentCount: 0,
+    usedJSHeapSize: 0,
+    totalJSHeapSize: 0,
+    jsHeapSizeLimit: 0,
+    leakDetected: false
   });
 
   const cleanupFunctionsRef = useRef<Set<() => void>>(new Set());
@@ -54,47 +64,63 @@ export const useMemoryManagement = (
     resize?: ResizeObserver;
   }>({});
 
-  // 메모리 통계 수집
-  const collectMemoryStats = useCallback(() => {
+  // 🔑 핵심 변경: 안정적인 함수 참조 (의존성 없음)
+  const checkMemoryAndNotify = useRef<() => void>(() => {});
+  const performCleanup = useRef<() => void>(() => {});
+
+  // 메모리 체크 및 이벤트 발생 (상태 업데이트 없음)
+  checkMemoryAndNotify.current = () => {
     if (!enableMonitoring) return;
 
-    let memoryInfo: MemoryStats = {
-      componentCount: cleanupFunctionsRef.current.size
-    };
+    const componentCount = cleanupFunctionsRef.current.size;
+    let memoryData: MemoryStats = { componentCount };
 
-    // Chrome의 memory API 사용 (사용 가능한 경우)
+    // Chrome memory API 사용
     if ('memory' in performance) {
       const memory = (performance as any).memory;
-      memoryInfo = {
-        ...memoryInfo,
-        usedJSHeapSize: memory.usedJSHeapSize,
+      const usedJSHeapSize = memory.usedJSHeapSize;
+      const usedMB = usedJSHeapSize / (1024 * 1024);
+      const leakDetected = usedMB > leakThreshold;
+
+      memoryData = {
+        ...memoryData,
+        usedJSHeapSize,
         totalJSHeapSize: memory.totalJSHeapSize,
-        jsHeapSizeLimit: memory.jsHeapSizeLimit
+        jsHeapSizeLimit: memory.jsHeapSizeLimit,
+        leakDetected
       };
 
-      // 메모리 누수 감지
-      const usedMB = memory.usedJSHeapSize / (1024 * 1024);
-      memoryInfo.leakDetected = usedMB > leakThreshold;
+      // ref 업데이트 (리렌더링 없음)
+      metricsRef.current = memoryData;
 
-      if (memoryInfo.leakDetected) {
+      // 임계값 초과시에만 경고 및 이벤트 발생
+      if (leakDetected) {
         console.warn(`🚨 Memory leak detected: ${usedMB.toFixed(2)}MB used`);
+        
+        // 이벤트 시스템으로 알림 (리렌더링 없음)
+        if (typeof window !== 'undefined' && window.dispatchEvent) {
+          window.dispatchEvent(new CustomEvent('memory-pressure', {
+            detail: { component: 'useMemoryManagement', usage: usedMB }
+          }));
+        }
+        
+        // 자동 최적화 - 5분마다 한 번만 실행
+        const now = Date.now();
+        const timeSinceLastCleanup = now - componentTimestampRef.current;
+        
+        if (usedMB > leakThreshold * 0.8 && timeSinceLastCleanup > maxComponentAge) {
+          console.log(`🧹 Auto-optimizing memory due to pressure (last cleanup: ${Math.round(timeSinceLastCleanup / 1000)}s ago)`);
+          if (performCleanup.current) {
+            performCleanup.current();
+          }
+          componentTimestampRef.current = now;
+        }
       }
     }
+  };
 
-    setStats(memoryInfo);
-  }, [enableMonitoring, leakThreshold]);
-
-  // 정리 함수 등록
-  const registerCleanup = useCallback((cleanup: () => void) => {
-    cleanupFunctionsRef.current.add(cleanup);
-    
-    return () => {
-      cleanupFunctionsRef.current.delete(cleanup);
-    };
-  }, []);
-
-  // 강제 정리 실행
-  const forceCleanup = useCallback(() => {
+  // 🔑 핵심 변경: 메모리 정리 실행 (상태 업데이트 없음)
+  performCleanup.current = () => {
     cleanupFunctionsRef.current.forEach(cleanup => {
       try {
         cleanup();
@@ -112,25 +138,54 @@ export const useMemoryManagement = (
       }
     });
     
-    // 가비지 컬렉션 제안 (사용 가능한 경우)
+    // 가비지 컬렉션 제안
     if ('gc' in window && typeof (window as any).gc === 'function') {
       (window as any).gc();
     }
     
-    collectMemoryStats();
-  }, [collectMemoryStats]);
+    // 🔑 핵심 변경: 정리 후 상태 업데이트 없이 바로 메모리 체크
+    if (checkMemoryAndNotify.current) {
+      checkMemoryAndNotify.current();
+    }
+  };
 
-  // 메모리 압박 상황 감지
-  const isMemoryPressure = stats.usedJSHeapSize 
-    ? stats.usedJSHeapSize / (1024 * 1024) > leakThreshold * 0.8
-    : false;
+  // 🔑 핵심 변경: 정리 함수 등록 (의존성 없음)
+  const registerCleanup = useCallback((cleanup: () => void) => {
+    cleanupFunctionsRef.current.add(cleanup);
+    
+    return () => {
+      cleanupFunctionsRef.current.delete(cleanup);
+    };
+  }, []); // 빈 의존성 배열
 
-  // 메모리 최적화
+  // 🔑 핵심 변경: 현재 메트릭스 조회 (상태 대신 ref)
+  const getCurrentMetrics = useCallback((): MemoryStats => {
+    return { ...metricsRef.current };
+  }, []);
+
+  // 🔑 핵심 변경: 메모리 압박 체크 (상태 의존 없이 ref 사용)
+  const isMemoryPressure = useCallback((): boolean => {
+    const current = metricsRef.current;
+    return current.usedJSHeapSize 
+      ? current.usedJSHeapSize / (1024 * 1024) > leakThreshold * 0.8
+      : false;
+  }, [leakThreshold]);
+
+  // 🔑 핵심 변경: 강제 정리 (상태 업데이트 없음)
+  const forceCleanup = useCallback(() => {
+    if (performCleanup.current) {
+      performCleanup.current();
+    }
+  }, []);
+
+  // 🔑 핵심 변경: 메모리 최적화 (상태 업데이트 없음)
   const optimizeMemory = useCallback(() => {
     // 오래된 컴포넌트 정리
     const now = Date.now();
     if (now - componentTimestampRef.current > maxComponentAge) {
-      forceCleanup();
+      if (performCleanup.current) {
+        performCleanup.current();
+      }
       componentTimestampRef.current = now;
     }
 
@@ -145,48 +200,48 @@ export const useMemoryManagement = (
       });
     }
 
-    // 이미지 캐시 정리 제거 - React 방식으로 처리해야 함
+    // 메모리 체크 (상태 업데이트 없음)
+    if (checkMemoryAndNotify.current) {
+      checkMemoryAndNotify.current();
+    }
+  }, [maxComponentAge]); // 의존성 최소화
 
-    collectMemoryStats();
-  }, [forceCleanup, maxComponentAge, collectMemoryStats]);
-
-  // 주기적인 메모리 모니터링
+  // 🔑 핵심 변경: 단순한 interval 관리 (의존성 체인 없음)
   useEffect(() => {
     if (!enableMonitoring) return;
 
-    collectMemoryStats();
+    // 초기 메모리 체크
+    if (checkMemoryAndNotify.current) {
+      checkMemoryAndNotify.current();
+    }
     
+    // 단순한 interval 설정 - 중복 실행 방지
     intervalRef.current = setInterval(() => {
-      collectMemoryStats();
-      
-      // 메모리 압박 시 자동 최적화 (직접 조건 확인)
-      if (stats.usedJSHeapSize && stats.usedJSHeapSize / (1024 * 1024) > leakThreshold * 0.8) {
-        console.log('🧹 Auto-optimizing memory due to pressure');
-        // 직접 최적화 함수 호출
-        const now = Date.now();
-        if (now - componentTimestampRef.current > maxComponentAge) {
-          forceCleanup();
-          componentTimestampRef.current = now;
-        }
+      // 메모리 체크만 수행 (자동 최적화는 체크 함수 내부로 이동)
+      if (checkMemoryAndNotify.current) {
+        checkMemoryAndNotify.current();
       }
     }, cleanupInterval);
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [enableMonitoring, cleanupInterval, collectMemoryStats, leakThreshold, maxComponentAge, forceCleanup]);
+  }, [enableMonitoring, cleanupInterval, leakThreshold, maxComponentAge]); // 안정적인 의존성만
 
-  // 컴포넌트 언마운트 시 정리
+  // 🔑 핵심 변경: 컴포넌트 언마운트 시 정리 (의존성 없음)
   useEffect(() => {
     return () => {
-      forceCleanup();
+      if (performCleanup.current) {
+        performCleanup.current();
+      }
     };
-  }, [forceCleanup]);
+  }, []); // 빈 의존성 배열
 
   return {
-    stats,
+    getCurrentMetrics,
     registerCleanup,
     forceCleanup,
     isMemoryPressure,
@@ -402,8 +457,6 @@ export const useLeakDetection = (componentName: string) => {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`📈 ${componentName} instance count: ${instanceCountRef.current}`);
-      
       // 빠른 시간 내에 많은 인스턴스가 생성되면 경고
       const recentMounts = mountTimeRef.current.filter(time => Date.now() - time < 5000);
       if (recentMounts.length > 5) {

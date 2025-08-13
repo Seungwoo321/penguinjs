@@ -13,7 +13,7 @@ import {
   MacrotaskItem,
   TaskId,
   Priority
-} from '../event-loop/types';
+} from '@/games/callstack-library/domain/event-loop/types';
 
 // 큐 구현 기본 클래스
 abstract class BaseQueue<T extends Task> implements Queue<T> {

@@ -6,8 +6,8 @@
  */
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { designSystem } from '../../theme/designSystem';
-import { useDesignSystem, type ThemeContext } from '../../hooks/useDesignSystem';
+import { designSystem } from '@/games/callstack-library/theme/designSystem';
+import { useDesignSystem, type ThemeContext } from '@/games/callstack-library/hooks/useDesignSystem';
 
 // 디자인 시스템 컨텍스트 타입
 interface DesignSystemContextType {
@@ -337,9 +337,9 @@ export const DesignSystemProvider: React.FC<DesignSystemProviderProps> = ({
     };
   }, [globalStyles, injectGlobalStyles]);
 
-  // HTML 데이터 속성 설정 (테마 변경 시)
+  // HTML 데이터 속성 설정 (next-themes와 충돌 방지)
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme.mode);
+    // next-themes가 이미 테마를 관리하므로 data-theme는 설정하지 않음
     document.documentElement.setAttribute('data-high-contrast', theme.highContrast.toString());
     document.documentElement.setAttribute('data-reduced-motion', theme.reducedMotion.toString());
   }, [theme]);

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Play, Pause, SkipBack, SkipForward, FastForward, Rewind } from 'lucide-react'
-import { StackItem } from '../../../types'
+import { StackItem } from '@/games/callstack-library/types'
 
 interface TimelineCallStackPanelProps {
   currentStep: number
@@ -33,6 +33,10 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
 }) => {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
   
   // 자동 재생 기능
   useEffect(() => {
@@ -63,29 +67,39 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
       className={cn("flex flex-col", className)}
     >
       {/* 헤더 */}
-      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+      <div className="px-4 py-3 border-b" style={{
+        borderColor: 'rgb(var(--border))',
+        backgroundColor: 'rgb(var(--muted))'
+      }}>
         <div className="text-center">
-          <h3 className="font-bold text-sm text-gray-800 dark:text-gray-200">
+          <h3 className="font-bold text-sm" style={{ color: 'rgb(var(--game-callstack-stage-advanced))' }}>
             실행 타임라인
           </h3>
-          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-xs" style={{ color: 'rgb(var(--text-secondary))' }}>
             각 시점의 콜스택 상태를 확인하세요
           </p>
         </div>
       </div>
       
       {/* 타임라인 컨트롤 */}
-      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+      <div className="px-4 py-3 border-b" style={{
+        borderColor: 'rgb(var(--border))',
+        backgroundColor: 'rgb(var(--muted))'
+      }}>
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => onStepChange(0)}
             disabled={currentStep === 0}
-            className={cn(
-              "p-2 rounded-lg transition-all",
-              currentStep === 0
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600"
-            )}
+            className="p-2 rounded-lg transition-all"
+            style={{
+              backgroundColor: currentStep === 0 
+                ? 'rgb(var(--background-secondary))'
+                : 'rgb(var(--game-callstack-stage-advanced))',
+              color: currentStep === 0 
+                ? 'rgb(var(--text-muted))'
+                : 'white',
+              cursor: currentStep === 0 ? 'not-allowed' : 'pointer'
+            }}
             title="처음으로"
           >
             <SkipBack className="h-4 w-4" />
@@ -94,12 +108,16 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
           <button
             onClick={() => onStepChange(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className={cn(
-              "p-2 rounded-lg transition-all",
-              currentStep === 0
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600"
-            )}
+            className="p-2 rounded-lg transition-all"
+            style={{
+              backgroundColor: currentStep === 0 
+                ? 'rgb(var(--background-secondary))'
+                : 'rgb(var(--game-callstack-stage-advanced))',
+              color: currentStep === 0 
+                ? 'rgb(var(--text-muted))'
+                : 'white',
+              cursor: currentStep === 0 ? 'not-allowed' : 'pointer'
+            }}
             title="이전 단계"
           >
             <Rewind className="h-4 w-4" />
@@ -107,7 +125,12 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
           
           <button
             onClick={onPlayPause}
-            className="p-3 rounded-lg transition-all bg-blue-500 text-white hover:bg-blue-600"
+            className="p-3 rounded-lg transition-all"
+            style={{
+              backgroundColor: 'rgb(var(--game-callstack-stage-advanced))',
+              color: 'white',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
             title={isPlaying ? "일시정지" : "재생"}
           >
             {isPlaying ? (
@@ -120,12 +143,16 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
           <button
             onClick={() => onStepChange(Math.min(totalSteps - 1, currentStep + 1))}
             disabled={currentStep >= totalSteps - 1}
-            className={cn(
-              "p-2 rounded-lg transition-all",
-              currentStep >= totalSteps - 1
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600"
-            )}
+            className="p-2 rounded-lg transition-all"
+            style={{
+              backgroundColor: currentStep >= totalSteps - 1 
+                ? 'rgb(var(--background-secondary))'
+                : 'rgb(var(--game-callstack-stage-advanced))',
+              color: currentStep >= totalSteps - 1 
+                ? 'rgb(var(--text-muted))'
+                : 'white',
+              cursor: currentStep >= totalSteps - 1 ? 'not-allowed' : 'pointer'
+            }}
             title="다음 단계"
           >
             <FastForward className="h-4 w-4" />
@@ -134,12 +161,16 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
           <button
             onClick={() => onStepChange(totalSteps - 1)}
             disabled={currentStep >= totalSteps - 1}
-            className={cn(
-              "p-2 rounded-lg transition-all",
-              currentStep >= totalSteps - 1
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600"
-            )}
+            className="p-2 rounded-lg transition-all"
+            style={{
+              backgroundColor: currentStep >= totalSteps - 1 
+                ? 'rgb(var(--background-secondary))'
+                : 'rgb(var(--game-callstack-stage-advanced))',
+              color: currentStep >= totalSteps - 1 
+                ? 'rgb(var(--text-muted))'
+                : 'white',
+              cursor: currentStep >= totalSteps - 1 ? 'not-allowed' : 'pointer'
+            }}
             title="마지막으로"
           >
             <SkipForward className="h-4 w-4" />
@@ -147,16 +178,17 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
         </div>
         
         {/* 진행 표시 */}
-        <div className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">
+        <div className="mt-3 text-center text-sm" style={{ color: 'rgb(var(--text-secondary))' }}>
           단계: {currentStep + 1} / {totalSteps}
         </div>
       </div>
       
       {/* 타임라인 진행바 */}
-      <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800">
-        <div className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div className="px-4 py-3" style={{ backgroundColor: 'rgb(var(--muted))' }}>
+        <div className="relative h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgb(var(--background-secondary))' }}>
           <motion.div
-            className="absolute inset-y-0 left-0 bg-blue-500"
+            className="absolute inset-y-0 left-0"
+            style={{ backgroundColor: 'rgb(var(--game-callstack-stage-advanced))' }}
             animate={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
             transition={{ duration: 0.3 }}
           />
@@ -175,12 +207,13 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
                   onClick={() => onStepChange(stepIndex)}
                   onMouseEnter={() => setHoveredStep(stepIndex)}
                   onMouseLeave={() => setHoveredStep(null)}
-                  className={cn(
-                    "w-3 h-3 rounded-full transition-all",
-                    isActive
-                      ? "bg-blue-500 scale-110"
-                      : "bg-gray-300 dark:bg-gray-600 hover:scale-110"
-                  )}
+                  className="w-3 h-3 rounded-full transition-all"
+                  style={{
+                    backgroundColor: isActive 
+                      ? 'rgb(var(--game-callstack-stage-advanced))'
+                      : 'rgb(var(--background-secondary))',
+                    transform: isActive || hoveredStep === stepIndex ? 'scale(1.1)' : 'scale(1)'
+                  }}
                   title={`단계 ${stepIndex + 1}`}
                 />
               )
@@ -193,8 +226,8 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
       <div className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-2">
           {currentStack.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">
-              <p>콜스택이 비어있습니다</p>
+            <div className="text-center py-8">
+              <p style={{ color: 'rgb(var(--text-muted))' }}>콜스택이 비어있습니다</p>
             </div>
           ) : (
             <AnimatePresence mode="popLayout">
@@ -205,11 +238,15 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 border border-gray-200 dark:border-gray-700"
+                  className="rounded-lg shadow-sm p-3 border"
+                  style={{
+                    backgroundColor: 'rgb(var(--background-elevated))',
+                    borderColor: 'rgb(var(--border))'
+                  }}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-sm">{item.functionName}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">#{currentStack.length - index}</span>
+                    <span className="font-mono text-sm" style={{ color: 'rgb(var(--text-primary))' }}>{item.functionName}</span>
+                    <span className="text-xs" style={{ color: 'rgb(var(--text-secondary))' }}>#{currentStack.length - index}</span>
                   </div>
                 </motion.div>
               ))}
@@ -220,7 +257,11 @@ export const TimelineCallStackPanel: React.FC<TimelineCallStackPanelProps> = ({
       
       {/* 호버된 스텝 정보 */}
       {hoveredStep !== null && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-3 py-1 rounded-lg text-xs">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-lg text-xs" style={{
+          backgroundColor: 'rgb(var(--background-elevated))',
+          color: 'rgb(var(--text-primary))',
+          border: '1px solid rgb(var(--border))'
+        }}>
           단계 {hoveredStep + 1}: {callstackHistory[hoveredStep]?.length || 0}개 항목
         </div>
       )}

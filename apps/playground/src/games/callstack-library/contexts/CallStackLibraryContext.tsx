@@ -10,8 +10,8 @@ import {
   QueueType, 
   QueueItem, 
   ExecutionStep
-} from '../types';
-import { QueueStatesSnapshot, EventLoopStep, QueueValidationResult } from '../types/layout';
+} from '@/games/callstack-library/types';
+import { QueueStatesSnapshot, EventLoopStep, QueueValidationResult } from '@/games/callstack-library/types/layout';
 
 // 액션 타입 정의
 export enum ActionType {

@@ -7,9 +7,9 @@
 import {
   EventSourcedEventLoopEngine,
   EventLoopEventTypes
-} from '../EventSourcedEventLoopEngine';
-import { InMemoryEventStore } from '../EventStore';
-import { EventLoopConfig } from '../../event-loop/types';
+} from '@/games/callstack-library/EventSourcedEventLoopEngine';
+import { InMemoryEventStore } from '@/games/callstack-library/EventStore';
+import { EventLoopConfig } from '@/games/callstack-library/domain/event-loop/types';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('EventSourcedEventLoopEngine', () => {

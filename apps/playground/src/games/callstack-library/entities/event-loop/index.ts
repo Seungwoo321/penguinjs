@@ -5,6 +5,6 @@
  * 핵심 비즈니스 엔티티와 도메인 모델들
  */
 
-export * from '../../domain/event-loop/EventLoopEngine';
-export * from '../../domain/event-loop/types';
-export * from '../../domain/queue-system/QueueSystem';
+export * from '@/games/callstack-library/domain/event-loop/EventLoopEngine';
+export * from '@/games/callstack-library/domain/event-loop/types';
+export * from '@/games/callstack-library/domain/queue-system/QueueSystem';

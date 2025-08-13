@@ -22,7 +22,7 @@ import {
   getQueryOptimizationHints,
   QueryFilters,
   QueryPagination
-} from '../Queries';
+} from '@/games/callstack-library/Queries';
 
 describe('Queries', () => {
   describe('QueryBuilder', () => {

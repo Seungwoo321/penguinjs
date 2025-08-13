@@ -12,7 +12,7 @@ import {
   IQueryHandler,
   QueryContext,
   QueryMiddleware
-} from '../QueryHandler';
+} from '@/games/callstack-library/QueryHandler';
 import {
   GameQuery,
   QueryResult,
@@ -26,10 +26,10 @@ import {
   GetPerformanceMetricsQuery,
   GetDebugInfoQuery,
   GetSimulationStateQuery
-} from '../Queries';
-import { EventSourcedEventLoopEngine } from '../../event-sourcing/EventSourcedEventLoopEngine';
-import { InMemoryEventStore } from '../../event-sourcing/EventStore';
-import { EventLoopConfig } from '../../event-loop/types';
+} from '@/games/callstack-library/Queries';
+import { EventSourcedEventLoopEngine } from '@/games/callstack-library/domain/event-sourcing/EventSourcedEventLoopEngine';
+import { InMemoryEventStore } from '@/games/callstack-library/domain/event-sourcing/EventStore';
+import { EventLoopConfig } from '@/games/callstack-library/domain/event-loop/types';
 
 describe('QueryHandler', () => {
   let dispatcher: QueryDispatcher;

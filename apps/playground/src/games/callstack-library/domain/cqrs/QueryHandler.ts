@@ -30,8 +30,8 @@ import {
   validateQuery
 } from './Queries';
 
-import { EventSourcedEventLoopEngine } from '../event-sourcing/EventSourcedEventLoopEngine';
-import { DomainEvent } from '../event-sourcing/EventStore';
+import { EventSourcedEventLoopEngine } from '@/games/callstack-library/domain/event-sourcing/EventSourcedEventLoopEngine';
+import { DomainEvent } from '@/games/callstack-library/domain/event-sourcing/EventStore';
 
 // 쿼리 처리 컨텍스트
 export interface QueryContext {

@@ -7,12 +7,11 @@ import React, { memo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Book, Zap, Calendar, X, Info, Clock } from 'lucide-react';
 import { cn } from '@penguinjs/ui';
-import { useCallStackLibraryTheme } from '../../hooks/useCallStackLibraryTheme';
-import { AccessibleButton } from '../ui/AccessibleButton';
-import { FunctionNameTooltip } from '../ui/AdaptiveTooltip';
-import { createListItemAttributes } from '../../utils/ariaUtils';
-import type { QueueItem, QueueType } from '../../types';
-import type { CallStackQueueType } from '../../theme/callstackLibraryTheme';
+import { AccessibleButton } from '@/games/callstack-library/components/ui/AccessibleButton';
+import { FunctionNameTooltip } from '@/games/callstack-library/components/ui/AdaptiveTooltip';
+import { createListItemAttributes } from '@/games/callstack-library/utils/ariaUtils';
+import type { QueueItem, QueueType } from '@/games/callstack-library/types';
+import type { CallStackQueueType } from '@/games/callstack-library/theme/callstackLibraryTheme';
 
 interface QueueItemComponentProps {
   item: QueueItem;
@@ -48,31 +47,34 @@ export const QueueItemComponent = memo<QueueItemComponentProps>(({
   onHover,
   className
 }) => {
-  const libraryTheme = useCallStackLibraryTheme();
   const [isHovered, setIsHovered] = useState(false);
   
-  // 큐별 아이콘 및 색상
+  // 큐별 아이콘 및 색상 (CSS 변수 사용)
   const queueConfig = {
     callstack: {
       icon: Book,
       label: '메인 서가',
-      color: libraryTheme.getQueueColor('callstack' as CallStackQueueType, 'main')
+      color: 'rgb(var(--game-callstack-queue-callstack))'
     },
     microtask: {
       icon: Zap,
       label: '긴급 처리',
-      color: libraryTheme.getQueueColor('microtask' as CallStackQueueType, 'main')
+      color: 'rgb(var(--game-callstack-queue-microtask))'
     },
     macrotask: {
       icon: Calendar,
       label: '예약 처리',
-      color: libraryTheme.getQueueColor('macrotask' as CallStackQueueType, 'main')
+      color: 'rgb(var(--game-callstack-queue-macrotask))'
     }
   };
 
   const config = queueConfig[queueType];
   const Icon = config.icon;
-  const isDarkMode = libraryTheme.isDarkMode;
+  
+  // 다크모드 감지 (CSS 클래스 기반)
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
 
   // 스타일 계산
   const itemStyles = {
@@ -92,17 +94,29 @@ export const QueueItemComponent = memo<QueueItemComponentProps>(({
 
   const currentStyle = itemStyles[variant];
 
-  // 배경색 계산
+  // 배경색 계산 (CSS 변수 사용)
+  const getQueueBgColor = (type: QueueType, variant: 'active' | 'hover' | 'default') => {
+    const queuePrefix = `--game-callstack-queue-${type}`;
+    switch (variant) {
+      case 'active':
+        return `rgb(var(${queuePrefix}))`; // 버튼 색상
+      case 'hover':
+        return `rgba(var(${queuePrefix}), 0.8)`; // 호버 색상
+      default:
+        return `rgb(var(${queuePrefix}-light))`; // 기본 밝은 색상
+    }
+  };
+  
   const backgroundColor = isActive
-    ? libraryTheme.getQueueColor(queueType as CallStackQueueType, 'button')
+    ? getQueueBgColor(queueType, 'active')
     : isHighlighted
-    ? libraryTheme.getQueueColor(queueType as CallStackQueueType, 'hover')
-    : item.color || libraryTheme.getQueueTheme(queueType as CallStackQueueType).secondary;
+    ? getQueueBgColor(queueType, 'hover')
+    : item.color || getQueueBgColor(queueType, 'default');
 
-  // 텍스트 색상 계산
+  // 텍스트 색상 계산 (CSS 변수 사용)
   const textColor = isActive
-    ? libraryTheme.getQueueText(queueType as CallStackQueueType, 'contrast')
-    : libraryTheme.getQueueText(queueType as CallStackQueueType, 'primary');
+    ? 'rgb(var(--primary-foreground))' // 대비 색상 (흰색)
+    : 'rgb(var(--text-primary))'; // 기본 텍스트 색상
 
   // 핸들러
   const handleClick = () => {
@@ -145,7 +159,7 @@ export const QueueItemComponent = memo<QueueItemComponentProps>(({
         ...currentStyle,
         backgroundColor,
         color: textColor,
-        borderColor: libraryTheme.getQueueBorder(queueType as CallStackQueueType),
+        borderColor: `rgb(var(--game-callstack-queue-${queueType}))`,
         borderWidth: '1px',
         borderStyle: 'solid',
         ['--tw-ring-color' as any]: isActive ? config.color : undefined
@@ -326,7 +340,6 @@ export const EmptyQueueState: React.FC<EmptyQueueStateProps> = ({
   showIcon = true,
   className
 }) => {
-  const libraryTheme = useCallStackLibraryTheme();
   
   const queueConfig = {
     callstack: {
@@ -359,13 +372,13 @@ export const EmptyQueueState: React.FC<EmptyQueueStateProps> = ({
       {showIcon && (
         <Icon 
           className="w-12 h-12 mb-3 opacity-30"
-          style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'secondary') }}
+          style={{ color: 'rgb(var(--text-secondary))' }}
           aria-hidden="true"
         />
       )}
       <p 
         className="text-sm"
-        style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'secondary') }}
+        style={{ color: 'rgb(var(--text-secondary))' }}
       >
         {displayMessage}
       </p>

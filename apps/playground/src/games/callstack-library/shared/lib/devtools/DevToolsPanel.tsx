@@ -15,10 +15,10 @@ import React, {
 } from 'react';
 import { cn } from '@penguinjs/ui';
 
-import { CQRSEventLoopService } from '../cqrs';
-// import { WorkerManager } from '../workers'; // TODO: WorkerManager 구현 필요
-import { PluginRegistry } from '../plugin-system';
-import { VirtualizedEventList } from '../virtualization';
+import { CQRSEventLoopService } from '@/games/callstack-library/domain/cqrs/CQRSEventLoopService';
+// import { WorkerManager } from '@/games/callstack-library/shared/workers'; // TODO: WorkerManager 구현 필요
+import { PluginRegistry } from '@/games/callstack-library/shared/lib/plugin-system/PluginRegistry';
+import { VirtualizedList as VirtualizedEventList } from '@/games/callstack-library/shared/lib/virtualization/VirtualizedList';
 
 // 임시 타입 정의
 type WorkerManager = any;
@@ -269,9 +269,23 @@ const EventsPanel: React.FC<{ events: any[] }> = memo(({ events }) => {
           />
         </div>
         <VirtualizedEventList
-          events={filteredEvents}
+          items={filteredEvents.map((event, index) => ({
+            id: index,
+            height: 60,
+            data: event
+          }))}
+          itemHeight={60}
           containerHeight={500}
-          onEventSelect={setSelectedEvent}
+          renderItem={(item, index, style) => (
+            <div 
+              key={item.id}
+              style={style}
+              className="p-2 border-b cursor-pointer hover:bg-gray-50"
+              onClick={() => setSelectedEvent(item.data)}
+            >
+              <div className="text-sm font-mono">{JSON.stringify(item.data).slice(0, 100)}...</div>
+            </div>
+          )}
         />
       </div>
       <div className="w-1/2 p-3">

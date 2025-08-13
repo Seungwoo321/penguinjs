@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { X, Check, AlertCircle, Plus } from 'lucide-react'
-import { StackItem } from '../../../types'
+import { StackItem } from '@/games/callstack-library/types'
 
 interface StackSnapshotBuilderPanelProps {
   currentStep: number
@@ -66,21 +66,45 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
       className={cn("flex flex-col", className)}
     >
       {/* 헤더 */}
-      <div className="px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700">
+      <div 
+        className="px-4 py-3 border-b" 
+        style={{
+          backgroundColor: 'rgb(var(--muted))',
+          borderColor: 'rgb(var(--border))'
+        }}
+      >
         <div className="text-center">
-          <h3 className="text-sm font-bold text-amber-800 dark:text-amber-200">
+          <h3 
+            className="text-sm font-bold"
+            style={{ color: 'rgb(var(--foreground))' }}
+          >
             책장 상태 구성
           </h3>
-          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+          <p 
+            className="text-xs mt-1"
+            style={{ color: 'rgb(var(--muted-foreground))' }}
+          >
             단계 {currentStep + 1}의 책장 상태를 {isCheckpoint ? '구성하세요' : '확인하세요'}
           </p>
           {isCheckpoint ? (
-            <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 rounded text-xs">
+            <div 
+              className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded text-xs"
+              style={{
+                backgroundColor: 'rgb(var(--card))',
+                color: 'rgb(var(--warning))'
+              }}
+            >
               <AlertCircle className="h-3 w-3" />
               <span className="font-medium">체크포인트</span>
             </div>
           ) : (
-            <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded text-xs">
+            <div 
+              className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded text-xs"
+              style={{
+                backgroundColor: 'rgb(var(--card))',
+                color: 'rgb(var(--success))'
+              }}
+            >
               <Check className="h-3 w-3" />
               <span className="font-medium">자동 기록</span>
             </div>
@@ -91,7 +115,10 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
       {/* 실행 단계 그리드 */}
       <div className="px-4 py-3 border-b border-editor-border">
         <div className="mb-2">
-          <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+          <h4 
+            className="text-xs font-semibold"
+            style={{ color: 'rgb(var(--muted-foreground))' }}
+          >
             기록 시점 선택:
           </h4>
         </div>
@@ -107,7 +134,10 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
       {/* 함수 선택 영역 */}
       <div className="px-4 py-3 border-b border-editor-border">
         <div className="mb-2">
-          <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+          <h4 
+            className="text-xs font-semibold"
+            style={{ color: 'rgb(var(--muted-foreground))' }}
+          >
             {isCheckpoint ? '사용 가능한 함수들:' : '참고용 함수 목록:'}
           </h4>
         </div>
@@ -122,7 +152,10 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
               />
             ))}
             {remainingFunctions.length === 0 && (
-              <div className="col-span-2 text-xs text-gray-400 italic text-center py-2">
+              <div 
+                className="col-span-2 text-xs italic text-center py-2"
+                style={{ color: 'rgb(var(--muted-foreground))' }}
+              >
                 모든 함수가 사용되었습니다
               </div>
             )}
@@ -132,7 +165,12 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
             {availableFunctions.map((func, index) => (
               <div
                 key={func}
-                className="p-2 text-xs rounded-lg border bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 text-center"
+                className="p-2 text-xs rounded-lg border text-center"
+                style={{
+                  backgroundColor: 'rgb(var(--muted))',
+                  color: 'rgb(var(--muted-foreground))',
+                  borderColor: 'rgb(var(--border))'
+                }}
               >
                 <span className="font-mono">{func}</span>
               </div>
@@ -144,10 +182,16 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
       {/* 스택 구성 영역 */}
       <div className="flex-1 px-4 py-3">
         <div className="mb-2 flex items-center justify-between">
-          <h4 className="text-xs font-semibold text-pink-600 dark:text-pink-400">
+          <h4 
+            className="text-xs font-semibold"
+            style={{ color: 'rgb(var(--primary))' }}
+          >
             구성된 스택 (위에서부터):
           </h4>
-          <span className="text-xs text-gray-500">
+          <span 
+            className="text-xs"
+            style={{ color: 'rgb(var(--muted-foreground))' }}
+          >
             {userSnapshot.length}개 함수
           </span>
         </div>
@@ -165,19 +209,23 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
         <button
           onClick={onValidateSnapshot}
           disabled={userSnapshot.length === 0}
-          className={cn(
-            "w-full py-2 px-4 rounded-lg text-sm font-medium transition-all",
-            "flex items-center justify-center gap-2",
-            userSnapshot.length === 0
-              ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+          className="w-full py-2 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+          style={{
+            backgroundColor: userSnapshot.length === 0
+              ? 'rgb(var(--muted))'
               : isValidated === true
-                ? "bg-green-500 text-white"
+                ? 'rgb(var(--success))'
                 : isValidated === false
-                  ? "bg-red-500 text-white"
+                  ? 'rgb(var(--destructive))'
                   : isCheckpoint
-                    ? "bg-pink-500 text-white hover:bg-pink-600"
-                    : "bg-blue-500 text-white hover:bg-blue-600"
-          )}
+                    ? 'rgb(var(--primary))'
+                    : 'rgb(var(--accent))',
+            color: userSnapshot.length === 0
+              ? 'rgb(var(--muted-foreground))'
+              : 'rgb(var(--primary-foreground))',
+            cursor: userSnapshot.length === 0 ? 'not-allowed' : 'pointer',
+            boxShadow: userSnapshot.length > 0 ? 'var(--shadow)' : 'none'
+          }}
         >
           {isValidated === true ? (
             <>
@@ -198,54 +246,23 @@ export const StackSnapshotBuilderPanel: React.FC<StackSnapshotBuilderPanelProps>
         </button>
       </div>
       
-      {/* 기존 체크포인트 전용 검증 버튼은 제거하고 위로 통합 */}
-      {false && isCheckpoint && (
-        <div className="px-4 py-3 border-t border-editor-border bg-surface-secondary">
-          <button
-            onClick={onValidateSnapshot}
-            disabled={userSnapshot.length === 0}
-            className={cn(
-              "w-full py-2 px-4 rounded-lg text-sm font-medium transition-all",
-              "flex items-center justify-center gap-2",
-              userSnapshot.length === 0
-                ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
-                : isValidated === true
-                  ? "bg-green-500 text-white"
-                  : isValidated === false
-                    ? "bg-red-500 text-white"
-                    : "bg-pink-500 text-white hover:bg-pink-600"
-            )}
-          >
-            {isValidated === true ? (
-              <>
-                <Check className="h-4 w-4" />
-                검증 완료
-              </>
-            ) : isValidated === false ? (
-              <>
-                <X className="h-4 w-4" />
-                다시 시도
-              </>
-            ) : (
-              <>
-                <AlertCircle className="h-4 w-4" />
-                스냅샷 검증
-              </>
-            )}
-          </button>
-        </div>
-      )}
       
       {/* 진행률 표시 */}
       <div className="px-4 py-2 bg-surface-secondary border-t border-editor-border">
-        <div className="flex items-center justify-between text-xs text-game-text-secondary">
-          <span>완성도: {Object.values(validationResults).filter(v => v === true).length} / {snapshotCheckpoints.length}</span>
-          <span>{Math.round((Object.values(validationResults).filter(v => v === true).length / snapshotCheckpoints.length) * 100)}%</span>
+        <div className="flex items-center justify-between text-xs">
+          <span style={{ color: 'rgb(var(--muted-foreground))' }}>완성도: {Object.values(validationResults).filter(v => v === true).length} / {snapshotCheckpoints.length}</span>
+          <span style={{ color: 'rgb(var(--muted-foreground))' }}>{Math.round((Object.values(validationResults).filter(v => v === true).length / snapshotCheckpoints.length) * 100)}%</span>
         </div>
-        <div className="mt-1 w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div 
+          className="mt-1 w-full h-1.5 rounded-full overflow-hidden"
+          style={{ backgroundColor: 'rgb(var(--border))' }}
+        >
           <div 
-            className="h-full bg-gradient-to-r from-pink-400 to-pink-600 transition-all duration-300"
-            style={{ width: `${(Object.values(validationResults).filter(v => v === true).length / snapshotCheckpoints.length) * 100}%` }}
+            className="h-full transition-all duration-300"
+            style={{ 
+              background: 'rgb(var(--primary))',
+              width: `${(Object.values(validationResults).filter(v => v === true).length / snapshotCheckpoints.length) * 100}%`
+            }}
           />
         </div>
       </div>
@@ -291,18 +308,52 @@ const StepButton: React.FC<{
   isFailed: boolean
   onClick?: () => void
 }> = ({ step, isActive, isCheckpoint, isCompleted, isFailed, onClick }) => {
+  const getButtonStyle = () => {
+    if (isCompleted) {
+      return {
+        backgroundColor: 'rgb(var(--success))',
+        color: 'rgb(var(--success-foreground))',
+        borderColor: 'rgb(var(--success))'
+      }
+    }
+    
+    if (isFailed) {
+      return {
+        backgroundColor: 'rgb(var(--destructive))',
+        color: 'rgb(var(--destructive-foreground))',
+        borderColor: 'rgb(var(--destructive))'
+      }
+    }
+    
+    if (isCheckpoint) {
+      return {
+        backgroundColor: 'rgb(var(--warning))',
+        color: 'rgb(var(--warning-foreground))',
+        borderColor: 'rgb(var(--warning))'
+      }
+    }
+    
+    return {
+      backgroundColor: 'rgb(var(--muted))',
+      color: 'rgb(var(--muted-foreground))',
+      borderColor: 'rgb(var(--border))'
+    }
+  }
+  
+  const buttonStyle = getButtonStyle()
+  
   return (
     <button
       onClick={onClick}
-      className={cn(
-        "h-7 text-xs rounded flex items-center justify-center font-mono transition-all",
-        "border cursor-pointer hover:opacity-90",
-        isActive && "ring-2 ring-pink-400",
-        isCompleted && "bg-green-500 text-white border-green-600",
-        isFailed && "bg-red-500 text-white border-red-600",
-        !isCompleted && !isFailed && isCheckpoint && "bg-pink-100 dark:bg-pink-900/30 border-pink-300 dark:border-pink-600 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/40",
-        !isCompleted && !isFailed && !isCheckpoint && "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
-      )}
+      className="h-7 text-xs rounded flex items-center justify-center font-mono transition-all border cursor-pointer hover:opacity-90"
+      style={{
+        ...buttonStyle,
+        ...(isActive && {
+          boxShadow: '0 0 0 2px rgb(var(--primary) / 0.25)',
+          outline: 'none',
+          transform: 'scale(1.1)'
+        })
+      }}
     >
       {step + 1}
     </button>
@@ -319,6 +370,24 @@ const FunctionChip: React.FC<{
 }> = ({ functionName, onClick, disabled = false }) => {
   const isGlobal = functionName === '<global>'
   
+  const getChipStyle = () => {
+    if (disabled) {
+      return {
+        backgroundColor: 'rgb(var(--muted))',
+        color: 'rgb(var(--muted-foreground))',
+        borderColor: 'rgb(var(--border))',
+        cursor: 'not-allowed'
+      }
+    }
+    
+    return {
+      backgroundColor: 'rgb(var(--primary))',
+      color: 'rgb(var(--primary-foreground))',
+      borderColor: 'rgb(var(--primary))',
+      cursor: 'pointer'
+    }
+  }
+  
   return (
     <motion.button
       onClick={onClick}
@@ -328,11 +397,9 @@ const FunctionChip: React.FC<{
       className={cn(
         "p-2 text-xs rounded-lg border transition-all",
         "flex items-center justify-center gap-1",
-        disabled
-          ? "bg-gray-100 dark:bg-gray-800 text-gray-400 border-gray-300 dark:border-gray-600 cursor-not-allowed"
-          : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer",
         isGlobal && "border-dashed"
       )}
+      style={getChipStyle()}
     >
       {isGlobal && <span className="text-xs">📍</span>}
       <span className="font-mono">{functionName}</span>
@@ -352,8 +419,14 @@ const StackConstructor: React.FC<{
 }> = ({ snapshot, onRemove, onReorder, disabled = false }) => {
   if (snapshot.length === 0) {
     return (
-      <div className="border-2 border-dashed border-pink-300 dark:border-pink-600 rounded-lg p-4 bg-pink-50 dark:bg-pink-900/10">
-        <div className="text-center text-pink-400 dark:text-pink-500">
+      <div 
+        className="border-2 border-dashed rounded-lg p-4"
+        style={{
+          borderColor: 'rgb(var(--primary))',
+          backgroundColor: 'rgb(var(--card))'
+        }}
+      >
+        <div className="text-center" style={{ color: 'rgb(var(--primary))' }}>
           <div className="text-2xl mb-2">📚</div>
           <p className="text-xs">
             함수를 선택하여 스택을 구성하세요
@@ -364,7 +437,13 @@ const StackConstructor: React.FC<{
   }
   
   return (
-    <div className="border-2 border-pink-500 rounded-lg p-3 bg-pink-50 dark:bg-pink-900/10 min-h-[200px]">
+    <div 
+      className="border-2 rounded-lg p-3 min-h-[200px]"
+      style={{
+        borderColor: 'rgb(var(--primary))',
+        backgroundColor: 'rgb(var(--card))'
+      }}
+    >
       <Reorder.Group 
         axis="y" 
         values={snapshot} 
@@ -410,28 +489,49 @@ const SnapshotItem: React.FC<{
       exit={{ opacity: 0, y: -10 }}
       className={cn(
         "flex items-center gap-2 p-2 rounded border",
-        "bg-white dark:bg-gray-800 border-pink-200 dark:border-pink-700",
         isGlobal && "border-dashed"
       )}
+      style={{
+        backgroundColor: 'rgb(var(--card))',
+        borderColor: 'rgb(var(--primary))'
+      }}
     >
       <div className="flex-shrink-0 text-sm">
         {isGlobal ? "📍" : "📥"}
       </div>
       
       <div className="flex-1">
-        <span className="font-mono text-xs text-gray-800 dark:text-gray-200">
+        <span 
+          className="font-mono text-xs"
+          style={{ color: 'rgb(var(--foreground))' }}
+        >
           {item.functionName}
         </span>
       </div>
       
-      <div className="flex-shrink-0 px-1.5 py-0.5 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded text-xs font-medium">
+      <div 
+        className="flex-shrink-0 px-1.5 py-0.5 rounded text-xs font-medium"
+        style={{
+          backgroundColor: 'rgb(var(--muted))',
+          color: 'rgb(var(--primary))'
+        }}
+      >
         #{index + 1}
       </div>
       
       {!disabled && (
         <button
           onClick={onRemove}
-          className="flex-shrink-0 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+          className="flex-shrink-0 p-1 rounded transition-colors"
+          style={{
+            color: 'rgb(var(--destructive))'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgb(var(--muted))'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
         >
           <X className="h-3 w-3" />
         </button>

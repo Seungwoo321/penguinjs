@@ -5,22 +5,22 @@ import React, { useState, useCallback, useMemo, memo } from 'react'
 import { cn, GamePanel } from '@penguinjs/ui'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { X, Check, AlertCircle, Plus, ChevronLeft, ChevronRight, BookOpen, Users, Sparkles, Calendar } from 'lucide-react'
-import { QueueSnapshotBuilderPanelProps, QueueStatesSnapshot } from '../../../types/layout'
-import { QueueType, QueueItem } from '../../../types'
-import { useCallStackLibraryTheme, useCallStackLibraryCSSVariables } from '../../../hooks/useCallStackLibraryTheme'
-import { useOptimizedAnimations } from '../../../hooks/useOptimizedAnimations'
-import { useResponsiveLayout } from '../../../hooks/useResponsiveLayout'
-import type { CallStackQueueType } from '../../../theme/callstackLibraryTheme'
-import { useFunctionNameOverflow } from '../../../hooks/useTextOverflow'
-import { FunctionNameTooltip } from '../../ui/AdaptiveTooltip'
-import { typography, createTextOverflowStyles } from '../../../utils/textUtils'
-import { usePerformanceOptimization } from '../../../hooks/usePerformanceOptimization'
-import { useMemoryManagement, useLeakDetection } from '../../../hooks/useMemoryManagement'
-import { QueueItemComponent } from '../../common/QueueItemComponent'
-import { ExecutionController } from '../../common/ExecutionController'
-import { ProgressIndicator } from '../../common/ProgressIndicator'
-import { useCallStackLibraryContext, ActionType } from '../../../contexts/CallStackLibraryContext'
-import { gameEvents } from '../../../utils/eventSystem'
+import { QueueSnapshotBuilderPanelProps, QueueStatesSnapshot } from '@/games/callstack-library/types/layout'
+import { QueueType, QueueItem } from '@/games/callstack-library/types'
+import { useOptimizedAnimations } from '@/games/callstack-library/hooks/useOptimizedAnimations'
+import { useResponsiveLayout } from '@/games/callstack-library/hooks/useResponsiveLayout'
+import type { CallStackQueueType } from '@/games/callstack-library/theme/callstackLibraryTheme'
+import { useFunctionNameOverflow } from '@/games/callstack-library/hooks/useTextOverflow'
+import { FunctionNameTooltip } from '@/games/callstack-library/components/ui/AdaptiveTooltip'
+import { typography, createTextOverflowStyles } from '@/games/callstack-library/utils/textUtils'
+import { usePerformanceOptimization } from '@/games/callstack-library/hooks/usePerformanceOptimization'
+import { useMemoryMonitor } from '@/games/callstack-library/hooks/useMemoryMonitor'
+import { useLeakDetection } from '@/games/callstack-library/hooks/useMemoryManagement'
+import { QueueItemComponent } from '@/games/callstack-library/components/common/QueueItemComponent'
+import { ExecutionController } from '@/games/callstack-library/components/common/ExecutionController'
+import { ProgressIndicator } from '@/games/callstack-library/components/common/ProgressIndicator'
+import { useCallStackLibraryContext, ActionType } from '@/games/callstack-library/contexts/CallStackLibraryContext'
+import { gameEvents } from '@/games/callstack-library/utils/eventSystem'
 
 /**
  * 큐 스냅샷 빌더 패널 (Layout B 전용)
@@ -48,9 +48,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
     enableMetrics: process.env.NODE_ENV === 'development',
     maxRenderCount: 30
   })
-  const { registerCleanup, isMemoryPressure } = useMemoryManagement({
-    enableMonitoring: process.env.NODE_ENV === 'development'
-  })
+  const { registerCleanup, isMemoryPressure } = useMemoryMonitor()
   useLeakDetection('QueueSnapshotBuilderPanel')
   
   // 공통 컴포넌트를 위한 이벤트 핸들러
@@ -70,9 +68,10 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
     [onQueueStateChange]
   );
   
-  // 콜스택 도서관 테마 및 성능 최적화 사용
-  const libraryTheme = useCallStackLibraryTheme()
-  const cssVariables = useCallStackLibraryCSSVariables()
+  // 다크모드 감지
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
   const optimizedAnimations = useOptimizedAnimations()
   
   // 상태 계산 (Context 우선)
@@ -210,10 +209,10 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
 
   return (
     <div 
-      className={cn("rounded-lg border bg-white dark:bg-gray-800", className)}
+      className={cn("rounded-lg border", className)}
       style={{
-        ...cssVariables,
-        background: libraryTheme.getLibraryBackground()
+        backgroundColor: 'rgb(var(--card))',
+        borderColor: 'rgb(var(--border))'
       }}
     >
       <GamePanel 
@@ -224,7 +223,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
       <div 
         className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
-          backgroundImage: libraryTheme.theme.library.textures.wood,
+          backgroundColor: 'rgba(var(--game-callstack-library-wood), 0.1)',
         }}
       />
 
@@ -252,7 +251,8 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
         <div 
           className="px-4 py-2 border-b border-editor-border"
           style={{
-            background: libraryTheme.getQueueColor('callstack', 'light'),
+            backgroundColor: 'rgb(var(--muted))',
+            borderColor: 'rgb(var(--border))'
           }}
         >
           <div className="flex items-center justify-between">
@@ -260,7 +260,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
               <p 
                 className="font-medium"
                 style={{ 
-                  color: libraryTheme.getQueueText('callstack', 'primary'),
+                  color: 'rgb(var(--text-primary))',
                   fontSize: typography.body.medium,
                   ...createTextOverflowStyles({ maxLines: 2, breakWord: true })
                 }}
@@ -270,7 +270,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
               <p 
                 className="mt-1"
                 style={{ 
-                  color: libraryTheme.getQueueText('callstack', 'secondary'),
+                  color: 'rgb(var(--text-secondary))',
                   fontSize: typography.caption.large
                 }}
               >
@@ -279,12 +279,17 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
             </div>
             <div className="flex items-center gap-2">
               {isValidated !== undefined && (
-                <span className={cn(
-                  "text-xs px-2 py-1 rounded flex items-center gap-1",
-                  isValidated 
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
-                    : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
-                )}>
+                <span 
+                  className="text-xs px-2 py-1 rounded flex items-center gap-1"
+                  style={{
+                    backgroundColor: isValidated 
+                      ? 'rgb(var(--success))'
+                      : 'rgb(var(--destructive))',
+                    color: isValidated
+                      ? 'rgb(var(--success-foreground))'
+                      : 'rgb(var(--destructive-foreground))'
+                  }}
+                >
                   {isValidated ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
                   {isValidated ? "✓ 정답" : "✗ 오답"}
                 </span>
@@ -295,7 +300,9 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
       )}
 
       {/* 큐 상태 빌더 */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden" style={{
+        background: 'rgb(var(--background))'
+      }}>
         <QueueStateBuilder
           queueType={selectedQueue}
           items={currentQueueItems}
@@ -310,7 +317,8 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
       <div 
         className="p-4 border-t border-editor-border"
         style={{
-          background: libraryTheme.getQueueColor('callstack', 'light'),
+          background: 'rgb(var(--card))',
+          borderColor: 'rgb(var(--border))'
         }}
       >
         <button
@@ -323,26 +331,26 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
             fontSize: responsiveLayout.config.fontSize.body,
             ...(currentQueueStates
               ? {
-                  background: libraryTheme.getQueueColor('callstack', 'button'),
-                  color: libraryTheme.getQueueText('callstack', 'contrast'),
-                  boxShadow: libraryTheme.theme.shadows.button,
-                  border: `1px solid ${libraryTheme.getQueueBorder('callstack')}`,
+                  background: 'rgb(var(--primary))',
+                  color: 'rgb(var(--primary-foreground))',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgb(var(--game-callstack-queue-callstack))',
                 }
               : {
-                  background: '#e5e7eb',
-                  color: '#6b7280',
+                  background: 'rgb(var(--muted))',
+                  color: 'rgb(var(--muted-foreground))',
                   cursor: 'not-allowed'
                 })
           }}
           onMouseEnter={(e) => {
             if (currentQueueStates) {
-              e.currentTarget.style.background = libraryTheme.getQueueColor('callstack', 'hover')
+              e.currentTarget.style.background = 'rgb(var(--primary-hover))'
               e.currentTarget.style.transform = 'translateY(-1px)'
             }
           }}
           onMouseLeave={(e) => {
             if (currentQueueStates) {
-              e.currentTarget.style.background = libraryTheme.getQueueColor('callstack', 'button')
+              e.currentTarget.style.background = 'rgb(var(--primary))'
               e.currentTarget.style.transform = 'translateY(0)'
             }
           }}
@@ -374,22 +382,22 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
   validationResults,
   onStepChange
 }) => {
-  const libraryTheme = useCallStackLibraryTheme()
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false
   
   return (
     <div 
       className="px-4 py-3 border-b border-editor-border"
       style={{
-        background: libraryTheme.getQueueColor('callstack', 'light'),
-        backgroundImage: libraryTheme.theme.library.textures.wood,
-        backgroundBlendMode: 'overlay'
+        background: 'rgb(var(--game-callstack-queue-callstack-light))'
       }}
     >
       <div className="flex items-center justify-between">
         <h3 
           className="font-semibold flex items-center gap-2"
           style={{ 
-            color: libraryTheme.getQueueText('callstack', 'primary'),
+            color: 'rgb(var(--text-primary))',
             fontSize: typography.body.medium
           }}
         >
@@ -398,7 +406,7 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
         </h3>
         <div 
           className="text-xs"
-          style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+          style={{ color: 'rgb(var(--text-secondary))' }}
         >
           {currentStep + 1}/{executionSteps.length}
         </div>
@@ -419,27 +427,27 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
             style={
               index === currentStep
                 ? {
-                    background: libraryTheme.getQueueColor('callstack', 'button'),
-                    borderColor: libraryTheme.getQueueBorder('callstack'),
-                    color: libraryTheme.getQueueText('callstack', 'contrast'),
-                    boxShadow: libraryTheme.theme.shadows.button
+                    background: 'rgb(var(--primary))',
+                    borderColor: 'rgb(var(--game-callstack-queue-callstack))',
+                    color: 'rgb(var(--primary-foreground))',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                   }
                 : validationResults[index]?.isValid
                   ? {
-                      background: '#dcfce7',
-                      borderColor: '#86efac',
-                      color: '#166534'
+                      backgroundColor: 'rgb(var(--success))',
+                      borderColor: 'rgb(var(--success))',
+                      color: 'rgb(var(--success-foreground))'
                     }
                   : validationResults[index]?.isValid === false
                     ? {
-                        background: '#fecaca',
-                        borderColor: '#fca5a5',
-                        color: '#dc2626'
+                        backgroundColor: 'rgb(var(--destructive))',
+                        borderColor: 'rgb(var(--destructive))',
+                        color: 'rgb(var(--destructive-foreground))'
                       }
                     : {
-                        background: libraryTheme.getQueueColor('callstack', 'light'),
-                        borderColor: libraryTheme.getQueueBorder('callstack', 'light'),
-                        color: libraryTheme.getQueueText('callstack', 'primary')
+                        backgroundColor: 'rgb(var(--muted))',
+                        borderColor: 'rgb(var(--border))',
+                        color: 'rgb(var(--muted-foreground))'
                       }
             }
             >
@@ -468,7 +476,9 @@ const QueueSelector: React.FC<QueueSelectorProps> = ({
   queueStates,
   queueTypes = ['callstack', 'microtask', 'macrotask']
 }) => {
-  const libraryTheme = useCallStackLibraryTheme()
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false
   
   // queueTypes에 따라 동적으로 탭 생성
   const queueTabsMap = {
@@ -488,7 +498,18 @@ const QueueSelector: React.FC<QueueSelectorProps> = ({
       {queueTabs.map(({ type, label, icon: Icon }) => {
         const count = queueStates?.[type]?.length || 0
         const isSelected = selectedQueue === type
-        const queueTheme = libraryTheme.getQueueTheme(type as CallStackQueueType)
+        const queueTheme = {
+          gradients: {
+            light: 'rgb(var(--muted))',
+            primary: 'rgb(var(--primary))'
+          },
+          border: {
+            primary: 'rgb(var(--primary))'
+          },
+          text: {
+            primary: 'rgb(var(--foreground))'
+          }
+        }
         
         return (
           <button
@@ -497,8 +518,8 @@ const QueueSelector: React.FC<QueueSelectorProps> = ({
             className="flex-1 px-4 py-3 text-sm font-medium transition-all border-b-2 relative overflow-hidden"
             style={{
               background: isSelected ? queueTheme.gradients.light : undefined,
-              borderBottomColor: isSelected ? queueTheme.border.main : 'transparent',
-              color: isSelected ? queueTheme.text.primary : '#6b7280'
+              borderBottomColor: isSelected ? queueTheme.border.primary : 'transparent',
+              color: isSelected ? queueTheme.text.primary : 'rgb(var(--muted-foreground))'
             }}
           >
             {/* 도서관 나무 질감 오버레이 */}
@@ -506,7 +527,7 @@ const QueueSelector: React.FC<QueueSelectorProps> = ({
               <div 
                 className="absolute inset-0 opacity-10"
                 style={{
-                  backgroundImage: libraryTheme.theme.library.textures.wood
+                  backgroundColor: 'rgba(var(--game-callstack-library-wood), 0.1)'
                 }}
               />
             )}
@@ -519,12 +540,12 @@ const QueueSelector: React.FC<QueueSelectorProps> = ({
                 style={
                   isSelected 
                     ? {
-                        backgroundColor: queueTheme.background.main,
+                        backgroundColor: queueTheme.gradients.primary,
                         color: queueTheme.text.primary
                       }
                     : {
-                        backgroundColor: '#f3f4f6',
-                        color: '#6b7280'
+                        backgroundColor: 'rgb(var(--muted))',
+                        color: 'rgb(var(--muted-foreground))'
                       }
                 }
               >
@@ -558,7 +579,9 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
   onRemoveFunction,
   onReorderItems
 }) => {
-  const libraryTheme = useCallStackLibraryTheme()
+  const isDarkMode = typeof document !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false
   const optimizedAnimations = useOptimizedAnimations()
   
   // 이미 추가된 함수 제외한 사용 가능한 함수들
@@ -570,17 +593,17 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
     <div 
       className="h-full flex flex-col"
       style={{
-        background: libraryTheme.getQueueColor('callstack', 'light'),
-        backgroundImage: libraryTheme.theme.library.textures.wood,
-        backgroundBlendMode: 'overlay'
+        background: 'transparent' // 부모 컨테이너가 배경색 처리
       }}
     >
       {/* 상단: 사용 가능한 함수들 */}
-      <div className="h-1/2 border-b border-editor-border p-4">
+      <div className="h-1/2 border-b border-editor-border p-4" style={{
+        backgroundColor: 'rgb(var(--card))'
+      }}>
         <h4 
           className="font-medium mb-3 flex items-center gap-2"
           style={{ 
-            color: libraryTheme.getQueueText('callstack', 'primary'),
+            color: 'rgb(var(--text-primary))',
             fontSize: typography.body.medium
           }}
         >
@@ -594,7 +617,7 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                 key={funcName}
                 functionName={funcName}
                 onClick={() => onAddFunction(funcName)}
-                libraryTheme={libraryTheme}
+                isDarkMode={isDarkMode}
                 optimizedAnimations={optimizedAnimations}
               />
             );
@@ -602,7 +625,7 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
           {remainingFunctions.length === 0 && (
             <p 
               className="text-sm text-center py-4"
-              style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+              style={{ color: 'rgb(var(--text-secondary))' }}
             >
               모든 도서가 처리 중입니다
             </p>
@@ -611,11 +634,13 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
       </div>
 
       {/* 하단: 현재 큐 상태 */}
-      <div className="h-1/2 p-4">
+      <div className="h-1/2 p-4" style={{
+        backgroundColor: 'rgb(var(--muted))'
+      }}>
         <h4 
           className="font-medium mb-3 flex items-center gap-2"
           style={{ 
-            color: libraryTheme.getQueueText('callstack', 'primary'),
+            color: 'rgb(var(--text-primary))',
             fontSize: typography.body.medium
           }}
         >
@@ -641,10 +666,10 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                 <motion.div
                   className="flex items-center justify-between p-3 border rounded-lg transition-all cursor-move relative overflow-hidden group"
                   style={{
-                    background: libraryTheme.getQueueColor(queueType as CallStackQueueType, 'light'),
-                    borderColor: libraryTheme.getQueueBorder(queueType as CallStackQueueType),
-                    borderRadius: libraryTheme.theme.borderRadius.book,
-                    boxShadow: libraryTheme.theme.shadows.button
+                    backgroundColor: 'rgb(var(--card))',
+                    borderColor: 'rgb(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                   }}
                   {...(optimizedAnimations.shouldAnimate('queueTransition') ? optimizedAnimations.variants.queueTransition : {
                     initial: { opacity: 0 },
@@ -657,27 +682,30 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                   <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     style={{
-                      background: libraryTheme.getQueueColor(queueType as CallStackQueueType, 'hover')
+                      backgroundColor: 'rgba(var(--primary), 0.1)'
                     }}
                   />
                   <div className="flex items-center gap-3 relative z-10 min-w-0">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <span 
                         className="text-xs font-medium opacity-60 flex-shrink-0"
-                        style={{ color: libraryTheme.getQueueText(queueType as CallStackQueueType, 'secondary') }}
+                        style={{ color: 'rgb(var(--text-secondary))' }}
                       >
                         {queueType === 'callstack' ? items.length - index : index + 1}
                       </span>
                       <QueueItemLabel
                         functionName={item.functionName}
                         queueType={queueType as CallStackQueueType}
-                        libraryTheme={libraryTheme}
+                        isDarkMode={isDarkMode}
                       />
                     </div>
                   </div>
                   <button
                     onClick={() => onRemoveFunction(index)}
-                    className="text-red-500 hover:text-red-700 p-1 relative z-10 transition-colors"
+                    className="p-1 relative z-10 transition-colors"
+                    style={{
+                      color: 'rgb(var(--destructive))'
+                    }}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -688,7 +716,7 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
         ) : (
           <div 
             className="text-center py-8"
-            style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+            style={{ color: 'rgb(var(--text-secondary))' }}
           >
             <div className="text-2xl mb-2">
               {queueType === 'callstack' ? '📚' : 
@@ -711,13 +739,13 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
 // 유틸리티 함수들
 function getFunctionColor(functionName: string): string {
   const colors: Record<string, string> = {
-    '<global>': 'rgb(107, 114, 128)',
-    'setTimeout': 'rgb(239, 68, 68)',
-    'queueMicrotask': 'rgb(34, 197, 94)',
-    'Promise': 'rgb(168, 85, 247)',
-    'console.log': 'rgb(251, 146, 60)',
+    '<global>': 'rgb(var(--muted-foreground))',
+    'setTimeout': 'rgb(var(--foreground))',
+    'queueMicrotask': 'rgb(var(--foreground))',
+    'Promise': 'rgb(var(--primary))',
+    'console.log': 'rgb(var(--foreground))',
   }
-  return colors[functionName] || 'rgb(59, 130, 246)'
+  return colors[functionName] || 'rgb(var(--foreground))'
 }
 
 function getQueueDisplayName(queueType: QueueType): string {
@@ -735,14 +763,14 @@ function getQueueDisplayName(queueType: QueueType): string {
 interface FunctionButtonProps {
   functionName: string;
   onClick: () => void;
-  libraryTheme: any;
+  isDarkMode: boolean;
   optimizedAnimations: any;
 }
 
 const FunctionButton: React.FC<FunctionButtonProps> = ({ 
   functionName, 
   onClick, 
-  libraryTheme, 
+  isDarkMode, 
   optimizedAnimations 
 }) => {
   const textOverflow = useFunctionNameOverflow(functionName);
@@ -757,9 +785,9 @@ const FunctionButton: React.FC<FunctionButtonProps> = ({
         onClick={onClick}
         className="w-full p-3 text-left border rounded-lg transition-all relative overflow-hidden group"
         style={{
-          background: libraryTheme.getQueueColor('callstack', 'light'),
-          borderColor: libraryTheme.getQueueBorder('callstack', 'light'),
-          borderRadius: libraryTheme.theme.borderRadius.book,
+          backgroundColor: 'rgb(var(--card))',
+          borderColor: 'rgb(var(--border))',
+          borderRadius: '8px',
           minHeight: '44px', // 접근성 터치 타겟
           fontSize: typography.body.medium
         }}
@@ -770,14 +798,14 @@ const FunctionButton: React.FC<FunctionButtonProps> = ({
         <div 
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
           style={{
-            background: libraryTheme.getQueueColor('callstack', 'hover')
+            backgroundColor: 'rgba(var(--primary), 0.1)'
           }}
         />
         <div className="flex items-center justify-between relative z-10 min-w-0">
           <span 
             className="font-mono font-medium flex-1 min-w-0"
             style={{ 
-              color: libraryTheme.getQueueText('callstack', 'primary'),
+              color: 'rgb(var(--text-primary))',
               ...textOverflow.styles
             }}
           >
@@ -785,7 +813,7 @@ const FunctionButton: React.FC<FunctionButtonProps> = ({
           </span>
           <Plus 
             className="w-4 h-4 ml-2 flex-shrink-0"
-            style={{ color: libraryTheme.getQueueText('callstack', 'secondary') }}
+            style={{ color: 'rgb(var(--text-secondary))' }}
           />
         </div>
       </motion.button>
@@ -799,13 +827,13 @@ const FunctionButton: React.FC<FunctionButtonProps> = ({
 interface QueueItemLabelProps {
   functionName: string;
   queueType: CallStackQueueType;
-  libraryTheme: any;
+  isDarkMode: boolean;
 }
 
 const QueueItemLabel: React.FC<QueueItemLabelProps> = ({
   functionName,
   queueType,
-  libraryTheme
+  isDarkMode
 }) => {
   const textOverflow = useFunctionNameOverflow(functionName);
   
@@ -818,7 +846,7 @@ const QueueItemLabel: React.FC<QueueItemLabelProps> = ({
         ref={textOverflow.ref as any}
         className="font-mono font-medium min-w-0 flex-1"
         style={{ 
-          color: libraryTheme.getQueueText(queueType, 'primary'),
+          color: 'rgb(var(--text-primary))',
           fontSize: typography.body.medium,
           ...textOverflow.styles
         }}

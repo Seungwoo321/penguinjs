@@ -1,5 +1,5 @@
 import { Game, GameStage } from '@penguinjs/game-engine'
-import { closureLevels } from './game-engine'
+import { closureLevels } from '@/games/closure-cave/game-engine'
 
 // 게임 엔진의 레벨을 GameStage 형식으로 변환
 const closureCaveStages: GameStage[] = closureLevels.map((level, index) => ({
@@ -36,4 +36,4 @@ export const closureCaveGame: Game = {
 }
 
 // 실제 게임 컴포넌트 export
-export { EnhancedClosureCaveGame as ClosureCaveGame } from './EnhancedClosureCaveGame'
+export { EnhancedClosureCaveGame as ClosureCaveGame } from '@/games/closure-cave/EnhancedClosureCaveGame'

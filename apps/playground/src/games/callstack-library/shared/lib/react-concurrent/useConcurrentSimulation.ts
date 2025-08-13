@@ -17,8 +17,8 @@ import {
   useMemo
 } from 'react';
 
-import { WorkerManager } from '../../workers/WorkerManager';
-import { EventLoopConfig } from '../../../entities/event-loop';
+import { WorkerManager } from '@/games/callstack-library/shared/workers/WorkerManager';
+import { EventLoopConfig } from '@/games/callstack-library/entities/event-loop';
 
 // Concurrent 시뮬레이션 상태
 export interface ConcurrentSimulationState {

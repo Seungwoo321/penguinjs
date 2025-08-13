@@ -11,6 +11,7 @@ const nextConfig = {
   ],
   experimental: {
     optimizePackageImports: ['lucide-react'],
+    // optimizeCss: true, // Disabled due to critters module error
   },
   images: {
     remotePatterns: [
@@ -19,6 +20,20 @@ const nextConfig = {
         hostname: '**.github.io',
       },
     ],
+  },
+  // 폰트 프리로딩 최적화
+  async headers() {
+    return [
+      {
+        source: '/_next/static/media/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 };
 

@@ -14,7 +14,7 @@ export * from './cqrs';
 export * from './react-integration';
 
 // Web Workers (Phase 3)
-export * from '../workers';
+export * from '@/games/callstack-library/shared/workers';
 
 // React Concurrent Features (Phase 3)
 export * from './react-concurrent';

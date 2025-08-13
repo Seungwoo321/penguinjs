@@ -8,8 +8,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { EventLoopEngine } from '../event-loop/EventLoopEngine';
-import { QueueSystem } from '../queue-system/QueueSystem';
+import { EventLoopEngine } from '@/games/callstack-library/domain/event-loop/EventLoopEngine';
+import { QueueSystem } from '@/games/callstack-library/domain/queue-system/QueueSystem';
 import {
   EventLoopConfig,
   EventLoopState,
@@ -18,7 +18,7 @@ import {
   MacrotaskItem,
   ExecutionResult,
   Task
-} from '../event-loop/types';
+} from '@/games/callstack-library/domain/event-loop/types';
 
 // React에서 사용할 UI 상태 타입
 export interface ReactEventLoopState {

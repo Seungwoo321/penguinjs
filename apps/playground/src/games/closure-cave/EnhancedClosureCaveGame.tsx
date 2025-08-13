@@ -5,19 +5,23 @@ import { GamePanel, CodeEditor, Button, ThemeToggle } from '@penguinjs/ui'
 import { Play, RotateCcw, Lightbulb, ChevronRight, ChevronLeft, Home, Globe, Lock, Star, Trophy } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { ClosureCaveBoard } from './ClosureCaveBoard'
-import { ClosureCaveEngine } from './enhanced-game-engine'
-import { GameManager } from '../shared/GameManager'
-import { GameDifficulty, GameLevel, GameStagePosition } from '../shared/types'
+import { ClosureCaveBoard } from '@/games/closure-cave/ClosureCaveBoard'
+import { ClosureCaveEngine } from '@/games/closure-cave/enhanced-game-engine'
+import { GameManager } from '@/games/shared/GameManager'
+import { GameDifficulty, GameLevel, GameStagePosition } from '@/games/shared/types'
 import { motion, AnimatePresence } from 'framer-motion'
-import { levels } from './levels'
-import { GameGuideModal } from './GameGuideModal'
+import { levels } from '@/games/closure-cave/levels'
+import { GameGuideModal } from '@/games/closure-cave/GameGuideModal'
+import { useClosureCaveTheme } from '@/games/closure-cave/hooks/useClosureCaveTheme'
 
 interface EnhancedClosureCaveGameProps {
   onScoreUpdate?: (score: number) => void
 }
 
 export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGameProps) {
+  // 테마 훅 사용
+  const theme = useClosureCaveTheme()
+  
   const [selectedDifficulty, setSelectedDifficulty] = useState<GameDifficulty>('beginner')
   const [currentStage, setCurrentStage] = useState(1)
   const [userCode, setUserCode] = useState('')
@@ -42,9 +46,7 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
   
   // loadLevel 함수를 먼저 정의
   const loadLevel = (difficulty: GameDifficulty, stage: number) => {
-    console.log('Loading level:', difficulty, stage)
     const level = gameEngine.getLevelByStage(difficulty, stage)
-    console.log('Loaded level:', level)
     if (level) {
       setCurrentLevel(level)
       setUserCode(level.codeTemplate)
@@ -188,7 +190,10 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
   }
   
   return (
-    <div className="min-h-screen">
+    <div 
+      className="min-h-screen transition-colors duration-200"
+      style={theme.getGameStyles()}
+    >
       {/* 게임 가이드 모달 */}
       <GameGuideModal 
         isOpen={showGuide}
@@ -206,7 +211,10 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
                 홈으로
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold text-foreground">
+            <h1 
+              className="text-3xl font-bold"
+              style={{ color: theme.getTextColor('primary') }}
+            >
               클로저 동굴 🕳️
             </h1>
           </div>
@@ -252,24 +260,53 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
               advanced: '고급'
             }
             
-            const difficultyColors = {
-              beginner: 'bg-green-100 dark:bg-green-900/20 border-green-300 dark:border-green-700',
-              intermediate: 'bg-yellow-100 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700',
-              advanced: 'bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+            const getDifficultyStyle = (difficulty: GameDifficulty, isSelected: boolean) => {
+              if (isSelected) return {}
+              
+              const suffix = theme.isDarkMode ? '-dark' : '-light'
+              
+              switch (difficulty) {
+                case 'beginner':
+                  return {
+                    backgroundColor: `rgba(${theme.getSpecialColor(`difficulty-beginner-bg${suffix}`)}, ${theme.isDarkMode ? 0.2 : 1})`,
+                    borderColor: `rgba(${theme.getSpecialColor(`difficulty-beginner-border${suffix}`)}, ${theme.isDarkMode ? 0.5 : 1})`,
+                    color: `rgb(${theme.getSpecialColor(`difficulty-beginner-text${suffix}`)})`
+                  }
+                case 'intermediate':
+                  return {
+                    backgroundColor: `rgba(${theme.getSpecialColor(`difficulty-intermediate-bg${suffix}`)}, ${theme.isDarkMode ? 0.2 : 1})`,
+                    borderColor: `rgba(${theme.getSpecialColor(`difficulty-intermediate-border${suffix}`)}, ${theme.isDarkMode ? 0.5 : 1})`,
+                    color: `rgb(${theme.getSpecialColor(`difficulty-intermediate-text${suffix}`)})`
+                  }
+                case 'advanced':
+                  return {
+                    backgroundColor: `rgba(${theme.getSpecialColor(`difficulty-advanced-bg${suffix}`)}, ${theme.isDarkMode ? 0.2 : 1})`,
+                    borderColor: `rgba(${theme.getSpecialColor(`difficulty-advanced-border${suffix}`)}, ${theme.isDarkMode ? 0.5 : 1})`,
+                    color: `rgb(${theme.getSpecialColor(`difficulty-advanced-text${suffix}`)})`
+                  }
+                default:
+                  return {}
+              }
             }
             
             return (
               <Button
                 key={difficulty}
                 variant={isSelected ? "default" : "outline"}
-                className={`relative ${isSelected ? '' : difficultyColors[difficulty]} ${!isUnlocked ? 'opacity-50' : ''}`}
+                className={`relative ${!isUnlocked ? 'opacity-50' : ''}`}
+                style={getDifficultyStyle(difficulty, isSelected)}
                 onClick={() => handleDifficultyChange(difficulty)}
                 disabled={!isUnlocked}
               >
                 <div className="flex items-center gap-2">
                   {!isUnlocked && <Lock className="h-4 w-4" />}
                   <span>{difficultyLabels[difficulty]}</span>
-                  {completedStages === 5 && <Trophy className="h-4 w-4 text-yellow-500" />}
+                  {completedStages === 5 && (
+                    <Trophy 
+                      className="h-4 w-4" 
+                      style={{ color: theme.getTreasureColor('gold') }}
+                    />
+                  )}
                   <span className="text-xs">({completedStages}/5)</span>
                 </div>
               </Button>
@@ -293,13 +330,15 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
           {[1, 2, 3, 4, 5].map((stage) => (
             <div
               key={stage}
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                progress?.completedStages.has(stage)
-                  ? 'bg-green-500 text-white'
+              className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200"
+              style={{
+                ...(progress?.completedStages.has(stage)
+                  ? { backgroundColor: theme.getSuccessColor(), color: 'white' }
                   : stage === currentStage
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
-              }`}
+                  ? { backgroundColor: theme.getPrimaryColor(), color: 'white' }
+                  : { backgroundColor: theme.getBackgroundColor('secondary'), color: theme.getTextColor('secondary') }
+                )
+              }}
             >
               {progress?.completedStages.has(stage) ? <Star className="h-4 w-4" /> : stage}
             </div>
@@ -361,9 +400,16 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
                       {currentLevel.hints.map((hint, index) => (
                         <div
                           key={index}
-                          className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded p-2"
+                          className="rounded p-2 border"
+                          style={{
+                            backgroundColor: theme.getSpecialColor('hint-bg'),
+                            borderColor: theme.getSpecialColor('hint-border')
+                          }}
                         >
-                          <p className="text-xs text-yellow-900 dark:text-yellow-100">
+                          <p 
+                            className="text-xs"
+                            style={{ color: theme.getSpecialColor('hint-text') }}
+                          >
                             힌트 {index + 1}: {hint}
                           </p>
                         </div>
@@ -394,13 +440,24 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className={`p-3 rounded-lg border ${
-                      message.type === 'success'
-                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+                    className="p-3 rounded-lg border"
+                    style={{
+                      backgroundColor: message.type === 'success'
+                        ? theme.getSpecialColor('message-success-bg')
                         : message.type === 'error'
-                        ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
-                        : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200'
-                    }`}
+                        ? theme.getSpecialColor('message-error-bg')
+                        : theme.getSpecialColor('message-info-bg'),
+                      borderColor: message.type === 'success'
+                        ? theme.getSuccessColor()
+                        : message.type === 'error'
+                        ? theme.getErrorColor()
+                        : theme.getPrimaryColor(),
+                      color: message.type === 'success'
+                        ? theme.getSpecialColor('message-success-text')
+                        : message.type === 'error'
+                        ? theme.getSpecialColor('message-error-text')
+                        : theme.getSpecialColor('message-info-text')
+                    }}
                   >
                     {message.text}
                   </motion.div>

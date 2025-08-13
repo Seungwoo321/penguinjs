@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useCallback, useRef, useEffect } from 'react'
-import { useCallStackLibraryTheme } from './useCallStackLibraryTheme'
+import { useCallStackLibraryGameTheme } from './useCallStackLibraryGameTheme'
 
 export interface OptimizedAnimationConfig {
   enableAnimations: boolean
@@ -52,7 +52,7 @@ export const useOptimizedAnimations = (
   getBatchedAnimationDelay: (index: number, maxDelay?: number) => number
   useReducedMotion: boolean
 } => {
-  const libraryTheme = useCallStackLibraryTheme()
+  const libraryTheme = useCallStackLibraryGameTheme()
   const animationQueueRef = useRef<Set<string>>(new Set())
   
   // 사용자 모션 설정 감지
@@ -71,7 +71,18 @@ export const useOptimizedAnimations = (
 
   // 성능 모드별 애니메이션 설정
   const getPerformanceBasedConfig = useCallback(() => {
-    const baseConfig = libraryTheme.theme.animations
+    const baseConfig = {
+      duration: { fast: 150, normal: 300, slow: 500 },
+      easing: { default: 'ease', bounce: 'ease-out', smooth: 'ease-in-out' },
+      bookDrop: {
+        stiffness: 100,
+        damping: 15,
+        mass: 1
+      },
+      timing: {
+        bookFlip: 300
+      }
+    }
 
     switch (finalConfig.performanceMode) {
       case 'high':
@@ -98,7 +109,7 @@ export const useOptimizedAnimations = (
           duration: baseConfig.timing.bookFlip
         }
     }
-  }, [finalConfig.performanceMode, libraryTheme.theme.animations])
+  }, [finalConfig.performanceMode])
 
   // 최적화된 애니메이션 변형들
   const variants = useMemo((): AnimationVariants => {
