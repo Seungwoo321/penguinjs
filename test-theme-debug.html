@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Theme Debug Test</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          card: {
+            DEFAULT: 'rgb(var(--card))',
+            foreground: 'rgb(var(--card-foreground))',
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+:root {
+  --card: 255 255 255;
+  --card-foreground: 45 62 80;
+}
+
+.dark {
+  --card: 30 41 59;
+  --card-foreground: 226 232 240;
+}
+
+.bg-card {
+  background-color: rgb(var(--card));
+}
+</style>
+</head>
+<body class="p-8">
+  <h1 class="text-2xl font-bold mb-4">Theme Color Test</h1>
+  
+  <div class="mb-4">
+    <button onclick="toggleTheme()" class="px-4 py-2 bg-blue-500 text-white rounded">
+      Toggle Theme
+    </button>
+  </div>
+  
+  <!-- Light Theme Test -->
+  <div class="light mb-8">
+    <h2 class="text-lg font-semibold mb-2">Light Theme (Forced)</h2>
+    <div class="bg-card border border-gray-300 rounded-lg p-4 w-64 h-32">
+      <p>Card with bg-card class</p>
+      <p>CSS Variable: <span id="light-card-value"></span></p>
+      <p>Computed: <span id="light-computed-bg"></span></p>
+    </div>
+  </div>
+  
+  <!-- Dark Theme Test -->
+  <div class="dark mb-8">
+    <h2 class="text-lg font-semibold mb-2 text-white">Dark Theme (Forced)</h2>
+    <div class="bg-card border border-gray-600 rounded-lg p-4 w-64 h-32 text-white">
+      <p>Card with bg-card class</p>
+      <p>CSS Variable: <span id="dark-card-value"></span></p>
+      <p>Computed: <span id="dark-computed-bg"></span></p>
+    </div>
+  </div>
+  
+  <!-- Dynamic Theme Test -->
+  <div id="dynamic-container" class="">
+    <h2 class="text-lg font-semibold mb-2">Dynamic Theme</h2>
+    <div class="bg-card border border-gray-300 dark:border-gray-600 rounded-lg p-4 w-64 h-32">
+      <p>Card with bg-card class</p>
+      <p>CSS Variable: <span id="dynamic-card-value"></span></p>
+      <p>Computed: <span id="dynamic-computed-bg"></span></p>
+    </div>
+  </div>
+
+<script>
+function updateValues() {
+  const lightContainer = document.querySelector('.light');
+  const darkContainer = document.querySelector('.dark');
+  const dynamicContainer = document.getElementById('dynamic-container');
+  
+  const lightCard = lightContainer.querySelector('.bg-card');
+  const darkCard = darkContainer.querySelector('.bg-card');
+  const dynamicCard = dynamicContainer.querySelector('.bg-card');
+  
+  // Light theme values
+  const lightCardValue = getComputedStyle(lightContainer).getPropertyValue('--card');
+  const lightComputedBg = getComputedStyle(lightCard).backgroundColor;
+  document.getElementById('light-card-value').textContent = lightCardValue;
+  document.getElementById('light-computed-bg').textContent = lightComputedBg;
+  
+  // Dark theme values
+  const darkCardValue = getComputedStyle(darkContainer).getPropertyValue('--card');
+  const darkComputedBg = getComputedStyle(darkCard).backgroundColor;
+  document.getElementById('dark-card-value').textContent = darkCardValue;
+  document.getElementById('dark-computed-bg').textContent = darkComputedBg;
+  
+  // Dynamic theme values
+  const dynamicCardValue = getComputedStyle(dynamicContainer).getPropertyValue('--card');
+  const dynamicComputedBg = getComputedStyle(dynamicCard).backgroundColor;
+  document.getElementById('dynamic-card-value').textContent = dynamicCardValue;
+  document.getElementById('dynamic-computed-bg').textContent = dynamicComputedBg;
+}
+
+function toggleTheme() {
+  const container = document.getElementById('dynamic-container');
+  container.classList.toggle('dark');
+  setTimeout(updateValues, 100);
+}
+
+// Initial update
+setTimeout(updateValues, 100);
+</script>
+</body>
+</html>

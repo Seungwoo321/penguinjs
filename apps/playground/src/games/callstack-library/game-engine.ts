@@ -1,6 +1,6 @@
-import { BaseGameEngine } from '../shared/BaseGameEngine'
+import { BaseGameEngine } from '@/games/shared/BaseGameEngine'
 import { CallStackLevel, StackItem, FunctionCall, CallStackGameState, QueueItem, QueueType } from './types'
-import { GameValidationResult, GameDifficulty } from '../shared/types'
+import { GameValidationResult, GameDifficulty } from '@/games/shared/types'
 import { callstackLibraryConfig } from './game-config'
 import { beginnerLevels } from './levels/beginner-levels'
 import { intermediateLevels } from './levels/intermediate-levels' 
@@ -20,10 +20,10 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
       macrotask: [],
       priority: [],
       circular: [],
-      deque: [],
       animation: [],
-      immediate: [],
-      idle: []
+      generator: [],
+      io: [],
+      worker: []
     },
     queueVisualConfigs
   }
@@ -71,7 +71,13 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
 
     // 스택에서 제거
     this.gameState.currentStack.pop()
-    this.gameState.currentFunction = this.gameState.currentStack[this.gameState.currentStack.length - 1]?.functionName || null
+    // null 체크 강화
+    const currentStack = this.gameState.currentStack
+    if (currentStack && currentStack.length > 0) {
+      this.gameState.currentFunction = currentStack[currentStack.length - 1]?.functionName || null
+    } else {
+      this.gameState.currentFunction = null
+    }
   }
 
   // 큐 타입에 따른 색상 반환
@@ -85,6 +91,11 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
       // Type E 레이아웃의 경우 스냅샷 검증
       if (layoutType === 'E') {
         return this.validateTypeESnapshots(level, userOrder)
+      }
+
+      // Type B 레이아웃의 경우 큐 상태 검증
+      if (layoutType === 'B') {
+        return this.validateTypeBQueues(level, userOrder)
       }
 
       // Type A+ 레이아웃의 경우 시뮬레이션 스텝과 비교
@@ -227,6 +238,41 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
     }
   }
 
+  // 타입 B 큐 상태 검증
+  private validateTypeBQueues(level: CallStackLevel, userQueues: any): GameValidationResult {
+    try {
+      // 기본적으로 expectedOrder를 사용하여 검증
+      if (level.expectedOrder && Array.isArray(userQueues)) {
+        const isCorrect = JSON.stringify(userQueues) === JSON.stringify(level.expectedOrder)
+        
+        if (isCorrect) {
+          const score = this.calculateScore(userQueues.length, level.hints.length)
+          return {
+            success: true,
+            message: '완벽합니다! 이벤트 루프의 실행 순서를 정확히 이해하셨네요! 🎉',
+            score
+          }
+        } else {
+          return {
+            success: false,
+            message: '실행 순서가 올바르지 않습니다. 큐의 우선순위를 다시 확인해보세요.',
+            hint: '마이크로태스크는 매크로태스크보다 먼저 실행됩니다.'
+          }
+        }
+      }
+      
+      return {
+        success: false,
+        message: '큐 상태 검증에 필요한 데이터가 없습니다.'
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: `큐 검증 중 오류가 발생했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`
+      }
+    }
+  }
+
   // 스냅샷 비교
   private compareSnapshots(expected: StackItem[], user: StackItem[]): boolean {
     if (expected.length !== user.length) {
@@ -339,10 +385,6 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
     const config = this.gameState.queueVisualConfigs[queueType]
     
     switch (queueType) {
-      case 'deque':
-        // 덱의 경우 앞에서 제거 (기본값)
-        return queue.shift() || null
-        
       default:
         // 일반적인 큐 동작
         if (config.fifo) {
@@ -353,20 +395,20 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
     }
   }
 
-  // 덱에서 뒤쪽 제거 (덱 전용)
-  removeFromDequeRear(): QueueItem | null {
-    const queue = this.gameState.queues['deque']
+  // 원형 큐에서 뒤쪽 제거 (원형 큐 전용)
+  removeFromCircularRear(): QueueItem | null {
+    const queue = this.gameState.queues['circular']
     if (!queue || queue.length === 0) return null
     return queue.pop() || null
   }
 
-  // 덱 앞쪽에 추가 (덱 전용)
-  addToDequeFont(item: QueueItem): void {
-    this.gameState.queues['deque'].unshift(item)
+  // 원형 큐 앞쪽에 추가 (원형 큐 전용)
+  addToCircularFront(item: QueueItem): void {
+    this.gameState.queues['circular'].unshift(item)
     
-    const config = this.gameState.queueVisualConfigs['deque']
-    if (this.gameState.queues['deque'].length > config.maxSize) {
-      this.gameState.queues['deque'].pop() // 뒤에서 제거
+    const config = this.gameState.queueVisualConfigs['circular']
+    if (this.gameState.queues['circular'].length > config.maxSize) {
+      this.gameState.queues['circular'].pop() // 뒤에서 제거
     }
   }
 
@@ -381,7 +423,7 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
       queueType,
       priority: funcCall.priority,
       timestamp: Date.now(),
-      data: funcCall.params,
+      data: { params: funcCall.params },
       position: funcCall.position
     }
   }
@@ -446,10 +488,10 @@ export class CallStackEngine extends BaseGameEngine<CallStackLevel> {
         macrotask: [],
         priority: [],
         circular: [],
-        deque: [],
         animation: [],
-        immediate: [],
-        idle: []
+        generator: [],
+        io: [],
+        worker: []
       },
       queueVisualConfigs
     }

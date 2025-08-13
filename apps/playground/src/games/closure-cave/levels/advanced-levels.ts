@@ -1,4 +1,4 @@
-import { GameLevel } from '../../shared/types'
+import { GameLevel } from '@/games/shared/types'
 
 export const advancedLevels: GameLevel[] = [
   {

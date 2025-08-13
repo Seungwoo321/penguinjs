@@ -1,0 +1,72 @@
+/* CallStack Library 게임 전용 CSS 변수 */
+/* 기본 테마와 충돌 방지를 위해 game-callstack 네임스페이스 사용 */
+
+@layer base {
+  :root {
+    /* CallStack Library 게임 전용 색상 변수 */
+    /* 메인 서가 (CallStack) */
+    --game-callstack-queue-primary: 74 74 74;
+    --game-callstack-queue-secondary: 97 97 97;
+    --game-callstack-queue-accent: 137 116 92;
+    --game-callstack-queue-bg-light: 252 251 250;
+    --game-callstack-queue-bg-main: 247 245 242;
+    --game-callstack-queue-bg-dark: 237 233 228;
+    
+    /* 긴급 처리대 (MicroTask) */
+    --game-callstack-urgent-primary: 21 94 117;
+    --game-callstack-urgent-secondary: 31 120 139;
+    --game-callstack-urgent-accent: 64 158 171;
+    --game-callstack-urgent-bg-light: 243 251 252;
+    --game-callstack-urgent-bg-main: 225 244 246;
+    --game-callstack-urgent-bg-dark: 203 235 238;
+    
+    /* 예약 처리대 (MacroTask) */
+    --game-callstack-scheduled-primary: 171 71 73;
+    --game-callstack-scheduled-secondary: 194 94 94;
+    --game-callstack-scheduled-accent: 229 127 116;
+    --game-callstack-scheduled-bg-light: 255 248 246;
+    --game-callstack-scheduled-bg-main: 254 236 231;
+    --game-callstack-scheduled-bg-dark: 252 217 209;
+    
+    /* 도서관 컨셉 색상 */
+    --game-callstack-library-wood: 137 116 92;
+    --game-callstack-library-paper: 252 251 250;
+    --game-callstack-library-leather: 92 65 38;
+    --game-callstack-library-success: 34 139 34;
+    --game-callstack-library-overdue: 178 34 34;
+  }
+  
+  /* 다크 모드 - 실제 화면 배경 시스템 사용 */
+  .dark {
+    /* 메인 서가 (CallStack) - 다크 */
+    --game-callstack-queue-primary: var(--foreground);
+    --game-callstack-queue-secondary: var(--muted-foreground);
+    --game-callstack-queue-accent: 205 184 158;
+    --game-callstack-queue-bg-light: var(--card);
+    --game-callstack-queue-bg-main: var(--muted);
+    --game-callstack-queue-bg-dark: var(--accent);
+    
+    /* 긴급 처리대 (MicroTask) - 다크 */
+    --game-callstack-urgent-primary: 147 209 217;
+    --game-callstack-urgent-secondary: 127 189 197;
+    --game-callstack-urgent-accent: 147 209 217;
+    --game-callstack-urgent-bg-light: var(--card);
+    --game-callstack-urgent-bg-main: var(--muted);
+    --game-callstack-urgent-bg-dark: var(--accent);
+    
+    /* 예약 처리대 (MacroTask) - 다크 */
+    --game-callstack-scheduled-primary: 249 167 156;
+    --game-callstack-scheduled-secondary: 239 147 136;
+    --game-callstack-scheduled-accent: 249 167 156;
+    --game-callstack-scheduled-bg-light: var(--card);
+    --game-callstack-scheduled-bg-main: var(--muted);
+    --game-callstack-scheduled-bg-dark: var(--accent);
+    
+    /* 도서관 컨셉 색상 - 다크 */
+    --game-callstack-library-wood: 205 184 158;
+    --game-callstack-library-paper: var(--background);
+    --game-callstack-library-leather: 115 92 69;
+    --game-callstack-library-success: 134 239 172;
+    --game-callstack-library-overdue: 252 165 165;
+  }
+}

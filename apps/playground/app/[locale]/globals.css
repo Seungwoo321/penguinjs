@@ -1,5 +1,14 @@
 @import 'tailwindcss';
 
+/* 폰트 로딩 최적화 */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Inter'), local('Inter-Regular');
+}
+
 @layer base {
   :root {
     /* ===== PenguinJS 브랜드 컬러 팔레트 ===== */
@@ -32,6 +41,7 @@
     --popover: 255 255 255;              /* surface-elevated */
     --popover-foreground: 27 42 58;      /* text-primary */
     --primary: 74 118 145;               /* penguin-600 */
+    --primary-hover: 62 98 128;          /* penguin-700 - 더 진한 색 */
     --primary-foreground: 255 255 255;   /* 흰색 */
     --secondary: 237 243 248;            /* surface-secondary */
     --secondary-foreground: 45 62 80;    /* text-secondary */
@@ -65,6 +75,202 @@
     --editor-border: 214 230 240;        /* border-primary */
     --editor-gutter: 237 243 248;        /* penguin-100 */
     --editor-selection: 74 118 145;      /* penguin-600 */
+    
+    /* CallStack Library 게임 전용 색상 변수 */
+    /* 메인 서가 (CallStack) */
+    --game-callstack-queue-primary: 74 74 74;
+    --game-callstack-queue-secondary: 97 97 97;
+    --game-callstack-queue-accent: 137 116 92;
+    --game-callstack-queue-bg-light: 252 251 250;
+    --game-callstack-queue-bg-main: 247 245 242;
+    --game-callstack-queue-bg-dark: 237 233 228;
+    
+    /* 긴급 처리대 (MicroTask) */
+    --game-callstack-urgent-primary: 21 94 117;
+    --game-callstack-urgent-secondary: 31 120 139;
+    --game-callstack-urgent-accent: 64 158 171;
+    --game-callstack-urgent-bg-light: 243 251 252;
+    --game-callstack-urgent-bg-main: 225 244 246;
+    --game-callstack-urgent-bg-dark: 203 235 238;
+    
+    /* 예약 처리대 (MacroTask) */
+    --game-callstack-scheduled-primary: 171 71 73;
+    --game-callstack-scheduled-secondary: 194 94 94;
+    --game-callstack-scheduled-accent: 229 127 116;
+    --game-callstack-scheduled-bg-light: 255 248 246;
+    --game-callstack-scheduled-bg-main: 254 236 231;
+    --game-callstack-scheduled-bg-dark: 252 217 209;
+    
+    /* 도서관 컨셉 색상 */
+    --game-callstack-library-wood: 137 116 92;
+    --game-callstack-library-paper: 252 251 250;
+    --game-callstack-library-leather: 92 65 38;
+    --game-callstack-library-success: 34 139 34;
+    --game-callstack-library-overdue: 178 34 34;
+    
+    /* GameGuideModal 전용 색상 */
+    /* 도서관 시각화 배경 */
+    --game-callstack-guide-library-bg-light: 254 243 199; /* amber-100 */
+    --game-callstack-guide-library-bg-dark: 252 211 77;   /* amber-200 */
+    --game-callstack-guide-library-accent: 245 158 11;    /* amber-500 */
+    --game-callstack-guide-library-text: 146 64 14;       /* amber-900 */
+    
+    /* 함수 박스 색상 */
+    --game-callstack-guide-func-blue-bg: 191 219 254;     /* blue-200 */
+    --game-callstack-guide-func-blue-text: 30 64 175;     /* blue-800 */
+    --game-callstack-guide-func-green-bg: 187 247 208;    /* green-200 */
+    --game-callstack-guide-func-green-text: 21 128 61;    /* green-800 */
+    --game-callstack-guide-func-pink-bg: 251 207 232;     /* pink-200 */
+    --game-callstack-guide-func-pink-text: 157 23 77;     /* pink-800 */
+    --game-callstack-guide-func-gray-bg: 229 231 235;     /* gray-200 */
+    --game-callstack-guide-func-gray-text: 31 41 55;      /* gray-800 */
+    --game-callstack-guide-func-red-bg: 254 202 202;      /* red-200 */
+    --game-callstack-guide-func-red-text: 153 27 27;      /* red-800 */
+    
+    /* 난이도별 헤더 색상 */
+    --game-callstack-guide-beginner-bg-start: 239 246 255; /* blue-50 */
+    --game-callstack-guide-beginner-bg-end: 224 231 255;   /* indigo-100 */
+    --game-callstack-guide-beginner-text: 79 70 229;       /* indigo-600 */
+    --game-callstack-guide-intermediate-bg-start: 239 246 255; /* blue-50 */
+    --game-callstack-guide-intermediate-bg-end: 224 231 255;   /* indigo-100 */
+    --game-callstack-guide-intermediate-text: 79 70 229;       /* indigo-600 */
+    --game-callstack-guide-advanced-bg-start: 245 243 255;     /* violet-50 */
+    --game-callstack-guide-advanced-bg-end: 237 233 254;       /* violet-100 */
+    --game-callstack-guide-advanced-text: 109 40 217;          /* violet-700 */
+    
+    /* 코드 하이라이트 색상 */
+    --game-callstack-guide-code-keyword: 139 92 246;      /* violet-500 */
+    --game-callstack-guide-code-string: 34 197 94;        /* emerald-500 */
+    --game-callstack-guide-code-number: 245 158 11;       /* amber-500 */
+    --game-callstack-guide-code-comment: 107 114 128;     /* gray-500 */
+    --game-callstack-guide-code-function: 59 130 246;     /* blue-500 */
+    --game-callstack-guide-code-operator: 239 68 68;      /* red-500 */
+    
+    /* 추가 가이드 색상 - 라이트 모드 */
+    --game-callstack-guide-indigo-bg-start: 238 242 255;  /* indigo-50 */
+    --game-callstack-guide-indigo-bg-end: 219 234 254;    /* blue-50 */
+    --game-callstack-guide-indigo-border: 165 180 252;    /* indigo-300 */
+    --game-callstack-guide-indigo-text: 55 48 163;        /* indigo-800 */
+    
+    --game-callstack-guide-violet-bg-start: 245 243 255; /* violet-50 */
+    --game-callstack-guide-violet-bg-end: 253 244 255;    /* fuchsia-50 */
+    --game-callstack-guide-violet-border: 196 181 253;    /* violet-300 */
+    --game-callstack-guide-violet-text: 124 58 237;       /* violet-800 */
+    
+    --game-callstack-guide-rose-bg-start: 255 241 242;   /* rose-50 */
+    --game-callstack-guide-rose-bg-end: 253 244 255;      /* pink-50 */
+    --game-callstack-guide-rose-border: 251 207 232;      /* rose-300 */
+    --game-callstack-guide-rose-text: 159 18 57;          /* rose-800 */
+
+    /* CallStack Library 테마 시스템 통일 - 기존 JavaScript 테마 색상 */
+    /* Queue 색상 (기존 JavaScript 테마 기반) */
+    --game-callstack-queue-callstack: 71 85 105;         /* slate-600 */
+    --game-callstack-queue-callstack-light: 148 163 184; /* slate-400 */
+    --game-callstack-queue-microtask: 14 165 233;        /* sky-500 */
+    --game-callstack-queue-microtask-light: 125 211 252; /* sky-300 */
+    --game-callstack-queue-macrotask: 34 197 94;         /* emerald-500 */
+    --game-callstack-queue-macrotask-light: 110 231 183; /* emerald-300 */
+    --game-callstack-queue-priority: 239 68 68;          /* red-500 */
+    --game-callstack-queue-priority-light: 252 165 165;  /* red-300 */
+    --game-callstack-queue-animation: 168 85 247;        /* purple-500 */
+    --game-callstack-queue-animation-light: 196 181 253; /* purple-300 */
+    --game-callstack-queue-io: 249 115 22;               /* orange-500 */
+    --game-callstack-queue-io-light: 253 186 116;        /* orange-300 */
+    --game-callstack-queue-worker: 59 130 246;           /* blue-500 */
+    --game-callstack-queue-worker-light: 147 197 253;    /* blue-300 */
+    --game-callstack-queue-generator: 20 184 166;        /* teal-500 */
+    --game-callstack-queue-generator-light: 94 234 212;  /* teal-300 */
+    
+    /* 힌트 시스템 색상 */
+    --game-callstack-hint-bg: 255 237 213;               /* orange-100 */
+    --game-callstack-hint-border: 251 146 60;            /* orange-400 */
+    --game-callstack-hint-text: 146 64 14;               /* orange-900 */
+    
+    /* Pop 순서 표시 색상 */
+    --game-callstack-pop-bg: 254 242 242;                /* red-50 */
+    --game-callstack-pop-border: 254 202 202;            /* red-200 */
+    
+    /* 경고/주의 색상 */
+    --warning: 251 146 60;                                /* orange-400 */
+    
+    /* 성공 색상 */
+    --success: 34 197 94;                                 /* emerald-500 */
+    --success-bg: 220 252 231;                            /* emerald-100 */
+    --success-text: 22 101 52;                            /* emerald-900 */
+
+    /* 라이브러리 테마 색상 */
+    --game-callstack-library-wood-theme: 100 116 139;    /* slate-500 */
+    --game-callstack-library-paper-theme: 248 250 252;   /* slate-50 */
+    --game-callstack-library-ink-theme: 15 23 42;        /* slate-900 */
+    --game-callstack-library-gold-theme: 100 116 139;    /* slate-500 */
+
+    /* 책 색상들 (중성적인 회색 계열) */
+    --game-callstack-book-red: 148 163 184;              /* slate-400 */
+    --game-callstack-book-blue: 100 116 139;             /* slate-500 */
+    --game-callstack-book-green: 71 85 105;              /* slate-600 */
+    --game-callstack-book-yellow: 51 65 85;              /* slate-700 */
+    --game-callstack-book-purple: 30 41 59;              /* slate-800 */
+    --game-callstack-book-pink: 148 163 184;             /* slate-400 */
+    --game-callstack-book-orange: 100 116 139;           /* slate-500 */
+    --game-callstack-book-teal: 71 85 105;               /* slate-600 */
+
+    /* 선반 색상 */
+    --game-callstack-shelf-wood-light: 168 162 158;      /* stone-400 */
+    --game-callstack-shelf-wood-dark: 87 83 78;          /* stone-600 */
+    --game-callstack-shelf-shadow: 41 37 36;             /* stone-800 */
+
+    /* 애니메이션 색상 */
+    --game-callstack-animation-highlight: 250 204 21;    /* yellow-400 */
+    --game-callstack-animation-success: 34 197 94;       /* emerald-500 */
+    --game-callstack-animation-error: 239 68 68;         /* red-500 */
+
+    /* 단계별 색상 */
+    --game-callstack-stage-beginner: 34 197 94;          /* emerald-500 */
+    --game-callstack-stage-intermediate: 14 165 233;     /* sky-500 */
+    --game-callstack-stage-advanced: 139 92 246;         /* violet-500 */
+
+    /* 함수별 색상 */
+    --game-callstack-function-global: 92 51 23;          /* 갈색 */
+    --game-callstack-function-main: 92 51 23;            /* 갈색 */
+    --game-callstack-function-primary: 21 94 173;        /* 파란색 */
+    --game-callstack-function-secondary: 21 128 61;      /* 녹색 */
+    --game-callstack-function-tertiary: 139 92 246;      /* 부드러운 보라색 */
+    --game-callstack-function-quaternary: 245 158 11;    /* 주황색 */
+
+    /* UI 요소 색상 */
+    --game-callstack-button-primary: 71 85 105;          /* slate-600 */
+    --game-callstack-button-secondary: 100 116 139;      /* slate-500 */
+    --game-callstack-button-hover: 51 65 85;             /* slate-700 */
+
+    /* 메모리 관련 색상 */
+    --game-callstack-memory-stack: 71 85 105;            /* slate-600 */
+    --game-callstack-memory-heap: 51 65 85;              /* slate-700 */
+    --game-callstack-memory-gc: 34 197 94;               /* emerald-500 */
+
+    /* 코드 하이라이트 색상 */
+    --game-callstack-code-keyword: 71 85 105;            /* slate-600 */
+    --game-callstack-code-string: 34 197 94;             /* emerald-500 */
+    --game-callstack-code-number: 14 165 233;            /* sky-500 */
+    --game-callstack-code-comment: 148 163 184;          /* slate-400 */
+
+    /* 레이아웃별 색상 */
+    --game-callstack-layout-a: 71 85 105;                /* slate-600 */
+    --game-callstack-layout-a-plus: 100 116 139;         /* slate-500 */
+    --game-callstack-layout-b: 51 65 85;                 /* slate-700 */
+
+    /* 접근성 색상 */
+    --game-callstack-focus-ring: 59 130 246;             /* blue-500 */
+    --game-callstack-high-contrast: 0 0 0;               /* black */
+    --game-callstack-error-border: 239 68 68;            /* red-500 */
+    --game-callstack-success-border: 34 197 94;          /* emerald-500 */
+    
+    /* Layout B 개발 대시보드 색상 */
+    --game-callstack-library-bg-secondary: 250 250 250;  /* neutral-50 */
+    --game-callstack-library-border-default: 229 229 229; /* neutral-200 */
+    --game-callstack-library-text-primary: 23 23 23;     /* neutral-900 */
+    --game-callstack-library-text-secondary: 115 115 115; /* neutral-500 */
+    --game-callstack-library-error: 239 68 68;           /* red-500 */
+    --game-callstack-library-success: 34 197 94;         /* emerald-500 */
   }
 
   .dark {
@@ -98,6 +304,7 @@
     --popover: 30 41 59;                  /* surface-elevated */
     --popover-foreground: 248 250 252;    /* text-primary */
     --primary: 123 163 181;               /* penguin-400 */
+    --primary-hover: 90 140 163;          /* penguin-500 - 더 진한 색 */
     --primary-foreground: 15 23 42;       /* slate-900 */
     --secondary: 30 41 59;                /* surface-secondary */
     --secondary-foreground: 248 250 252;  /* text-primary */
@@ -130,6 +337,202 @@
     --editor-border: 123 163 181;         /* penguin-400 */
     --editor-gutter: 51 65 85;            /* slate-700 */
     --editor-selection: 123 163 181;      /* penguin-400 */
+    
+    /* CallStack Library 게임 전용 색상 변수 - 다크 모드 */
+    /* 메인 서가 (CallStack) - 다크 */
+    --game-callstack-queue-primary: 248 250 252;  /* text-primary */
+    --game-callstack-queue-secondary: 203 213 225; /* muted-foreground */
+    --game-callstack-queue-accent: 205 184 158;
+    --game-callstack-queue-bg-light: 30 41 59;     /* surface-elevated 직접 참조 */
+    --game-callstack-queue-bg-main: 51 65 85;      /* muted 직접 참조 */
+    --game-callstack-queue-bg-dark: 51 65 85;      /* accent 직접 참조 */
+    
+    /* 긴급 처리대 (MicroTask) - 다크 */
+    --game-callstack-urgent-primary: 147 209 217;
+    --game-callstack-urgent-secondary: 127 189 197;
+    --game-callstack-urgent-accent: 147 209 217;
+    --game-callstack-urgent-bg-light: 30 41 59;    /* surface-elevated 직접 참조 */
+    --game-callstack-urgent-bg-main: 51 65 85;     /* muted 직접 참조 */
+    --game-callstack-urgent-bg-dark: 51 65 85;     /* accent 직접 참조 */
+    
+    /* 예약 처리대 (MacroTask) - 다크 */
+    --game-callstack-scheduled-primary: 249 167 156;
+    --game-callstack-scheduled-secondary: 239 147 136;
+    --game-callstack-scheduled-accent: 249 167 156;
+    --game-callstack-scheduled-bg-light: 30 41 59;  /* surface-elevated 직접 참조 */
+    --game-callstack-scheduled-bg-main: 51 65 85;   /* muted 직접 참조 */
+    --game-callstack-scheduled-bg-dark: 51 65 85;   /* accent 직접 참조 */
+    
+    /* 도서관 컨셉 색상 - 다크 */
+    --game-callstack-library-wood: 205 184 158;
+    --game-callstack-library-paper: 15 23 42;       /* background 직접 참조 */
+    --game-callstack-library-leather: 115 92 69;
+    --game-callstack-library-success: 134 239 172;
+    --game-callstack-library-overdue: 252 165 165;
+    
+    /* GameGuideModal 전용 색상 - 다크 모드 */
+    /* 도서관 시각화 배경 */
+    --game-callstack-guide-library-bg-light: 64 46 8;     /* 다크 amber */
+    --game-callstack-guide-library-bg-dark: 92 66 12;     /* 다크 amber */
+    --game-callstack-guide-library-accent: 245 158 11;    /* amber-500 유지 */
+    --game-callstack-guide-library-text: 251 191 36;      /* amber-400 */
+    
+    /* 함수 박스 색상 - 다크 */
+    --game-callstack-guide-func-blue-bg: 30 58 138;       /* blue-900 */
+    --game-callstack-guide-func-blue-text: 147 197 253;   /* blue-300 */
+    --game-callstack-guide-func-green-bg: 20 83 45;       /* green-900 */
+    --game-callstack-guide-func-green-text: 134 239 172;  /* green-300 */
+    --game-callstack-guide-func-pink-bg: 131 24 67;       /* pink-900 */
+    --game-callstack-guide-func-pink-text: 249 168 212;   /* pink-300 */
+    --game-callstack-guide-func-gray-bg: 55 65 81;        /* gray-700 */
+    --game-callstack-guide-func-gray-text: 209 213 219;   /* gray-300 */
+    --game-callstack-guide-func-red-bg: 127 29 29;        /* red-900 */
+    --game-callstack-guide-func-red-text: 252 165 165;    /* red-300 */
+    
+    /* 난이도별 헤더 색상 - 다크 */
+    --game-callstack-guide-beginner-bg-start: 59 130 246;     /* blue-500 */
+    --game-callstack-guide-beginner-bg-end: 99 102 241;       /* indigo-500 */
+    --game-callstack-guide-beginner-text: 255 255 255;        /* white */
+    --game-callstack-guide-intermediate-bg-start: 59 130 246; /* blue-500 */
+    --game-callstack-guide-intermediate-bg-end: 99 102 241;   /* indigo-500 */
+    --game-callstack-guide-intermediate-text: 255 255 255;    /* white */
+    --game-callstack-guide-advanced-bg-start: 139 92 246;     /* violet-500 */
+    --game-callstack-guide-advanced-bg-end: 168 85 247;       /* purple-500 */
+    --game-callstack-guide-advanced-text: 255 255 255;        /* white */
+    
+    /* 코드 하이라이트 색상 - 다크 */
+    --game-callstack-guide-code-keyword: 167 139 250;   /* violet-400 */
+    --game-callstack-guide-code-string: 134 239 172;    /* emerald-300 */
+    --game-callstack-guide-code-number: 252 211 77;     /* amber-300 */
+    --game-callstack-guide-code-comment: 156 163 175;   /* gray-400 */
+    --game-callstack-guide-code-function: 147 197 253;  /* blue-300 */
+    --game-callstack-guide-code-operator: 248 113 113;  /* red-400 */
+    
+    /* 추가 가이드 색상 - 다크 모드 */
+    --game-callstack-guide-indigo-bg-start: 67 56 202;    /* indigo-600 */
+    --game-callstack-guide-indigo-bg-end: 59 130 246;     /* blue-500 */
+    --game-callstack-guide-indigo-border: 99 102 241;     /* indigo-500 */
+    --game-callstack-guide-indigo-text: 199 210 254;      /* indigo-200 */
+    
+    --game-callstack-guide-violet-bg-start: 139 92 246;   /* violet-500 */
+    --game-callstack-guide-violet-bg-end: 168 85 247;     /* purple-500 */
+    --game-callstack-guide-violet-border: 139 92 246;     /* violet-500 */
+    --game-callstack-guide-violet-text: 221 214 254;      /* violet-200 */
+    
+    --game-callstack-guide-rose-bg-start: 244 63 94;     /* rose-500 */
+    --game-callstack-guide-rose-bg-end: 236 72 153;       /* pink-500 */
+    --game-callstack-guide-rose-border: 244 63 94;        /* rose-500 */
+    --game-callstack-guide-rose-text: 255 228 230;        /* rose-100 */
+
+    /* CallStack Library 테마 시스템 통일 - 다크모드 색상 */
+    /* Queue 색상 (다크모드) */
+    --game-callstack-queue-callstack: 148 163 184;        /* slate-400 (다크) */
+    --game-callstack-queue-callstack-light: 203 213 225;  /* slate-300 (다크) */
+    --game-callstack-queue-microtask: 56 189 248;         /* sky-400 (다크) */
+    --game-callstack-queue-microtask-light: 147 197 253;  /* sky-300 (다크) */
+    --game-callstack-queue-macrotask: 74 222 128;         /* emerald-400 (다크) */
+    --game-callstack-queue-macrotask-light: 134 239 172;  /* emerald-300 (다크) */
+    --game-callstack-queue-priority: 248 113 113;         /* red-400 (다크) */
+    --game-callstack-queue-priority-light: 254 202 202;   /* red-200 (다크) */
+    --game-callstack-queue-animation: 196 181 253;        /* purple-400 (다크) */
+    --game-callstack-queue-animation-light: 221 214 254;  /* purple-200 (다크) */
+    --game-callstack-queue-io: 251 146 60;                /* orange-400 (다크) */
+    --game-callstack-queue-io-light: 254 215 170;         /* orange-200 (다크) */
+    --game-callstack-queue-worker: 96 165 250;            /* blue-400 (다크) */
+    --game-callstack-queue-worker-light: 191 219 254;     /* blue-200 (다크) */
+    --game-callstack-queue-generator: 45 212 191;         /* teal-400 (다크) */
+    --game-callstack-queue-generator-light: 153 246 228;  /* teal-200 (다크) */
+    
+    /* 힌트 시스템 색상 (다크모드) */
+    --game-callstack-hint-bg: 78 29 0;                    /* orange-950 with opacity */
+    --game-callstack-hint-border: 251 146 60;             /* orange-400 (다크) */
+    --game-callstack-hint-text: 254 215 170;              /* orange-200 (다크) */
+    
+    /* Pop 순서 표시 색상 (다크모드) */
+    --game-callstack-pop-bg: 69 10 10;                    /* red-950 with opacity */
+    --game-callstack-pop-border: 153 27 27;               /* red-800 (다크) */
+    
+    /* 경고/주의 색상 (다크모드) */
+    --warning: 251 146 60;                                /* orange-400 (다크) */
+    
+    /* 성공 색상 (다크모드) */
+    --success: 74 222 128;                                /* emerald-400 (다크) */
+    --success-bg: 6 78 59;                                /* emerald-950 with opacity */
+    --success-text: 134 239 172;                          /* emerald-300 (다크) */
+
+    /* 라이브러리 테마 색상 (다크모드) */
+    --game-callstack-library-wood-theme: 148 163 184;     /* slate-400 (다크) */
+    --game-callstack-library-paper-theme: 30 41 59;       /* slate-800 (다크) */
+    --game-callstack-library-ink-theme: 248 250 252;      /* slate-50 (다크) */
+    --game-callstack-library-gold-theme: 148 163 184;     /* slate-400 (다크) */
+
+    /* 책 색상들 (다크모드) */
+    --game-callstack-book-red: 203 213 225;               /* slate-300 (다크) */
+    --game-callstack-book-blue: 148 163 184;              /* slate-400 (다크) */
+    --game-callstack-book-green: 100 116 139;             /* slate-500 (다크) */
+    --game-callstack-book-yellow: 71 85 105;              /* slate-600 (다크) */
+    --game-callstack-book-purple: 51 65 85;               /* slate-700 (다크) */
+    --game-callstack-book-pink: 203 213 225;              /* slate-300 (다크) */
+    --game-callstack-book-orange: 148 163 184;            /* slate-400 (다크) */
+    --game-callstack-book-teal: 100 116 139;              /* slate-500 (다크) */
+
+    /* 선반 색상 (다크모드) */
+    --game-callstack-shelf-wood-light: 120 113 108;       /* stone-500 (다크) */
+    --game-callstack-shelf-wood-dark: 68 64 60;           /* stone-700 (다크) */
+    --game-callstack-shelf-shadow: 28 25 23;              /* stone-900 (다크) */
+
+    /* 애니메이션 색상 (다크모드 - 동일) */
+    --game-callstack-animation-highlight: 250 204 21;     /* yellow-400 */
+    --game-callstack-animation-success: 34 197 94;        /* emerald-500 */
+    --game-callstack-animation-error: 239 68 68;          /* red-500 */
+
+    /* 단계별 색상 (다크모드 - 동일) */
+    --game-callstack-stage-beginner: 34 197 94;           /* emerald-500 */
+    --game-callstack-stage-intermediate: 14 165 233;      /* sky-500 */
+    --game-callstack-stage-advanced: 139 92 246;          /* violet-500 */
+
+    /* 함수별 색상 (다크모드 - 밝게 조정) */
+    --game-callstack-function-global: 127 75 37;          /* 밝은 갈색 */
+    --game-callstack-function-main: 127 75 37;            /* 밝은 갈색 */
+    --game-callstack-function-primary: 59 130 246;        /* blue-500 */
+    --game-callstack-function-secondary: 34 197 94;       /* emerald-500 */
+    --game-callstack-function-tertiary: 167 139 250;      /* violet-400 */
+    --game-callstack-function-quaternary: 251 191 36;     /* amber-400 */
+
+    /* UI 요소 색상 (다크모드) */
+    --game-callstack-button-primary: 148 163 184;         /* slate-400 (다크) */
+    --game-callstack-button-secondary: 100 116 139;       /* slate-500 (다크) */
+    --game-callstack-button-hover: 203 213 225;           /* slate-300 (다크) */
+
+    /* 메모리 관련 색상 (다크모드) */
+    --game-callstack-memory-stack: 148 163 184;           /* slate-400 (다크) */
+    --game-callstack-memory-heap: 100 116 139;            /* slate-500 (다크) */
+    --game-callstack-memory-gc: 34 197 94;                /* emerald-500 */
+
+    /* 코드 하이라이트 색상 (다크모드) */
+    --game-callstack-code-keyword: 148 163 184;           /* slate-400 (다크) */
+    --game-callstack-code-string: 34 197 94;              /* emerald-500 */
+    --game-callstack-code-number: 14 165 233;             /* sky-500 */
+    --game-callstack-code-comment: 100 116 139;           /* slate-500 (다크) */
+
+    /* 레이아웃별 색상 (다크모드) */
+    --game-callstack-layout-a: 148 163 184;               /* slate-400 (다크) */
+    --game-callstack-layout-a-plus: 100 116 139;          /* slate-500 (다크) */
+    --game-callstack-layout-b: 71 85 105;                 /* slate-600 (다크) */
+
+    /* 접근성 색상 (다크모드) */
+    --game-callstack-focus-ring: 59 130 246;              /* blue-500 */
+    --game-callstack-high-contrast: 255 255 255;          /* white */
+    --game-callstack-error-border: 239 68 68;             /* red-500 */
+    --game-callstack-success-border: 34 197 94;           /* emerald-500 */
+    
+    /* Layout B 개발 대시보드 색상 (다크모드) */
+    --game-callstack-library-bg-secondary: 23 23 23;      /* neutral-900 */
+    --game-callstack-library-border-default: 64 64 64;    /* neutral-700 */
+    --game-callstack-library-text-primary: 245 245 245;   /* neutral-100 */
+    --game-callstack-library-text-secondary: 163 163 163; /* neutral-400 */
+    --game-callstack-library-error: 248 113 113;          /* red-400 */
+    --game-callstack-library-success: 74 222 128;         /* emerald-400 */
   }
 }
 
@@ -137,5 +540,47 @@
   body {
     background-color: rgb(var(--background));
     color: rgb(var(--foreground));
+  }
+}
+
+@layer utilities {
+  /* 테마 시스템 빠른 적용을 위한 유틸리티 클래스 */
+  .theme-bg {
+    background-color: rgb(var(--background));
+  }
+  
+  .theme-text {
+    color: rgb(var(--foreground));
+  }
+  
+  .theme-card {
+    background-color: rgb(var(--card));
+    color: rgb(var(--card-foreground));
+  }
+  
+  .theme-modal {
+    background-color: rgb(var(--surface-elevated));
+    color: rgb(var(--text-primary));
+  }
+  
+  .theme-muted {
+    background-color: rgb(var(--muted));
+    color: rgb(var(--muted-foreground));
+  }
+  
+  .theme-border {
+    border-color: rgb(var(--border));
+  }
+  
+  /* 게임 전용 유틸리티 */
+  .theme-game-panel {
+    background-color: rgb(var(--game-panel));
+    color: rgb(var(--game-text));
+  }
+  
+  .theme-editor {
+    background-color: rgb(var(--editor-bg));
+    color: rgb(var(--editor-text));
+    border-color: rgb(var(--editor-border));
   }
 }

@@ -6,24 +6,29 @@ import { Play, RotateCcw, Lightbulb, ChevronRight, ChevronLeft, Home, Globe, Loc
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { CallStackEngine } from './game-engine'
-import { GameManager } from '../shared/GameManager'
-import { GameDifficulty } from '../shared/types'
+import { GameManager } from '@/games/shared/GameManager'
+import { GameDifficulty } from '@/games/shared/types'
 import { CallStackLevel, QueueItem, StackItem, QueueType, CallStackGameState } from './types'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
+import { useDarkModeDetection } from './hooks/useCSSThemeSync'
 import { IntegratedCallStackBoard } from './IntegratedCallStackBoard'
 import { EnhancedCallStackBoard } from './EnhancedCallStackBoard'
 import { UniversalQueueBoard } from './UniversalQueueBoard'
 import { GameGuideModal } from './GameGuideModal'
+import { DebugInfoPanel } from './components/DebugInfoPanel'
 import { useLayoutType } from './hooks/useLayoutType'
 import { getDelay, AnimationSpeed } from './constants/animationConfig'
 import { LayoutRenderer } from './components/layout/LayoutRenderer'
 import { getLayoutType, getLayoutConfig } from './utils/layoutClassifier'
 import { GameData, GameHandlers } from './types/layout'
-import { useStageNavigation } from '../shared/hooks/useStageNavigation'
+import { useStageNavigation } from '@/games/shared/hooks/useStageNavigation'
 import { CALLSTACK_STAGE_RANGES } from './game-config'
 import { simulateExecution, interpolateFromSnapshots, SimulatorConfig } from './utils/executionSimulator'
 import { simulateEventLoop, createEmptyQueueSnapshot } from './utils/queueSimulator'
 import { QueueStatesSnapshot, EventLoopStep, QueueValidationResult } from './types/layout'
+import { isValidLayoutType, isValidDifficulty, isValidStage, safeArray } from './utils/validation'
+import { useCallStackLibraryContext, ActionType } from './contexts/CallStackLibraryContext'
+import { getRelativeStageNumber, getAbsoluteStageNumber } from './utils/stageMapping'
 
 interface CallStackLibraryGameProps {
   onScoreUpdate?: (score: number) => void
@@ -34,9 +39,19 @@ interface CallStackLibraryGameProps {
 }
 
 export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackLibraryGameProps) {
-  // URL 파라미터로부터 초기 값 설정
-  const urlDifficulty = (searchParams?.difficulty as GameDifficulty) || null
-  const urlStage = searchParams?.stage ? parseInt(searchParams.stage, 10) : null
+  // 다크모드 감지
+  const isDarkMode = useDarkModeDetection()
+  
+  // 마운트 상태 먼저 확인
+  const [mounted, setMounted] = useState(false)
+  
+  // CSS 변수는 이미 동기화됨
+  
+  // URL 파라미터로부터 초기 값 설정 (검증 포함)
+  const rawDifficulty = searchParams?.difficulty
+  const urlDifficulty = isValidDifficulty(rawDifficulty) ? rawDifficulty : null
+  const rawStage = searchParams?.stage ? parseInt(searchParams.stage, 10) : null
+  const urlStage = isValidStage(rawStage) ? rawStage : null
   
   // 난이도에 맞는 기본 스테이지 설정
   const getDefaultStage = (difficulty: GameDifficulty) => {
@@ -47,35 +62,13 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   const initialDifficulty = urlDifficulty || 'beginner'
   const initialStage = urlStage || getDefaultStage(initialDifficulty)
   
-  console.log('CallStackLibraryGame Props:', { searchParams, initialDifficulty, initialStage })
-  
-  const [mounted, setMounted] = useState(false)
+  // console.log 제거 (프로덕션 빌드 경고 방지)
   
   // 통합된 게임 설정 상태
   const [gameConfig, setGameConfig] = useState({
     difficulty: initialDifficulty,
     stage: initialStage
   })
-  
-  // 기존 코드 호환성을 위한 변수
-  const selectedDifficulty = gameConfig.difficulty
-  const currentStage = gameConfig.stage
-  
-  // 상태 변경 추적
-  useEffect(() => {
-    console.log('🔄 gameConfig changed:', gameConfig)
-  }, [gameConfig])
-  
-  // URL 파라미터 변경 감지 및 상태 동기화
-  useEffect(() => {
-    if (urlDifficulty && urlDifficulty !== gameConfig.difficulty) {
-      const newStage = urlStage || getDefaultStage(urlDifficulty)
-      setGameConfig({
-        difficulty: urlDifficulty,
-        stage: newStage
-      })
-    }
-  }, [urlDifficulty, urlStage])
   const [userOrder, setUserOrder] = useState<string[]>([])
   const [isExecuting, setIsExecuting] = useState(false)
   const [showHints, setShowHints] = useState(false)
@@ -84,6 +77,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
   const [showGuide, setShowGuide] = useState(false)
   const [hasSeenGuide, setHasSeenGuide] = useState(false)
+  const [seenStages, setSeenStages] = useState<Set<number>>(new Set())
   const abortControllerRef = useRef<AbortController | null>(null)
   const [microtaskQueue, setMicrotaskQueue] = useState<QueueItem[]>([])
   const [macrotaskQueue, setMacrotaskQueue] = useState<QueueItem[]>([])
@@ -126,11 +120,76 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           : undefined
       }
       
-      return simulateExecution(level, config)
+      const result = simulateExecution(level, config)
+      return result
     }
     
     // simulationSteps가 없는 경우 expectedSnapshots 기반 보간
-    return interpolateFromSnapshots(level)
+    const result = interpolateFromSnapshots(level)
+    
+    // Fallback: 결과가 비어있거나 문제가 있으면 expectedSnapshots로 직접 생성
+    if (result.length === 0 || result.every(stack => stack.length === 0) || result.length < (level.executionSteps?.length || 0)) {
+      const executionStepsLength = level.executionSteps?.length || 0
+      const fallbackResult: StackItem[][] = []
+      
+      for (let i = 0; i < executionStepsLength; i++) {
+        if (level.expectedSnapshots && level.expectedSnapshots[i]) {
+          // expectedSnapshots에 해당 단계가 있으면 사용
+          fallbackResult[i] = level.expectedSnapshots[i].map((item, idx) => ({
+            ...item,
+            id: item.id || `${item.functionName}-fallback-${i}-${idx}`,
+            height: item.height || 40,
+            color: item.color || 'rgb(var(--game-callstack-queue-secondary))',
+            isGlobalContext: item.isGlobalContext || item.functionName === '<global>'
+          }))
+        } else {
+          // 없으면 가장 가까운 이전 체크포인트의 스택 상태 사용
+          const previousCheckpoint = level.snapshotCheckpoints?.slice().reverse().find(cp => cp < i)
+          if (previousCheckpoint !== undefined && level.expectedSnapshots && level.expectedSnapshots[previousCheckpoint]) {
+            fallbackResult[i] = level.expectedSnapshots[previousCheckpoint].map((item, idx) => ({
+              ...item,
+              id: item.id || `${item.functionName}-fallback-${i}-${idx}`,
+              height: item.height || 40,
+              color: item.color || 'rgb(var(--game-callstack-queue-secondary))',
+              isGlobalContext: item.isGlobalContext || item.functionName === '<global>'
+            }))
+          } else {
+            // 전역 컨텍스트만 있는 기본 상태
+            fallbackResult[i] = [{ 
+              id: `global-fallback-${i}`, 
+              functionName: '<global>', 
+              isGlobalContext: true, 
+              color: 'rgb(var(--game-callstack-queue-secondary))', 
+              height: 40 
+            }]
+          }
+        }
+      }
+      
+      return fallbackResult
+    }
+    
+    return result
+  }
+
+  // 현재 표시할 스택 계산 (Type E 전용)
+  const getCurrentDisplayStack = (): StackItem[] => {
+    if (!currentLevel || currentLayoutType !== 'E') return []
+    
+    const checkpoints = currentLevel.snapshotCheckpoints || []
+    const isCheckpoint = checkpoints.includes(currentStep)
+    
+    const computedStack = callstackHistory[currentStep] || []
+    const userStack = userSnapshots[currentStep] || []
+    
+    
+    if (isCheckpoint) {
+      // 체크포인트인 경우 사용자가 구성한 스택 표시
+      return userStack
+    } else {
+      // 체크포인트가 아닌 경우 계산된 스택 상태 표시
+      return computedStack
+    }
   }
   
   // 함수별 큐 타입 결정 (Layout B, C, D용)
@@ -149,30 +208,75 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   const [currentLevel, setCurrentLevel] = useState<CallStackLevel | null>(null)
   const [availableFunctions, setAvailableFunctions] = useState<{name: string, queueType?: QueueType}[]>([])
   
-  // 현재 레벨 변경 추적
-  useEffect(() => {
-    console.log('🎮 currentLevel changed:', currentLevel ? { 
-      id: currentLevel.id, 
-      title: currentLevel.title, 
-      stageNumber: currentLevel.stageNumber,
-      difficulty: currentLevel.difficulty 
-    } : 'null')
-  }, [currentLevel])
+  // Context 사용 - 모든 useState 이후에 위치
+  const { state: contextState, dispatch } = useCallStackLibraryContext();
   
-  // 레이아웃 타입 결정
-  const layoutInfo = useLayoutType(selectedDifficulty, currentStage)
+  // 레이아웃 타입 결정 - custom hook은 다른 hooks와 함께 위치
+  const layoutInfo = useLayoutType(gameConfig.difficulty, gameConfig.stage)
+  
+  // 스테이지 네비게이션 훅 사용 - 다른 hooks와 함께 위치
+  const { handleStageChange, canGoPrev, canGoNext } = useStageNavigation(
+    CALLSTACK_STAGE_RANGES,
+    gameConfig.stage,
+    gameConfig.difficulty,
+    (newStage) => {
+      setGameConfig(prev => ({
+        ...prev,
+        stage: newStage
+      }))
+    }
+  )
+  
+  // 기존 코드 호환성을 위한 변수
+  const selectedDifficulty = gameConfig.difficulty
+  const currentStage = gameConfig.stage
   const currentLayoutType = getLayoutType(selectedDifficulty, currentStage)
   const layoutConfig = getLayoutConfig(currentLayoutType)
   
+  // URL 파라미터 변경 감지 및 상태 동기화
+  useEffect(() => {
+    if (urlDifficulty && urlDifficulty !== gameConfig.difficulty) {
+      const newStage = urlStage || getDefaultStage(urlDifficulty)
+      setGameConfig({
+        difficulty: urlDifficulty,
+        stage: newStage
+      })
+    }
+  }, [urlDifficulty, urlStage, gameConfig.difficulty])
+  
+  // 난이도 전환 시점에 가이드 표시
+  useEffect(() => {
+    // 이미 본 스테이지인지 확인
+    if (!seenStages.has(currentStage)) {
+      // 처음 보는 스테이지면 추가
+      setSeenStages(prev => new Set(prev).add(currentStage))
+      
+      // 난이도 전환 시점(중급 시작: 9, 고급 시작: 17, 고급 새로운 큐 도입: 22, 고급 7: 23, 고급 8: 24)에 가이드 표시
+      if (currentStage === 9 || currentStage === 17 || currentStage === 22 || currentStage === 23 || currentStage === 24) {
+        setShowGuide(true)
+      }
+    }
+  }, [currentStage, seenStages])
+  
+  // 현재 레벨 변경 추적
+  useEffect(() => {
+    // console.log('🎮 currentLevel changed:', currentLevel ? { 
+    //   id: currentLevel.id, 
+    //   title: currentLevel.title, 
+    //   stageNumber: currentLevel.stageNumber,
+    //   difficulty: currentLevel.difficulty 
+    // } : 'null')
+  }, [currentLevel])
+  
   // 디버그 로깅
   useEffect(() => {
-    console.log('CallStackLibraryGame Debug:', {
-      selectedDifficulty,
-      currentStage,
-      currentLayoutType,
-      currentLevel: !!currentLevel,
-      layoutConfig
-    })
+    // console.log('CallStackLibraryGame Debug:', {
+    //   selectedDifficulty,
+    //   currentStage,
+    //   currentLayoutType,
+    //   currentLevel: !!currentLevel,
+    //   layoutConfig
+    // })
   }, [selectedDifficulty, currentStage, currentLayoutType, currentLevel])
   
 
@@ -246,7 +350,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
 
   // 답안 확인
   const handleCheckAnswer = () => {
-    console.log('handleCheckAnswer called', { currentLevel, userOrder, currentLayoutType })
+    // console.log('handleCheckAnswer called', { currentLevel, userOrder, currentLayoutType })
     if (!currentLevel) return
     
     // Layout E는 별도 처리
@@ -340,8 +444,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     }
   }
 
-  // 코드 실행 시뮬레이션 - 선언만 하고 나중에 정의
-  let handleRunSimulation: () => void
+  // 코드 실행 시뮬레이션 함수는 아래에서 정의됨 (타입 E 핸들러들 이후)
   
   // 타입 E 전용 핸들러들을 먼저 정의
   const handleReorderSnapshot = useCallback((step: number, newOrder: StackItem[]) => {
@@ -356,7 +459,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       id: `${funcName}-${Date.now()}`,
       functionName: funcName,
       height: 40,
-      color: 'rgb(59, 130, 246)' // blue-500
+      color: 'rgb(var(--game-callstack-queue-primary))' // 글로벌 CSS 변수 사용
     }
     
     setUserSnapshots(prev => ({
@@ -373,7 +476,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   }, [currentStep])
   
   const handleStepChange = useCallback((step: number) => {
-    console.log('handleStepChange called with step:', step)
+    // console.log('handleStepChange called with step:', step)
     setCurrentStep(step)
   }, [])
   
@@ -397,6 +500,27 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     
     const currentSnapshot = userSnapshots[currentStep] || []
     const expectedSnapshot = currentLevel.expectedSnapshots?.[currentStep] || []
+    
+    // 이미 검증이 실패한 상태에서 다시 시도 버튼을 클릭한 경우
+    if (validationResults[currentStep] === false) {
+      // 현재 스냅샷을 초기화
+      setUserSnapshots(prev => ({
+        ...prev,
+        [currentStep]: []
+      }))
+      // 검증 결과도 초기화
+      setValidationResults(prev => {
+        const newResults = { ...prev }
+        delete newResults[currentStep]
+        return newResults
+      })
+      setMessage({
+        type: 'info',
+        text: '스냅샷을 초기화했습니다. 다시 구성해보세요.'
+      })
+      setTimeout(() => setMessage(null), 2000)
+      return
+    }
     
     // 스냅샷 검증 로직
     const isValid = gameEngine.validateSnapshot(currentSnapshot, expectedSnapshot)
@@ -472,11 +596,14 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       [step]: newQueueStates
     }))
     
+    // Context에 큐 상태 업데이트
+    dispatch({ type: ActionType.UPDATE_CURRENT_QUEUE_STATES, payload: newQueueStates })
+    
     // 현재 단계인 경우 현재 큐 상태도 업데이트
     if (step === currentStep) {
       setCurrentQueueStates(newQueueStates)
     }
-  }, [currentStep])
+  }, [currentStep, dispatch])
 
   const handleValidateQueueStep = useCallback((step: number) => {
     if (!currentLevel || !eventLoopSteps[step]) {
@@ -494,27 +621,126 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       return
     }
 
-    // 간단한 검증: 각 큐에 적절한 함수들이 배치되었는지 확인
-    const hasValidCallStack = userQueueStates.callstack.length >= 0 // 콜스택은 비어있을 수 있음
-    const hasValidMicrotask = userQueueStates.microtask.length >= 0 // 마이크로태스크도 비어있을 수 있음  
-    const hasValidMacrotask = userQueueStates.macrotask.length >= 0 // 매크로태스크도 비어있을 수 있음
+    // 실제 검증: eventLoopStep의 beforeState 또는 afterState와 비교
+    const expectedStep = eventLoopSteps[step]
+    const expectedState = expectedStep.afterState || expectedStep.beforeState
+    
+    if (!expectedState) {
+      // 예상 상태가 없으면 기본 검증
+      const isValid = true
+      const feedbackMessage = '✅ 정답입니다!'
+      
+      const validationResult: QueueValidationResult = {
+        callstack: true,
+        microtask: true,
+        macrotask: true,
+        isValid,
+        message: feedbackMessage
+      }
+      
+      setQueueValidationResults(prev => ({
+        ...prev,
+        [step]: validationResult
+      }))
+      
+      dispatch({ type: ActionType.ADD_QUEUE_VALIDATION_RESULT, payload: { step, result: validationResult } })
+      
+      setMessage({
+        type: 'success',
+        text: feedbackMessage
+      })
+      
+      setTimeout(() => setMessage(null), 3000)
+      return
+    }
+    
+    // 각 큐별로 검증
+    const validateQueue = (queueName: string, userQueue: any[], expectedQueue: any[]) => {
+      if (userQueue.length !== expectedQueue.length) {
+        return false
+      }
+      
+      return userQueue.every((item, index) => {
+        const expected = expectedQueue[index]
+        // 함수 이름 비교 (functionName 또는 name 필드)
+        return (item.functionName || item.name) === (expected.functionName || expected.name || expected)
+      })
+    }
+    
+    // 사용자가 설정한 큐 상태와 예상 상태 비교
+    const callStackValid = validateQueue('callstack', 
+      userQueueStates.callstack || [], 
+      expectedState.callstack || []
+    )
+    const microtaskValid = validateQueue('microtask',
+      userQueueStates.microtask || [],
+      expectedState.microtask || []
+    )
+    const macrotaskValid = validateQueue('macrotask',
+      userQueueStates.macrotask || [],
+      expectedState.macrotask || []
+    )
+    
+    // 추가 큐 타입 검증 (Layout C, D)
+    let animationValid = true
+    let generatorValid = true
+    let ioValid = true
+    let workerValid = true
+    let priorityValid = true
+    
+    if (expectedState.animation !== undefined) {
+      animationValid = validateQueue('animation',
+        userQueueStates.animation || [],
+        expectedState.animation || []
+      )
+    }
+    
+    if (expectedState.generator !== undefined) {
+      generatorValid = validateQueue('generator',
+        userQueueStates.generator || [],
+        expectedState.generator || []
+      )
+    }
+    
+    if (expectedState.io !== undefined) {
+      ioValid = validateQueue('io',
+        userQueueStates.io || [],
+        expectedState.io || []
+      )
+    }
+    
+    if (expectedState.worker !== undefined) {
+      workerValid = validateQueue('worker',
+        userQueueStates.worker || [],
+        expectedState.worker || []
+      )
+    }
+    
+    if (expectedState.priority !== undefined) {
+      priorityValid = validateQueue('priority',
+        userQueueStates.priority || [],
+        expectedState.priority || []
+      )
+    }
 
-    // 기본적으로 구성되어 있으면 유효한 것으로 간주 (더 정교한 검증은 나중에 추가)
-    const callStackValid = hasValidCallStack
-    const microtaskValid = hasValidMicrotask
-    const macrotaskValid = hasValidMacrotask
-
-    const isValid = callStackValid && microtaskValid && macrotaskValid
+    const isValid = callStackValid && microtaskValid && macrotaskValid && 
+                   animationValid && generatorValid && ioValid && 
+                   workerValid && priorityValid
 
     // 구체적인 피드백 메시지 생성
     const errorMessages: string[] = []
     if (!callStackValid) errorMessages.push('콜스택')
-    if (!microtaskValid) errorMessages.push('마이크로태스크 큐')
-    if (!macrotaskValid) errorMessages.push('매크로태스크 큐')
+    if (!microtaskValid) errorMessages.push('마이크로태스크')
+    if (!macrotaskValid) errorMessages.push('매크로태스크')
+    if (!animationValid) errorMessages.push('애니메이션')
+    if (!generatorValid) errorMessages.push('제너레이터')
+    if (!ioValid) errorMessages.push('I/O')
+    if (!workerValid) errorMessages.push('워커')
+    if (!priorityValid) errorMessages.push('우선순위')
     
     const feedbackMessage = isValid 
-      ? '✅ 정답입니다!' 
-      : `❌ ${errorMessages.join(', ')} 상태를 확인해보세요.`
+      ? '✅ 정답입니다! 모든 큐가 올바르게 구성되었습니다.' 
+      : `❌ ${errorMessages.join(', ')} 큐의 상태를 다시 확인해주세요.`
 
     const validationResult: QueueValidationResult = {
       callstack: callStackValid,
@@ -528,6 +754,9 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       ...prev,
       [step]: validationResult
     }))
+    
+    // Context에 검증 결과 저장
+    dispatch({ type: ActionType.ADD_QUEUE_VALIDATION_RESULT, payload: { step, result: validationResult } })
 
     setMessage({
       type: isValid ? 'success' : 'error',
@@ -644,20 +873,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     setTimeout(() => setHighlightedQueue(undefined), 1000)
   }, [])
 
-  // 타임라인에서 표시할 스택 결정 (이중 스택 시스템)
-  const getCurrentDisplayStack = () => {
-    if (currentLayoutType !== 'E' || !currentLevel?.snapshotCheckpoints) {
-      return callstackHistory[currentStep] || []
-    }
-    
-    // 체크포인트인 경우 사용자 스냅샷 사용 (비어있을 수 있음)
-    if (currentLevel.snapshotCheckpoints.includes(currentStep)) {
-      return userSnapshots[currentStep] || []
-    }
-    
-    // 비체크포인트인 경우 계산된 스택 사용
-    return callstackHistory[currentStep] || []
-  }
 
   // 새로운 레이아웃 시스템을 위한 데이터 준비
   const gameData: GameData = {
@@ -693,7 +908,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   const gameHandlers: GameHandlers = {
     onFunctionSelect: handleFunctionSelect,
     onSnapshotChange: (step: number, snapshot: any) => {
-      console.log('Snapshot change:', step, snapshot)
+      // console.log('Snapshot change:', step, snapshot)
     },
     onSubmit: handleCheckAnswer,
     onReset: () => setUserOrder([]),
@@ -785,8 +1000,8 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       const allFunctions = Array.from(functionStarts).concat(Array.from(functionEnds))
       
       setAvailableFunctions(allFunctions.map(name => ({ name })))
-    } else if (layoutType === 'B') {
-      // Layout B (고급 21-22): 큐 타입 정보 포함
+    } else if (layoutType === 'B' || layoutType === 'C' || layoutType === 'D') {
+      // Layout B, C, D: 큐 타입 정보 포함
       if (level.functionCalls) {
         const funcsWithQueue: {name: string, queueType?: QueueType}[] = []
         const seen = new Set<string>()
@@ -845,13 +1060,16 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       gameEngine.resetGameState()
       setGameState(gameEngine.getGameState())
       
-      // 타입 E 상태 초기화
+      // 타입 E 상태 완전 초기화
       setUserSnapshots({})
       setCurrentStep(0)
       setValidationResults({})
       setIsTimelinePlaying(false)
+      setCallstackHistory([])
+      setBreakpoints([])
+      setExecutionPath([])
       
-      // Layout B 상태 초기화
+      // Layout B 상태 완전 초기화
       setQueueStates({})
       setCurrentQueueStates(createEmptyQueueSnapshot(0))
       setEventLoopSteps([])
@@ -865,13 +1083,14 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       if (layoutType === 'E' && level.snapshotCheckpoints && level.executionSteps) {
         // 이중 스택 시스템: 계산된 스택 + 사용자 스택
         const computedHistory = calculateAllStackStates(level)
-        const userHistory: StackItem[][] = Array(level.executionSteps.length).fill(null).map(() => [])
+        
         
         // 사용자 스냅샷은 체크포인트만 빈 상태로 초기화
         const initialUserSnapshots: Record<number, StackItem[]> = {}
         level.snapshotCheckpoints.forEach(checkpoint => {
           initialUserSnapshots[checkpoint] = []
         })
+        
         
         setCallstackHistory(computedHistory) // 계산된 전체 스택 상태
         setUserSnapshots(initialUserSnapshots) // 사용자가 구성할 체크포인트만
@@ -892,6 +1111,9 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         })
         setEventLoopSteps(loopSteps)
         
+        // Context에 이벤트 루프 단계 설정
+        dispatch({ type: ActionType.SET_EVENT_LOOP_STEPS, payload: loopSteps })
+        
         // 초기 큐 상태들 설정
         const initialQueueStates: Record<number, QueueStatesSnapshot> = {}
         loopSteps.forEach((step, index) => {
@@ -899,9 +1121,14 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         })
         setQueueStates(initialQueueStates)
         
+        // Context에 큐 상태 히스토리 설정
+        dispatch({ type: ActionType.SET_QUEUE_STATES_HISTORY, payload: initialQueueStates })
+        
         // 첫 번째 단계의 큐 상태를 현재 상태로 설정
         if (loopSteps.length > 0) {
           setCurrentQueueStates(loopSteps[0].beforeState)
+          // Context에 현재 큐 상태 설정
+          dispatch({ type: ActionType.UPDATE_CURRENT_QUEUE_STATES, payload: loopSteps[0].beforeState })
         }
       }
       
@@ -941,7 +1168,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   
   // 레벨 로드
   useEffect(() => {
-    console.log('🔄 Level load useEffect triggered:', { mounted, gameConfig })
+    // console.log('🔄 Level load useEffect triggered:', { mounted, gameConfig })
     if (!mounted) return
     
     // 유효한 difficulty-stage 조합인지 검증
@@ -949,11 +1176,11 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     const isValidStage = gameConfig.stage >= stageRange.min && gameConfig.stage <= stageRange.max
     
     if (!isValidStage) {
-      console.warn('⚠️ Invalid stage for difficulty:', { 
-        difficulty: gameConfig.difficulty, 
-        stage: gameConfig.stage, 
-        validRange: stageRange 
-      })
+      // console.warn('⚠️ Invalid stage for difficulty:', { 
+      //   difficulty: gameConfig.difficulty, 
+      //   stage: gameConfig.stage, 
+      //   validRange: stageRange 
+      // })
       // 유효한 스테이지로 자동 보정
       const correctedStage = stageRange.min
       setGameConfig(prev => ({
@@ -968,10 +1195,10 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   
   // 난이도 변경 - useCallback으로 메모이제이션하고 원자적 상태 업데이트
   const handleDifficultyChange = useCallback((difficulty: GameDifficulty) => {
-    console.log('🎚️ handleDifficultyChange called:', { difficulty, currentDifficulty: selectedDifficulty, currentStage })
+    // console.log('🎚️ handleDifficultyChange called:', { difficulty, currentDifficulty: selectedDifficulty, currentStage })
     
     const progress = gameManager.getGameProgress('callstack-library', difficulty)
-    console.log('📈 Progress for', difficulty + ':', progress)
+    // console.log('📈 Progress for', difficulty + ':', progress)
     
     if (!progress?.isUnlocked) {
       setMessage({ 
@@ -984,7 +1211,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     // 난이도별 시작 스테이지 계산
     const startStage = CALLSTACK_STAGE_RANGES[difficulty].min
     const targetStage = progress.currentStage || startStage
-    console.log('🎯 Setting new stage:', { startStage, targetStage, range: CALLSTACK_STAGE_RANGES[difficulty] })
+    // console.log('🎯 Setting new stage:', { startStage, targetStage, range: CALLSTACK_STAGE_RANGES[difficulty] })
     
     // 원자적 상태 업데이트 - React 18의 자동 배치 활용
     setGameConfig({ 
@@ -996,7 +1223,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   }, [gameManager, selectedDifficulty, currentStage])
   
   // 코드 실행 시뮬레이션
-  handleRunSimulation = () => {
+  const handleRunSimulation = () => {
     if (!currentLevel || isExecuting) return
     
     if (userOrder.length === 0) {
@@ -1028,14 +1255,14 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         let macroQueue: QueueItem[] = []
         
         // 1. 동기 코드 실행
-        console.log('1. 동기 코드 실행 시작')
+        // console.log('1. 동기 코드 실행 시작')
         
         // 전역 실행 컨텍스트 시작
         simulationStack.push({
           id: `global-${Date.now()}`,
           functionName: '<global>',
           height: 40,
-          color: 'rgb(59, 130, 246)',
+          color: 'rgb(var(--game-callstack-queue-primary))',
           isGlobalContext: true
         })
         simulationOrder.push('<global>')
@@ -1057,7 +1284,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `console.log-start-${Date.now()}`,
           functionName: 'console.log("시작")',
           height: 40,
-          color: 'rgb(16, 185, 129)'
+          color: 'rgb(var(--game-callstack-urgent-primary))'
         })
         simulationOrder.push('console.log("시작")')
         
@@ -1088,7 +1315,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `setTimeout-${Date.now()}`,
           functionName: 'setTimeout',
           height: 40,
-          color: 'rgb(245, 158, 11)'
+          color: 'rgb(var(--game-callstack-scheduled-primary))'
         })
         simulationOrder.push('setTimeout')
         
@@ -1108,7 +1335,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `timeout-callback-${Date.now()}`,
           functionName: 'console.log("타임아웃")',
           height: 40,
-          color: 'rgb(107, 114, 128)',
+          color: 'rgb(var(--text-secondary))',
           queueType: 'macrotask',
           returnValue: undefined
         })
@@ -1129,7 +1356,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `promise-resolve-${Date.now()}`,
           functionName: 'Promise.resolve',
           height: 40,
-          color: 'rgb(139, 92, 246)'
+          color: 'rgb(var(--primary))'
         })
         simulationOrder.push('Promise.resolve')
         
@@ -1160,7 +1387,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `then-${Date.now()}`,
           functionName: 'then',
           height: 40,
-          color: 'rgb(236, 72, 153)'
+          color: 'rgb(var(--accent))'
         })
         simulationOrder.push('then')
         
@@ -1180,7 +1407,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `promise-callback-${Date.now()}`,
           functionName: 'console.log("프로미스")',
           height: 40,
-          color: 'rgb(59, 130, 246)',
+          color: 'rgb(var(--game-callstack-queue-primary))',
           queueType: 'microtask',
           returnValue: undefined
         })
@@ -1201,7 +1428,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           id: `console.log-end-${Date.now()}`,
           functionName: 'console.log("끝")',
           height: 40,
-          color: 'rgb(16, 185, 129)'
+          color: 'rgb(var(--game-callstack-urgent-primary))'
         })
         simulationOrder.push('console.log("끝")')
         
@@ -1230,7 +1457,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         }))
         await new Promise(resolve => setTimeout(resolve, getDelay('stackPush', simulationSpeed)))
         
-        console.log('2. 콜스택이 비었음 - 마이크로태스크 처리')
+        // console.log('2. 콜스택이 비었음 - 마이크로태스크 처리')
         
         // 2. 마이크로태스크 큐 처리
         while (microQueue.length > 0) {
@@ -1254,7 +1481,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
             id: `console.log-promise-${Date.now()}`,
             functionName: 'console.log("프로미스")',
               height: 40,
-            color: 'rgb(16, 185, 129)'
+            color: 'rgb(var(--game-callstack-urgent-primary))'
           })
           simulationOrder.push('console.log("프로미스")')
           
@@ -1284,7 +1511,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           await new Promise(resolve => setTimeout(resolve, getDelay('stackPush', simulationSpeed)))
         }
         
-        console.log('3. 마이크로태스크 큐가 비었음 - 매크로태스크 처리')
+        // console.log('3. 마이크로태스크 큐가 비었음 - 매크로태스크 처리')
         
         // 3. 매크로태스크 큐 처리 (하나만)
         if (macroQueue.length > 0) {
@@ -1308,7 +1535,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
             id: `console.log-timeout-${Date.now()}`,
             functionName: 'console.log("타임아웃")',
               height: 40,
-            color: 'rgb(16, 185, 129)'
+            color: 'rgb(var(--game-callstack-urgent-primary))'
           })
           simulationOrder.push('console.log("타임아웃")')
           
@@ -1370,10 +1597,10 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               macrotask: [],
               priority: [],
               circular: [],
-              deque: [],
               animation: [],
-              immediate: [],
-              idle: []
+              generator: [],
+              io: [],
+              worker: []
             },
             executionOrder: []
           }
@@ -1385,7 +1612,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               const stackItem: StackItem = {
                 id: `${funcCall.name}-${Date.now()}`,
                 functionName: funcCall.name,
-                color: 'rgb(59, 130, 246)',
+                color: 'rgb(var(--game-callstack-queue-primary))',
                 height: 40,
                 returnValue: funcCall.returns
               }
@@ -1454,12 +1681,12 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
             functionName: funcName,
               height: 40,
             color: [
-              'rgb(59, 130, 246)',   // blue-500
-              'rgb(16, 185, 129)',   // emerald-500  
-              'rgb(245, 158, 11)',   // amber-500
-              'rgb(239, 68, 68)',    // red-500
-              'rgb(139, 92, 246)',   // violet-500
-              'rgb(236, 72, 153)'    // pink-500
+              'rgb(var(--game-callstack-queue-primary))',   // callstack primary
+              'rgb(var(--game-callstack-urgent-primary))',   // microtask primary  
+              'rgb(var(--game-callstack-scheduled-primary))', // macrotask primary
+              'rgb(var(--text-secondary))',    // text secondary
+              'rgb(var(--primary))',   // accent
+              'rgb(var(--muted))'    // muted
             ][simulationStack.length % 6]
           })
           
@@ -1510,22 +1737,6 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     setValidationResults({})
   }
   
-  // 스테이지 네비게이션 훅 사용
-  const { handleStageChange, canGoPrev, canGoNext } = useStageNavigation(
-    CALLSTACK_STAGE_RANGES,
-    currentStage,
-    selectedDifficulty,
-    (newStage) => {
-      console.log('📍 Stage navigation callback called:', { newStage, currentStage, selectedDifficulty })
-      // 원자적 상태 업데이트
-      setGameConfig(prev => ({
-        ...prev,
-        stage: newStage
-      }))
-      // initializeLevel은 useEffect에서 자동으로 호출됨
-    }
-  )
-  
   // 진행 상황 데이터
   const progress = gameManager.getGameProgress('callstack-library', selectedDifficulty)
   
@@ -1546,20 +1757,33 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
     return () => clearTimeout(timer)
   }, [isTimelinePlaying, currentStep, currentLayoutType, currentLevel])
   
-  if (!mounted || !currentLevel) {
-    return <div className="flex items-center justify-center h-96">로딩 중...</div>
-  }
-
+  // 모든 훅을 조건문 전에 실행 - Hook 에러 방지
   return (
-    <div>
+    <React.Fragment>
       <GameGuideModal 
         isOpen={showGuide}
         onClose={() => setShowGuide(false)}
         onStart={() => setShowGuide(false)}
+        layoutType={currentLayoutType}
+        currentStage={currentStage}
       />
-      <div className="min-h-screen bg-background">
-      
-      <div className="max-w-7xl mx-auto p-4">
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundColor: 'rgb(var(--background))',
+          color: 'rgb(var(--text-primary))'
+        }}
+      >
+        <div className="w-full p-4">
+          {!mounted || !currentLevel ? (
+            <div className="flex items-center justify-center h-96">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">로딩 중...</p>
+              </div>
+            </div>
+          ) : (
+            <React.Fragment>
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -1617,24 +1841,55 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 advanced: '고급'
               }
               
-              const difficultyColors = {
-                beginner: 'bg-green-100 dark:bg-green-900/20 border-green-300 dark:border-green-700',
-                intermediate: 'bg-yellow-100 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700',
-                advanced: 'bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+              const getDifficultyTheme = (diff: string) => {
+                switch (diff) {
+                  case 'beginner':
+                    return {
+                      bg: 'rgb(var(--game-callstack-stage-beginner) / 0.1)',
+                      border: '1px solid rgb(var(--game-callstack-stage-beginner))'
+                    }
+                  case 'intermediate':
+                    return {
+                      bg: 'rgb(var(--game-callstack-stage-intermediate) / 0.1)',
+                      border: '1px solid rgb(var(--game-callstack-stage-intermediate))'
+                    }
+                  case 'advanced':
+                    return {
+                      bg: 'rgb(var(--game-callstack-stage-advanced) / 0.1)',
+                      border: '1px solid rgb(var(--game-callstack-stage-advanced))'
+                    }
+                  default:
+                    return {
+                      bg: 'rgb(var(--game-callstack-queue-callstack-light))',
+                      border: '1px solid rgb(var(--game-callstack-queue-callstack))'
+                    }
+                }
               }
               
+              const difficultyTheme = getDifficultyTheme(difficulty)
+
               return (
                 <Button
                   key={difficulty}
                   variant={isSelected ? "default" : "outline"}
-                  className={`relative ${isSelected ? '' : difficultyColors[difficulty]} ${!isUnlocked ? 'opacity-50' : ''}`}
+                  className={`relative ${!isUnlocked ? 'opacity-50' : ''}`}
                   onClick={() => handleDifficultyChange(difficulty)}
                   disabled={!isUnlocked}
+                  style={!isSelected ? {
+                    background: difficultyTheme.bg,
+                    borderColor: difficultyTheme.border,
+                    color: 'rgb(var(--text-primary))'
+                  } : undefined}
                 >
                   <div className="flex items-center gap-2">
                     {!isUnlocked && <Lock className="h-4 w-4" />}
                     <span>{difficultyLabels[difficulty]}</span>
-                    {completedStages === gameEngine.getTotalStages(difficulty) && <Trophy className="h-4 w-4 text-yellow-500" />}
+                    {completedStages === gameEngine.getTotalStages(difficulty) && (
+                      <Trophy 
+                        className="h-4 w-4" 
+                        style={{ color: `rgb(var(--game-callstack-library-success))` }}
+                      />
+                    )}
                     <span className="text-xs">({completedStages}/{gameEngine.getTotalStages(difficulty)})</span>
                   </div>
                 </Button>
@@ -1666,15 +1921,19 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               return stageRange.map((stageNumber, index) => (
                 <div
                   key={stageNumber}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    progress?.completedStages.has(stageNumber)
-                      ? 'bg-green-500 text-white'
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                  style={{
+                    background: progress?.completedStages.has(stageNumber)
+                      ? `rgb(var(--game-callstack-library-success))`
                       : stageNumber === currentStage
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
-                  }`}
+                      ? `rgb(var(--primary))`
+                      : `rgb(var(--muted))`,
+                    color: progress?.completedStages.has(stageNumber) || stageNumber === currentStage
+                      ? `rgb(var(--primary-foreground))`
+                      : `rgb(var(--muted-foreground))`
+                  }}
                 >
-                  {progress?.completedStages.has(stageNumber) ? <Star className="h-4 w-4" /> : index + 1}
+                  {progress?.completedStages.has(stageNumber) ? <Star className="h-4 w-4" /> : getRelativeStageNumber(stageNumber)}
                 </div>
               ))
             })()}
@@ -1691,8 +1950,8 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               </div>
             </div>
             
-            {/* 함수 목록이 로드될 때까지 대기 (타입 B, E는 함수 목록 불필요) */}
-            {(currentLayoutType === 'B' || currentLayoutType === 'E') || availableFunctions.length > 0 ? (
+            {/* 함수 목록이 로드될 때까지 대기 (타입 B, C, D, E는 함수 목록 불필요) */}
+            {(['B', 'C', 'D', 'E'].includes(currentLayoutType)) || availableFunctions.length > 0 ? (
               <LayoutRenderer
                 layoutType={currentLayoutType}
                 gameData={gameData}
@@ -1707,11 +1966,28 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
             
             {/* 메시지 표시 영역 */}
             {message && (
-              <div className={`mb-4 p-3 rounded-lg text-sm ${
-                message.type === 'success' ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200' :
-                message.type === 'error' ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200' :
-                'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200'
-              }`}>
+              <div 
+                className="mb-4 p-3 rounded-lg text-sm"
+                style={{
+                  background: message.type === 'success' 
+                    ? `rgb(var(--game-callstack-library-success) / 0.1)`
+                    : message.type === 'error' 
+                      ? `rgb(var(--game-callstack-library-overdue) / 0.1)`
+                      : 'rgb(var(--game-callstack-queue-microtask-light))',
+                  color: message.type === 'success'
+                    ? `rgb(var(--game-callstack-library-success))`
+                    : message.type === 'error'
+                      ? `rgb(var(--game-callstack-library-overdue))`
+                      : 'rgb(var(--text-primary))',
+                  border: `1px solid ${
+                    message.type === 'success'
+                      ? `rgb(var(--game-callstack-library-success))`
+                      : message.type === 'error'
+                        ? `rgb(var(--game-callstack-library-overdue))`
+                        : '1px solid rgb(var(--game-callstack-queue-microtask))'
+                  }`
+                }}
+              >
                 {message.text}
               </div>
             )}
@@ -1759,11 +2035,24 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               </div>
               
               {/* 게임 방법 설명 */}
-              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-1">
+              <div 
+                className="mt-4 p-4 rounded-lg"
+                style={{
+                  background: 'rgb(var(--game-callstack-queue-microtask-light))',
+                  border: '1px solid rgb(var(--game-callstack-queue-microtask))',
+                  borderRadius: '8px'
+                }}
+              >
+                <h3 
+                  className="text-sm font-semibold mb-2 flex items-center gap-1"
+                  style={{ color: 'rgb(var(--text-primary))' }}
+                >
                   🎯 게임 방법:
                 </h3>
-                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                <ul 
+                  className="text-xs space-y-1"
+                  style={{ color: 'rgb(var(--text-secondary))' }}
+                >
                   <li><strong>1️⃣</strong> 코드를 읽고 함수 호출 순서를 파악하세요</li>
                   <li><strong>2️⃣</strong> 우측의 함수 칩을 클릭하여 순서대로 배치하세요</li>
                   <li><strong>3️⃣</strong> 드래그로 순서를 조정할 수 있습니다</li>
@@ -1778,7 +2067,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
               <div className="flex-1 flex flex-col space-y-4">
                 {/* 코드 에디터 섹션 */}
                 <div>
-                  <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">코드 보기</h4>
+                  <h4 className="text-sm font-medium text-[rgb(var(--muted-foreground))] mb-2">코드 보기</h4>
                   <div className="h-[300px]">
                     <CodeEditor
                       value={currentLevel.code}
@@ -1791,11 +2080,11 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 
                 {/* 예상 실행 순서 섹션 */}
                 <div className="flex-1 flex flex-col">
-                  <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">🎯 예상 실행 순서</h4>
+                  <h4 className="text-sm font-medium text-[rgb(var(--muted-foreground))] mb-3">🎯 예상 실행 순서</h4>
                   
                   {/* 사용 가능한 함수 */}
                   <div className="mb-3">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">사용 가능한 함수 (클릭하여 추가)</p>
+                    <p className="text-xs text-[rgb(var(--muted-foreground))] mb-2">사용 가능한 함수 (클릭하여 추가)</p>
                     <div className="flex flex-wrap gap-2">
                       {availableFunctions.map((func, index) => {
                         const funcObj = typeof func === 'string' ? { name: func } : func
@@ -1804,13 +2093,36 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                             key={`${funcObj.name}-${index}`}
                             onClick={() => handleFunctionSelect(funcObj.name)}
                             disabled={isExecuting}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                              funcObj.queueType === 'microtask'
-                                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50'
+                            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                            style={{
+                              background: funcObj.queueType === 'microtask'
+                                ? 'rgb(var(--game-callstack-queue-microtask-light))'
                                 : funcObj.queueType === 'macrotask'
-                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
-                            }`}
+                                ? 'rgb(var(--game-callstack-queue-macrotask-light))'
+                                : 'rgb(var(--game-callstack-queue-callstack-light))',
+                              color: funcObj.queueType === 'microtask'
+                                ? 'rgb(var(--text-primary))'
+                                : funcObj.queueType === 'macrotask'
+                                ? 'rgb(var(--text-primary))'
+                                : 'rgb(var(--text-primary))',
+                              border: `1px solid ${
+                                funcObj.queueType === 'microtask'
+                                  ? 'rgb(var(--game-callstack-queue-microtask))'
+                                  : funcObj.queueType === 'macrotask'
+                                  ? 'rgb(var(--game-callstack-queue-macrotask))'
+                                  : 'rgb(var(--game-callstack-queue-callstack))'
+                              }`
+                            }}
+                            onMouseEnter={(e) => {
+                              const queueType = funcObj.queueType === 'microtask' ? 'microtask' : 
+                                              funcObj.queueType === 'macrotask' ? 'macrotask' : 'callstack'
+                              e.currentTarget.style.background = queueType === 'microtask' ? 'rgb(var(--game-callstack-queue-microtask))' : queueType === 'macrotask' ? 'rgb(var(--game-callstack-queue-macrotask))' : 'rgb(var(--game-callstack-queue-callstack))'
+                            }}
+                            onMouseLeave={(e) => {
+                              const queueType = funcObj.queueType === 'microtask' ? 'microtask' : 
+                                              funcObj.queueType === 'macrotask' ? 'macrotask' : 'callstack'
+                              e.currentTarget.style.background = queueType === 'microtask' ? 'rgb(var(--game-callstack-queue-microtask-light))' : queueType === 'macrotask' ? 'rgb(var(--game-callstack-queue-macrotask-light))' : 'rgb(var(--game-callstack-queue-callstack-light))'
+                            }}
                           >
                             {funcObj.name}
                             {funcObj.queueType && (
@@ -1826,10 +2138,10 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                   
                   {/* 드래그 가능한 순서 목록 */}
                   <div className="flex-1 min-h-0">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">실행 순서 (드래그하여 정렬)</p>
+                    <p className="text-xs text-[rgb(var(--muted-foreground))] mb-2">실행 순서 (드래그하여 정렬)</p>
                     {userOrder.length === 0 ? (
-                      <div className="h-full bg-white dark:bg-slate-800 rounded-lg p-4 border-2 border-dashed border-slate-300 dark:border-slate-600">
-                        <div className="flex items-center justify-center h-full text-slate-400 dark:text-slate-500 text-sm">
+                      <div className="h-full bg-[rgb(var(--card))] rounded-lg p-4 border-2 border-dashed border-[rgb(var(--border))]">
+                        <div className="flex items-center justify-center h-full text-[rgb(var(--muted-foreground))] text-sm">
                           위의 함수를 클릭하여 추가하세요
                         </div>
                       </div>
@@ -1838,7 +2150,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                         axis="y"
                         values={userOrder}
                         onReorder={setUserOrder}
-                        className="space-y-2 h-full overflow-y-auto bg-white dark:bg-slate-800 rounded-lg p-3"
+                        className="space-y-2 h-full overflow-y-auto bg-[rgb(var(--card))] rounded-lg p-3"
                       >
                         {userOrder.map((funcName, index) => {
                           const funcObj = availableFunctions.find(f => 
@@ -1850,17 +2162,25 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                             <Reorder.Item
                               key={`${funcName}-${index}`}
                               value={funcName}
-                              className={`flex items-center justify-between p-2.5 rounded-lg cursor-move ${
-                                queueType === 'microtask'
-                                  ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'
+                              className="flex items-center justify-between p-2.5 rounded-lg cursor-move"
+                              style={{
+                                background: queueType === 'microtask'
+                                  ? 'rgb(var(--game-callstack-queue-microtask-light))'
                                   : queueType === 'macrotask'
-                                  ? 'bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600'
-                                  : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
-                              }`}
+                                  ? 'rgb(var(--game-callstack-queue-macrotask-light))'
+                                  : 'rgb(var(--game-callstack-queue-callstack-light))',
+                                border: `1px solid ${
+                                  queueType === 'microtask'
+                                    ? 'rgb(var(--game-callstack-queue-microtask))'
+                                    : queueType === 'macrotask'
+                                    ? 'rgb(var(--game-callstack-queue-macrotask))'
+                                    : 'rgb(var(--game-callstack-queue-callstack))'
+                                }`
+                              }}
                               whileDrag={{ scale: 1.05, boxShadow: "0px 5px 20px rgba(0,0,0,0.1)" }}
                             >
                               <div className="flex items-center gap-2">
-                                <span className="text-slate-400 dark:text-slate-500">
+                                <span className="text-[rgb(var(--muted-foreground))]">
                                   <svg width="10" height="16" viewBox="0 0 12 20" fill="currentColor">
                                     <circle cx="3" cy="5" r="1.5" />
                                     <circle cx="9" cy="5" r="1.5" />
@@ -1870,21 +2190,30 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                                     <circle cx="9" cy="15" r="1.5" />
                                   </svg>
                                 </span>
-                                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                <span className="text-sm font-medium text-[rgb(var(--muted-foreground))]">
                                   {index + 1}.
                                 </span>
                                 <span className="font-medium text-sm">
                                   {funcName}
                                 </span>
                                 {queueType && (
-                                  <span className="text-xs px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10">
+                                  <span className="text-xs px-1.5 py-0.5 rounded bg-[rgb(var(--surface-secondary))]/10">
                                     {queueType === 'microtask' ? '긴급' : '일반'}
                                   </span>
                                 )}
                               </div>
                               <button
                                 onClick={() => setUserOrder(userOrder.filter(f => f !== funcName))}
-                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                                className="text-sm transition-colors"
+                                style={{
+                                  color: `rgb(var(--game-callstack-library-overdue))`
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.color = `rgb(var(--game-callstack-library-overdue) / 0.8)`
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.color = `rgb(var(--game-callstack-library-overdue))`
+                                }}
                                 disabled={isExecuting}
                               >
                                 ✕
@@ -1929,7 +2258,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                     
                     {/* 속도 조절 버튼 */}
                     <div className="ml-auto flex items-center gap-2">
-                      <span className="text-xs text-slate-500 dark:text-slate-400">속도:</span>
+                      <span className="text-xs text-[rgb(var(--muted-foreground))]">속도:</span>
                       <Button
                         variant={simulationSpeed === 'fast' ? 'default' : 'outline'}
                         size="sm"
@@ -1970,13 +2299,26 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className={`mt-4 p-3 rounded-lg text-sm font-medium shadow-lg ${
-                          message.type === 'success'
-                            ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700'
+                        className="mt-4 p-3 rounded-lg text-sm font-medium shadow-lg"
+                        style={{
+                          background: message.type === 'success'
+                            ? `rgb(var(--game-callstack-library-success) / 0.1)`
                             : message.type === 'error'
-                            ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700'
-                            : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700'
-                        }`}
+                            ? `rgb(var(--game-callstack-library-overdue) / 0.1)`
+                            : 'rgb(var(--game-callstack-queue-microtask-light))',
+                          color: message.type === 'success'
+                            ? `rgb(var(--game-callstack-library-success))`
+                            : message.type === 'error'
+                            ? `rgb(var(--game-callstack-library-overdue))`
+                            : 'rgb(var(--text-primary))',
+                          border: `1px solid ${
+                            message.type === 'success'
+                              ? `rgb(var(--game-callstack-library-success))`
+                              : message.type === 'error'
+                              ? `rgb(var(--game-callstack-library-overdue))`
+                              : '1px solid rgb(var(--game-callstack-queue-microtask))'
+                          }`
+                        }}
                       >
                         {message.text}
                       </motion.div>
@@ -2066,15 +2408,19 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
                     onClick={handleShowHint}
-                    className="text-xs"
+                    className="text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 transition-all"
+                    style={{
+                      backgroundColor: 'rgb(var(--destructive))',
+                      color: 'white',
+                      border: '1px solid rgb(var(--destructive))',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                    }}
                   >
-                    <Lightbulb className="h-3 w-3 mr-1" />
+                    <Lightbulb className="h-3 w-3" />
                     힌트 {showHints ? '숨기기' : '보기'}
-                  </Button>
+                  </button>
                   <span className="text-xs text-muted-foreground font-medium self-center">
                     {hintsUsed}개 사용됨
                   </span>
@@ -2091,9 +2437,16 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                       {currentLevel.hints.map((hint, index) => (
                         <div
                           key={index}
-                          className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded p-2"
+                          className="rounded p-2"
+                          style={{
+                            background: `rgb(var(--game-callstack-library-warning) / 0.1)`,
+                            border: `1px solid rgb(var(--game-callstack-library-warning))`
+                          }}
                         >
-                          <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                          <p 
+                            className="text-xs"
+                            style={{ color: `rgb(var(--game-callstack-library-warning))` }}
+                          >
                             💡 힌트 {index + 1}: {hint}
                           </p>
                         </div>
@@ -2110,7 +2463,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 <div className="space-y-4">
                   {/* 사용 가능한 함수 */}
                   <div>
-                    <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
+                    <h4 className="text-sm font-medium text-[rgb(var(--muted-foreground))] mb-3">
                       사용 가능한 함수 (클릭하여 추가)
                     </h4>
                     <div className="flex flex-wrap gap-2">
@@ -2121,13 +2474,36 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                             key={`${funcObj.name}-${index}`}
                             onClick={() => handleFunctionSelect(funcObj.name)}
                             disabled={isExecuting}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                              funcObj.queueType === 'microtask'
-                                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50'
+                            className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                            style={{
+                              background: funcObj.queueType === 'microtask'
+                                ? 'rgb(var(--game-callstack-queue-microtask-light))'
                                 : funcObj.queueType === 'macrotask'
-                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
-                            }`}
+                                ? 'rgb(var(--game-callstack-queue-macrotask-light))'
+                                : 'rgb(var(--game-callstack-queue-callstack-light))',
+                              color: funcObj.queueType === 'microtask'
+                                ? 'rgb(var(--text-primary))'
+                                : funcObj.queueType === 'macrotask'
+                                ? 'rgb(var(--text-primary))'
+                                : 'rgb(var(--text-primary))',
+                              border: `1px solid ${
+                                funcObj.queueType === 'microtask'
+                                  ? 'rgb(var(--game-callstack-queue-microtask))'
+                                  : funcObj.queueType === 'macrotask'
+                                  ? 'rgb(var(--game-callstack-queue-macrotask))'
+                                  : 'rgb(var(--game-callstack-queue-callstack))'
+                              }`
+                            }}
+                            onMouseEnter={(e) => {
+                              const queueType = funcObj.queueType === 'microtask' ? 'microtask' : 
+                                              funcObj.queueType === 'macrotask' ? 'macrotask' : 'callstack'
+                              e.currentTarget.style.background = queueType === 'microtask' ? 'rgb(var(--game-callstack-queue-microtask))' : queueType === 'macrotask' ? 'rgb(var(--game-callstack-queue-macrotask))' : 'rgb(var(--game-callstack-queue-callstack))'
+                            }}
+                            onMouseLeave={(e) => {
+                              const queueType = funcObj.queueType === 'microtask' ? 'microtask' : 
+                                              funcObj.queueType === 'macrotask' ? 'macrotask' : 'callstack'
+                              e.currentTarget.style.background = queueType === 'microtask' ? 'rgb(var(--game-callstack-queue-microtask-light))' : queueType === 'macrotask' ? 'rgb(var(--game-callstack-queue-macrotask-light))' : 'rgb(var(--game-callstack-queue-callstack-light))'
+                            }}
                           >
                             {funcObj.name}
                             {funcObj.queueType && (
@@ -2143,12 +2519,12 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                   
                   {/* 드래그 가능한 순서 목록 */}
                   <div className="flex-1">
-                    <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
+                    <h4 className="text-sm font-medium text-[rgb(var(--muted-foreground))] mb-3">
                       실행 순서 (드래그하여 정렬)
                     </h4>
                     {userOrder.length === 0 ? (
-                      <div className="min-h-[200px] bg-white dark:bg-slate-800 rounded-lg p-4">
-                        <div className="text-center py-8 text-slate-400 dark:text-slate-500">
+                      <div className="min-h-[200px] bg-[rgb(var(--card))] rounded-lg p-4">
+                        <div className="text-center py-8 text-[rgb(var(--muted-foreground))]">
                           위의 함수를 클릭하여 추가하세요
                         </div>
                       </div>
@@ -2157,7 +2533,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                         axis="y"
                         values={userOrder}
                         onReorder={setUserOrder}
-                        className="space-y-2 min-h-[200px] bg-white dark:bg-slate-800 rounded-lg p-4"
+                        className="space-y-2 min-h-[200px] bg-[rgb(var(--card))] rounded-lg p-4"
                       >
                         {userOrder.map((funcName, index) => {
                           const funcObj = availableFunctions.find(f => 
@@ -2169,17 +2545,25 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                             <Reorder.Item
                               key={`${funcName}-${index}`}
                               value={funcName}
-                              className={`flex items-center justify-between p-3 rounded-lg cursor-move ${
-                                queueType === 'microtask'
-                                  ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'
+                              className="flex items-center justify-between p-3 rounded-lg cursor-move"
+                              style={{
+                                background: queueType === 'microtask'
+                                  ? 'rgb(var(--game-callstack-queue-microtask-light))'
                                   : queueType === 'macrotask'
-                                  ? 'bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600'
-                                  : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
-                              }`}
+                                  ? 'rgb(var(--game-callstack-queue-macrotask-light))'
+                                  : 'rgb(var(--game-callstack-queue-callstack-light))',
+                                border: `1px solid ${
+                                  queueType === 'microtask'
+                                    ? 'rgb(var(--game-callstack-queue-microtask))'
+                                    : queueType === 'macrotask'
+                                    ? 'rgb(var(--game-callstack-queue-macrotask))'
+                                    : 'rgb(var(--game-callstack-queue-callstack))'
+                                }`
+                              }}
                               whileDrag={{ scale: 1.05, boxShadow: "0px 5px 20px rgba(0,0,0,0.1)" }}
                             >
                               <div className="flex items-center gap-3">
-                                <span className="text-slate-400 dark:text-slate-500">
+                                <span className="text-[rgb(var(--muted-foreground))]">
                                   <svg width="12" height="20" viewBox="0 0 12 20" fill="currentColor">
                                     <circle cx="3" cy="5" r="1.5" />
                                     <circle cx="9" cy="5" r="1.5" />
@@ -2189,21 +2573,30 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                                     <circle cx="9" cy="15" r="1.5" />
                                   </svg>
                                 </span>
-                                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                <span className="text-sm font-medium text-[rgb(var(--muted-foreground))]">
                                   {index + 1}.
                                 </span>
                                 <span className="font-medium">
                                   {funcName}
                                 </span>
                                 {queueType && (
-                                  <span className="text-xs px-2 py-1 rounded bg-black/10 dark:bg-white/10">
+                                  <span className="text-xs px-2 py-1 rounded bg-[rgb(var(--surface-secondary))]/10">
                                     {queueType === 'microtask' ? '긴급' : '일반'}
                                   </span>
                                 )}
                               </div>
                               <button
                                 onClick={() => setUserOrder(userOrder.filter(f => f !== funcName))}
-                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                className="transition-colors"
+                                style={{
+                                  color: `rgb(var(--game-callstack-library-overdue))`
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.color = `rgb(var(--game-callstack-library-overdue) / 0.8)`
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.color = `rgb(var(--game-callstack-library-overdue))`
+                                }}
                                 disabled={isExecuting}
                               >
                                 ✕
@@ -2234,13 +2627,26 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className={`p-3 rounded-lg text-sm font-medium ${
-                      message.type === 'success'
-                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                    className="p-3 rounded-lg text-sm font-medium"
+                    style={{
+                      background: message.type === 'success'
+                        ? `rgb(var(--game-callstack-library-success) / 0.1)`
                         : message.type === 'error'
-                        ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
-                        : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
-                    }`}
+                        ? `rgb(var(--game-callstack-library-overdue) / 0.1)`
+                        : 'rgb(var(--game-callstack-queue-microtask-light))',
+                      color: message.type === 'success'
+                        ? `rgb(var(--game-callstack-library-success))`
+                        : message.type === 'error'
+                        ? `rgb(var(--game-callstack-library-overdue))`
+                        : 'rgb(var(--text-primary))',
+                      border: `1px solid ${
+                        message.type === 'success'
+                          ? `rgb(var(--game-callstack-library-success))`
+                          : message.type === 'error'
+                          ? `rgb(var(--game-callstack-library-overdue))`
+                          : '1px solid rgb(var(--game-callstack-queue-microtask))'
+                      }`
+                    }}
                   >
                     {message.text}
                   </motion.div>
@@ -2340,15 +2746,19 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <button
                       onClick={handleShowHint}
-                      className="text-xs"
+                      className="text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 transition-all"
+                      style={{
+                        backgroundColor: 'rgb(var(--destructive))',
+                        color: 'white',
+                        border: '1px solid rgb(var(--destructive))',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                      }}
                     >
-                      <Lightbulb className="h-3 w-3 mr-1" />
+                      <Lightbulb className="h-3 w-3" />
                       힌트 {showHints ? '숨기기' : '보기'}
-                    </Button>
+                    </button>
                     <span className="text-xs text-muted-foreground font-medium self-center">
                       {hintsUsed}개 사용됨
                     </span>
@@ -2365,9 +2775,16 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                         {currentLevel.hints.map((hint, index) => (
                           <div
                             key={index}
-                            className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded p-2"
+                            className="rounded p-2"
+                          style={{
+                            background: `rgb(var(--game-callstack-library-warning) / 0.1)`,
+                            border: `1px solid rgb(var(--game-callstack-library-warning))`
+                          }}
                           >
-                            <p className="text-xs text-yellow-900 dark:text-yellow-100">
+                            <p 
+                              className="text-xs"
+                              style={{ color: `rgb(var(--game-callstack-library-warning))` }}
+                            >
                               힌트 {index + 1}: {hint}
                             </p>
                           </div>
@@ -2399,13 +2816,26 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className={`p-3 rounded-lg border ${
-                        message.type === 'success'
-                          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+                      className="p-3 rounded-lg"
+                      style={{
+                        background: message.type === 'success'
+                          ? `rgb(var(--game-callstack-library-success) / 0.1)`
                           : message.type === 'error'
-                          ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
-                          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200'
-                      }`}
+                          ? `rgb(var(--game-callstack-library-overdue) / 0.1)`
+                          : 'rgb(var(--game-callstack-queue-microtask-light))',
+                        color: message.type === 'success'
+                          ? `rgb(var(--game-callstack-library-success))`
+                          : message.type === 'error'
+                          ? `rgb(var(--game-callstack-library-overdue))`
+                          : 'rgb(var(--text-primary))',
+                        border: `1px solid ${
+                          message.type === 'success'
+                            ? `rgb(var(--game-callstack-library-success))`
+                            : message.type === 'error'
+                            ? `rgb(var(--game-callstack-library-overdue))`
+                            : '1px solid rgb(var(--game-callstack-queue-microtask))'
+                        }`
+                      }}
                     >
                       {message.text}
                     </motion.div>
@@ -2462,8 +2892,44 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           </div>
         </div>
         )}
+            </React.Fragment>
+          )}
+        </div>
       </div>
-    </div>
-    </div>
+      
+      {/* 디버그 정보 패널 */}
+      <DebugInfoPanel
+        layoutType={currentLayoutType}
+        breakpoint={
+          typeof window !== 'undefined' 
+            ? window.innerWidth >= 1280 ? 'xl' 
+            : window.innerWidth >= 1024 ? 'lg' 
+            : window.innerWidth >= 768 ? 'md' 
+            : window.innerWidth >= 640 ? 'sm' 
+            : 'xs'
+            : 'lg'
+        }
+        queueItems={
+          (currentQueueStates?.callstack?.length || 0) +
+          (currentQueueStates?.microtask?.length || 0) +
+          (currentQueueStates?.macrotask?.length || 0) +
+          (currentQueueStates?.animation?.length || 0) +
+          (currentQueueStates?.generator?.length || 0) +
+          (currentQueueStates?.io?.length || 0) +
+          (currentQueueStates?.worker?.length || 0) +
+          gameState.currentStack.length +
+          microtaskQueue.length +
+          macrotaskQueue.length
+        }
+        currentStep={currentStep}
+        totalSteps={
+          eventLoopSteps?.length || 
+          currentLevel?.executionSteps?.length || 
+          currentLevel?.simulationSteps?.length || 
+          0
+        }
+        memoryPressure={false}
+      />
+    </React.Fragment>
   )
 }

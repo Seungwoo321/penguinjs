@@ -1,4 +1,4 @@
-import { GameConfig, DifficultyStageRanges } from '../shared/types'
+import { GameConfig, DifficultyStageRanges } from '@/games/shared/types'
 
 export const callstackLibraryConfig: GameConfig = {
   id: 'callstack-library',
@@ -9,8 +9,8 @@ export const callstackLibraryConfig: GameConfig = {
   icon: '📚',
   difficulties: ['beginner', 'intermediate', 'advanced'],
   concepts: ['functions', 'recursion', 'stack overflow', 'execution context'],
-  stagesPerDifficulty: 5,
-  totalStagesPerDifficulty: 5,
+  stagesPerDifficulty: 8,
+  totalStagesPerDifficulty: 8,
   requiredScore: 70
 }
 
@@ -18,5 +18,5 @@ export const callstackLibraryConfig: GameConfig = {
 export const CALLSTACK_STAGE_RANGES: DifficultyStageRanges = {
   beginner: { min: 1, max: 8 },
   intermediate: { min: 9, max: 16 },
-  advanced: { min: 17, max: 22 }
+  advanced: { min: 17, max: 24 }
 }

@@ -1,4 +1,30 @@
-import { CallStackLevel } from '../types'
+import { CallStackLevel } from '@/games/callstack-library/types'
+import { callstackLibraryThemeConfig } from '@/games/callstack-library/theme/callstackLibraryGameTheme'
+
+// 함수별 색상 매핑 (테마 시스템 사용)
+const getFunctionColor = (functionName: string): string => {
+  const baseColors = callstackLibraryThemeConfig.specialColors
+  
+  // 함수명에 따른 색상 분류
+  if (functionName.includes('<global>')) {
+    return `rgb(${baseColors['function-global']})`
+  }
+  if (functionName.includes('main')) {
+    return `rgb(${baseColors['function-main']})`
+  }
+  if (functionName.includes('processUser') || functionName.includes('calculate') || 
+      functionName.includes('factorial') || functionName.includes('checkNumbers') || 
+      functionName.includes('dangerousRecursion')) {
+    return `rgb(${baseColors['function-primary']})`
+  }
+  if (functionName.includes('greet') || functionName.includes('multiply') || 
+      functionName.includes('isEven')) {
+    return `rgb(${baseColors['function-secondary']})`
+  }
+  
+  // 기본값은 primary 색상
+  return `rgb(${baseColors['function-primary']})`
+}
 
 export const advancedLevels: CallStackLevel[] = [
   {
@@ -34,22 +60,22 @@ processUser();`,
     snapshotCheckpoints: [2, 3, 4, 6], // 각 브레이크포인트에 해당하는 실행 단계들
     expectedSnapshots: {
       2: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'process-1', functionName: 'processUser', color: 'rgb(59, 130, 246)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'process-1', functionName: 'processUser', color: getFunctionColor('primary'), height: 40 }
       ], // Step 2: greet 호출 직전 (라인 7) - greet은 아직 스택에 없음
       3: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'process-1', functionName: 'processUser', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'greet-1', functionName: 'greet', color: 'rgb(34, 197, 94)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'process-1', functionName: 'processUser', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'greet-1', functionName: 'greet', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 3: greet 내부 console.log 실행 (라인 2)
       4: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'process-1', functionName: 'processUser', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'greet-1', functionName: 'greet', color: 'rgb(34, 197, 94)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'process-1', functionName: 'processUser', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'greet-1', functionName: 'greet', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 4: greet의 return 실행 (라인 3) - 아직 스택에 있음
       6: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'process-1', functionName: 'processUser', color: 'rgb(59, 130, 246)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'process-1', functionName: 'processUser', color: getFunctionColor('primary'), height: 40 }
       ] // Step 6: processUser의 console.log 실행 (라인 8) - greet은 이미 종료됨
     },
     functionCalls: [
@@ -120,25 +146,25 @@ console.log("결과:", result);`,
     snapshotCheckpoints: [2, 3, 4, 5], // breakpoints 라인에서 실행되는 단계들
     expectedSnapshots: {
       2: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'calc-1', functionName: 'calculate', color: 'rgb(59, 130, 246)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'calc-1', functionName: 'calculate', color: getFunctionColor('primary'), height: 40 }
       ], // Step 2: multiply 호출 (라인 2)
       3: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'calc-1', functionName: 'calculate', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'mult-1', functionName: 'multiply', color: 'rgb(34, 197, 94)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'calc-1', functionName: 'calculate', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'mult-1', functionName: 'multiply', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 3: add 호출 (라인 6)
       4: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'calc-1', functionName: 'calculate', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'mult-1', functionName: 'multiply', color: 'rgb(34, 197, 94)', height: 40 }, 
-        { id: 'add-1', functionName: 'add', color: 'rgb(168, 85, 247)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'calc-1', functionName: 'calculate', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'mult-1', functionName: 'multiply', color: getFunctionColor('secondary'), height: 40 }, 
+        { id: 'add-1', functionName: 'add', color: 'rgb(126, 34, 206)', height: 40 }
       ], // Step 4: console.log 실행 (라인 10)
       5: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'calc-1', functionName: 'calculate', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'mult-1', functionName: 'multiply', color: 'rgb(34, 197, 94)', height: 40 }, 
-        { id: 'add-1', functionName: 'add', color: 'rgb(168, 85, 247)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'calc-1', functionName: 'calculate', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'mult-1', functionName: 'multiply', color: getFunctionColor('secondary'), height: 40 }, 
+        { id: 'add-1', functionName: 'add', color: 'rgb(126, 34, 206)', height: 40 }
       ] // Step 5: add return (라인 11) - return 실행 중이므로 add는 아직 스택에 있음
     },
     functionCalls: [
@@ -223,25 +249,25 @@ console.log("최종 결과:", answer);`,
     snapshotCheckpoints: [4, 8, 9, 10], // 실제 체크포인트에 해당하는 단계들
     expectedSnapshots: {
       4: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'fact-3', functionName: 'factorial(3)', color: 'rgb(59, 130, 246)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'fact-3', functionName: 'factorial(3)', color: getFunctionColor('primary'), height: 40 }
       ], // Step 4: factorial(2) 호출 직전 (라인 9) - factorial(2)는 아직 스택에 없음
       8: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'fact-3', functionName: 'factorial(3)', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'fact-2', functionName: 'factorial(2)', color: 'rgb(34, 197, 94)', height: 40 }, 
-        { id: 'fact-1', functionName: 'factorial(1)', color: 'rgb(168, 85, 247)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'fact-3', functionName: 'factorial(3)', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'fact-2', functionName: 'factorial(2)', color: getFunctionColor('secondary'), height: 40 }, 
+        { id: 'fact-1', functionName: 'factorial(1)', color: 'rgb(126, 34, 206)', height: 40 }
       ], // Step 8: 기저 조건 (라인 5)
       9: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'fact-3', functionName: 'factorial(3)', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'fact-2', functionName: 'factorial(2)', color: 'rgb(34, 197, 94)', height: 40 }, 
-        { id: 'fact-1', functionName: 'factorial(1)', color: 'rgb(168, 85, 247)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'fact-3', functionName: 'factorial(3)', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'fact-2', functionName: 'factorial(2)', color: getFunctionColor('secondary'), height: 40 }, 
+        { id: 'fact-1', functionName: 'factorial(1)', color: 'rgb(126, 34, 206)', height: 40 }
       ], // Step 9: factorial(1) return 실행 (라인 6) - return 실행 중이므로 아직 스택에 있음
       10: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'fact-3', functionName: 'factorial(3)', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'fact-2', functionName: 'factorial(2)', color: 'rgb(34, 197, 94)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'fact-3', functionName: 'factorial(3)', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'fact-2', functionName: 'factorial(2)', color: getFunctionColor('secondary'), height: 40 }
       ] // Step 10: factorial(2)로 복귀 (라인 10) - factorial(1)은 종료됨
     },
     functionCalls: [
@@ -335,27 +361,27 @@ checkNumbers([1, 2, 3]);`,
     snapshotCheckpoints: [2, 3, 6, 7, 9], // breakpoints 라인에서 실행되는 단계들
     expectedSnapshots: {
       2: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(59, 130, 246)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }
       ], // Step 2: 첫 번째 요소 확인 (라인 5)
       3: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'even-1', functionName: 'isEven', color: 'rgb(34, 197, 94)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'even-1', functionName: 'isEven', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 3: isEven(1) 호출 (라인 5)
       6: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'even-2', functionName: 'isEven', color: 'rgb(34, 197, 94)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'even-2', functionName: 'isEven', color: getFunctionColor('secondary'), height: 40 }
       ], // Step 6: isEven(2) 호출 (라인 5)
       7: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(59, 130, 246)', height: 40 }, 
-        { id: 'process-1', functionName: 'processEven', color: 'rgb(168, 85, 247)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }, 
+        { id: 'process-1', functionName: 'processEven', color: 'rgb(126, 34, 206)', height: 40 }
       ], // Step 7: processEven(2) 호출 (라인 7)
       9: [
-        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: 'rgb(107, 114, 128)', height: 40 }, 
-        { id: 'check-1', functionName: 'checkNumbers', color: 'rgb(59, 130, 246)', height: 40 }
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 }, 
+        { id: 'check-1', functionName: 'checkNumbers', color: getFunctionColor('primary'), height: 40 }
       ] // Step 9: 검사 완료 (라인 13) - checkNumbers는 아직 실행 중
     },
     functionCalls: [
@@ -401,7 +427,7 @@ checkNumbers([1, 2, 3]);`,
     explanation: '무한 재귀는 스택 오버플로우를 일으킵니다.',
     difficulty: 'advanced',
     stageNumber: 21,
-    layoutType: 'B' as const,
+    layoutType: 'E' as const,
     code: `let depth = 0;
 const maxDepth = 10;
 
@@ -424,6 +450,63 @@ function dangerousRecursion(n) {
 }
 
 dangerousRecursion(3);`,
+    executionSteps: [
+      { step: 0, description: "프로그램 시작", currentLine: 22 },
+      { step: 1, description: "dangerousRecursion(3) 호출", currentLine: 22 },
+      { step: 2, description: "깊이 1 도달", currentLine: 12 },
+      { step: 3, description: "첫 번째 재귀 호출 dangerousRecursion(2)", currentLine: 15 },
+      { step: 4, description: "깊이 2 도달", currentLine: 12 },
+      { step: 5, description: "dangerousRecursion(1) 첫 번째 호출", currentLine: 15 },
+      { step: 6, description: "깊이 3 도달 (dangerousRecursion(1))", currentLine: 12 },
+      { step: 7, description: "dangerousRecursion(0) 첫 번째 호출", currentLine: 15 },
+      { step: 8, description: "깊이 4 도달 (dangerousRecursion(0))", currentLine: 12 },
+      { step: 9, description: "dangerousRecursion(0) 두 번째 호출", currentLine: 15 },
+      { step: 10, description: "깊이 5 도달", currentLine: 12 },
+      { step: 11, description: "dangerousRecursion(1) 복귀", currentLine: 15 },
+      { step: 12, description: "dangerousRecursion(1) 두 번째 호출", currentLine: 15 },
+      { step: 13, description: "깊이 3 재도달", currentLine: 12 },
+      { step: 14, description: "dangerousRecursion(0) 세 번째 호출", currentLine: 15 },
+      { step: 15, description: "깊이 4 재도달", currentLine: 12 },
+      { step: 16, description: "dangerousRecursion(0) 네 번째 호출", currentLine: 15 },
+      { step: 17, description: "깊이 5 재도달", currentLine: 12 },
+      { step: 18, description: "dangerousRecursion(2) 두 번째 호출", currentLine: 15 },
+      { step: 19, description: "스택 오버플로우 위험 감지", currentLine: 8 },
+      { step: 20, description: "재귀 종료 및 정리", currentLine: 22 }
+    ],
+    breakpoints: [5, 8, 12, 15],
+    snapshotCheckpoints: [4, 8, 12, 16, 19],
+    expectedSnapshots: {
+      4: [
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 }
+      ],
+      8: [
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 },
+        { id: 'danger-1-1', functionName: 'dangerousRecursion(1)', color: 'rgb(126, 34, 206)', height: 40 },
+        { id: 'danger-0-1', functionName: 'dangerousRecursion(0)', color: 'rgb(185, 28, 28)', height: 40 }
+      ],
+      12: [
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 },
+        { id: 'danger-1-2', functionName: 'dangerousRecursion(1)', color: 'rgb(126, 34, 206)', height: 40 }
+      ],
+      16: [
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-1', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 },
+        { id: 'danger-1-2', functionName: 'dangerousRecursion(1)', color: 'rgb(126, 34, 206)', height: 40 },
+        { id: 'danger-0-3', functionName: 'dangerousRecursion(0)', color: 'rgb(185, 28, 28)', height: 40 }
+      ],
+      19: [
+        { id: 'global-1', functionName: '<global>', isGlobalContext: true, color: getFunctionColor('<global>'), height: 40 },
+        { id: 'danger-3', functionName: 'dangerousRecursion(3)', color: getFunctionColor('primary'), height: 40 },
+        { id: 'danger-2-2', functionName: 'dangerousRecursion(2)', color: getFunctionColor('secondary'), height: 40 }
+      ]
+    },
     functionCalls: [
       {
         name: '<global>',
@@ -467,7 +550,7 @@ dangerousRecursion(3);`,
     ],
     expectedOrder: ['<global>', 'dangerousRecursion(3)', 'console.log', 'dangerousRecursion(2)', 'console.log', 'dangerousRecursion(1)', 'console.log', 'dangerousRecursion(0)', 'dangerousRecursion(0)', 'dangerousRecursion(1)', 'console.log', 'dangerousRecursion(0)', 'dangerousRecursion(0)', 'dangerousRecursion(2)', 'console.log'],
     simulationSteps: ['<global>', 'dangerousRecursion(3)', 'console.log', 'console.log-return', 'dangerousRecursion(2)', 'console.log', 'console.log-return', 'dangerousRecursion(1)', 'console.log', 'console.log-return', 'dangerousRecursion(0)', 'dangerousRecursion(0)-return', 'dangerousRecursion(0)', 'dangerousRecursion(0)-return', 'dangerousRecursion(1)-return', 'dangerousRecursion(1)', 'console.log', 'console.log-return', 'dangerousRecursion(0)', 'dangerousRecursion(0)-return', 'dangerousRecursion(0)', 'dangerousRecursion(0)-return', 'dangerousRecursion(1)-return', 'dangerousRecursion(2)-return', 'dangerousRecursion(2)', 'console.log', 'console.log-return', 'dangerousRecursion(2)-return', 'dangerousRecursion(3)-return', '<global>-return'],
-    maxStackSize: 11,
+    maxStackSize: 10,
     hints: [
       '각 재귀 호출이 두 번씩 분기합니다.',
       '깊이가 지수적으로 증가합니다.',
@@ -572,6 +655,455 @@ console.log("1.5: 동기 끝");`,
       '애니메이션 프레임이 매크로태스크보다 우선순위가 높습니다.',
       '모든 출력의 순서를 주의깊게 관찰하세요.'
     ],
-    concepts: ['큐 우선순위', '이벤트 루프', '복합 시스템', '실행 순서 예측', '브라우저 스케줄링']
+    concepts: ['큐 우선순위', '이벤트 루프', '복합 시스템', '실행 순서 예측', '브라우저 스케줄링'],
+    eventLoopSteps: [
+      {
+        stepNumber: 0,
+        description: "초기 상태 - 프로그램 시작",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: []
+        },
+        afterState: {
+          callstack: ['<global>'],
+          microtask: [],
+          macrotask: []
+        }
+      },
+      {
+        stepNumber: 1,
+        description: "비동기 작업 등록",
+        beforeState: {
+          callstack: ['<global>'],
+          microtask: [],
+          macrotask: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['then-callback'],
+          macrotask: ['timer-callback']
+        }
+      },
+      {
+        stepNumber: 2,
+        description: "마이크로태스크 처리",
+        beforeState: {
+          callstack: [],
+          microtask: ['then-callback'],
+          macrotask: ['timer-callback']
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['microtask-callback'],
+          macrotask: ['timer-callback']
+        }
+      },
+      {
+        stepNumber: 3,
+        description: "매크로태스크 처리",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback']
+        },
+        afterState: {
+          callstack: [],
+          microtask: [],
+          macrotask: []
+        }
+      }
+    ]
+  },
+  {
+    id: 'advanced-7',
+    title: '고급 이벤트 루프 패턴',
+    description: '복잡한 비동기 패턴에서 이벤트 루프의 동작을 분석해보세요.',
+    explanation: '실제 애플리케이션에서 사용되는 고급 비동기 패턴을 이해해보세요.',
+    difficulty: 'advanced',
+    stageNumber: 23,
+    layoutType: 'C' as const,
+    queueTypes: ['callstack', 'microtask', 'macrotask', 'animation'],
+    code: `async function fetchData() {
+  console.log("1: 비동기 함수 시작");
+  
+  const promise = new Promise(resolve => {
+    setTimeout(() => {
+      console.log("3: 타이머 콜백");
+      resolve("데이터");
+    }, 0);
+  });
+  
+  console.log("2: Promise 생성 완료");
+  
+  const result = await promise;
+  console.log("4: 결과 받음", result);
+  
+  return result;
+}
+
+console.log("0: 프로그램 시작");
+fetchData().then(data => {
+  console.log("5: 최종 처리", data);
+});
+console.log("1.5: 동기 코드 완료");`,
+    executionSteps: [
+      { step: 0, description: "프로그램 시작", currentLine: 1 },
+      { step: 1, description: "console.log('0: 프로그램 시작') 실행", currentLine: 1 },
+      { step: 2, description: "fetchData() 호출", currentLine: 2 },
+      { step: 3, description: "console.log('1: 비동기 함수 시작') 실행", currentLine: 3 },
+      { step: 4, description: "Promise 생성자 실행", currentLine: 4 },
+      { step: 5, description: "setTimeout 등록", currentLine: 5 },
+      { step: 6, description: "console.log('2: Promise 생성 완료') 실행", currentLine: 11 },
+      { step: 7, description: "await 일시정지", currentLine: 13 },
+      { step: 8, description: "console.log('1.5: 동기 코드 완료') 실행", currentLine: 21 },
+      { step: 9, description: "타이머 콜백 실행", currentLine: 6 },
+      { step: 10, description: "Promise resolve", currentLine: 7 },
+      { step: 11, description: "await 재개", currentLine: 13 },
+      { step: 12, description: "console.log('4: 결과 받음') 실행", currentLine: 14 }
+    ],
+    simulationSteps: ['<global>', 'console.log', 'console.log-return', 'fetchData', 'console.log', 'console.log-return', 'Promise', 'setTimeout', 'setTimeout-return', 'Promise-return', 'console.log', 'console.log-return', 'fetchData-suspend', 'console.log', 'console.log-return', '<global>-return', 'timer-callback', 'console.log', 'console.log-return', 'promise-resolve', 'fetchData-resume', 'console.log', 'console.log-return', 'fetchData-return', 'then-callback', 'console.log', 'console.log-return', 'then-callback-return'],
+    maxStackSize: 4,
+    hints: [
+      'async/await는 Promise의 문법적 설탕입니다.',
+      'await는 현재 함수를 일시정지시킵니다.',
+      'Promise가 resolve되면 마이크로태스크 큐에 추가됩니다.'
+    ],
+    concepts: ['async/await', 'Promise', '이벤트 루프', '함수 일시정지/재개'],
+    functionCalls: [
+      {
+        name: '<global>',
+        queueType: 'callstack',
+        calls: [
+          { name: 'console.log', params: ['0: 프로그램 시작'], queueType: 'callstack' },
+          { name: 'fetchData', queueType: 'callstack' },
+          { name: 'console.log', params: ['1.5: 동기 코드 완료'], queueType: 'callstack' }
+        ]
+      },
+      {
+        name: 'fetchData',
+        queueType: 'callstack',
+        calls: [
+          { name: 'console.log', params: ['1: 비동기 함수 시작'], queueType: 'callstack' },
+          { name: 'Promise', queueType: 'callstack' },
+          { name: 'console.log', params: ['2: Promise 생성 완료'], queueType: 'callstack' },
+          { name: 'await', queueType: 'callstack' }
+        ]
+      },
+      {
+        name: 'timer-callback',
+        queueType: 'macrotask',
+        calls: [
+          { name: 'console.log', params: ['3: 타이머 콜백'], queueType: 'macrotask' },
+          { name: 'resolve', queueType: 'macrotask' }
+        ]
+      },
+      {
+        name: 'fetchData-resume',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['4: 결과 받음'], queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'then-callback',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['5: 최종 처리'], queueType: 'microtask' }
+        ]
+      }
+    ],
+    expectedOrder: ['<global>', 'console.log', 'fetchData', 'console.log', 'Promise', 'console.log', 'await', 'console.log', 'timer-callback', 'console.log', 'resolve', 'fetchData-resume', 'console.log', 'then-callback', 'console.log'],
+    eventLoopSteps: [
+      {
+        stepNumber: 0,
+        description: "초기 상태 - async/await 시작",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: [],
+          animation: []
+        },
+        afterState: {
+          callstack: ['<global>', 'fetchData'],
+          microtask: [],
+          macrotask: [],
+          animation: []
+        }
+      },
+      {
+        stepNumber: 1,
+        description: "Promise 생성 및 타이머 등록",
+        beforeState: {
+          callstack: ['<global>', 'fetchData'],
+          microtask: [],
+          macrotask: [],
+          animation: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: []
+        }
+      },
+      {
+        stepNumber: 2,
+        description: "타이머 콜백 실행 및 resolve",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['fetchData-resume'],
+          macrotask: [],
+          animation: []
+        }
+      },
+      {
+        stepNumber: 3,
+        description: "async 함수 재개 및 then 처리",
+        beforeState: {
+          callstack: [],
+          microtask: ['fetchData-resume'],
+          macrotask: [],
+          animation: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['then-callback'],
+          macrotask: [],
+          animation: []
+        }
+      }
+    ]
+  },
+  {
+    id: 'advanced-8',
+    title: '마스터 레벨: 복합 스케줄링',
+    description: '모든 큐 타입이 함께 작동하는 최고 난이도 시나리오입니다.',
+    explanation: '실제 브라우저 환경에서 일어나는 복잡한 스케줄링을 완벽히 이해해보세요.',
+    difficulty: 'advanced',
+    stageNumber: 24,
+    layoutType: 'D' as const,
+    queueTypes: ['callstack', 'microtask', 'macrotask', 'animation', 'io', 'worker'],
+    code: `console.log("1: 시작");
+
+// 즉시 실행
+queueMicrotask(() => {
+  console.log("3: 마이크로태스크 1");
+  queueMicrotask(() => {
+    console.log("5: 중첩 마이크로태스크");
+  });
+});
+
+// 타이머
+setTimeout(() => {
+  console.log("7: 매크로태스크");
+  queueMicrotask(() => {
+    console.log("8: 매크로태스크 내 마이크로태스크");
+  });
+}, 0);
+
+// 애니메이션
+requestAnimationFrame(() => {
+  console.log("6: 애니메이션 프레임");
+});
+
+// 추가 마이크로태스크
+Promise.resolve().then(() => {
+  console.log("4: Promise 마이크로태스크");
+});
+
+console.log("2: 동기 완료");`,
+    executionSteps: [
+      { step: 0, description: "프로그램 시작", currentLine: 1 },
+      { step: 1, description: "console.log('1: 시작') 실행", currentLine: 1 },
+      { step: 2, description: "queueMicrotask 등록", currentLine: 3 },
+      { step: 3, description: "setTimeout 등록", currentLine: 10 },
+      { step: 4, description: "requestAnimationFrame 등록", currentLine: 18 },
+      { step: 5, description: "Promise.resolve().then 등록", currentLine: 23 },
+      { step: 6, description: "console.log('2: 동기 완료') 실행", currentLine: 27 },
+      { step: 7, description: "마이크로태스크 1 실행", currentLine: 4 },
+      { step: 8, description: "중첩 마이크로태스크 등록", currentLine: 5 },
+      { step: 9, description: "Promise 마이크로태스크 실행", currentLine: 24 },
+      { step: 10, description: "중첩 마이크로태스크 실행", currentLine: 6 },
+      { step: 11, description: "애니메이션 프레임 실행", currentLine: 19 },
+      { step: 12, description: "매크로태스크 실행", currentLine: 11 },
+      { step: 13, description: "매크로태스크 내 마이크로태스크 실행", currentLine: 13 }
+    ],
+    simulationSteps: ['<global>', 'console.log', 'console.log-return', 'queueMicrotask', 'queueMicrotask-return', 'setTimeout', 'setTimeout-return', 'requestAnimationFrame', 'requestAnimationFrame-return', 'Promise.resolve().then', 'Promise.resolve().then-return', 'console.log', 'console.log-return', '<global>-return', 'microtask-1', 'console.log', 'console.log-return', 'queueMicrotask', 'queueMicrotask-return', 'microtask-1-return', 'microtask-2', 'console.log', 'console.log-return', 'microtask-2-return', 'microtask-3', 'console.log', 'console.log-return', 'microtask-3-return', 'animation-frame', 'console.log', 'console.log-return', 'animation-frame-return', 'macrotask-timer', 'console.log', 'console.log-return', 'queueMicrotask', 'queueMicrotask-return', 'macrotask-timer-return', 'microtask-4', 'console.log', 'console.log-return', 'microtask-4-return'],
+    maxStackSize: 4,
+    hints: [
+      '마이크로태스크는 항상 다른 큐보다 우선순위가 높습니다.',
+      '중첩된 마이크로태스크도 즉시 처리됩니다.',
+      '매크로태스크 실행 후에도 마이크로태스크 큐를 확인합니다.',
+      '모든 실행 순서를 정확히 예측해보세요.'
+    ],
+    concepts: ['복합 스케줄링', '큐 우선순위', '중첩 큐', '완전한 이벤트 루프', '마스터 레벨'],
+    functionCalls: [
+      {
+        name: '<global>',
+        queueType: 'callstack',
+        calls: [
+          { name: 'console.log', params: ['1: 시작'], queueType: 'callstack' },
+          { name: 'queueMicrotask', queueType: 'microtask' },
+          { name: 'setTimeout', queueType: 'macrotask' },
+          { name: 'requestAnimationFrame', queueType: 'animation' },
+          { name: 'Promise.resolve().then', queueType: 'microtask' },
+          { name: 'console.log', params: ['2: 동기 완료'], queueType: 'callstack' }
+        ]
+      },
+      {
+        name: 'microtask-1',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['3: 마이크로태스크 1'], queueType: 'microtask' },
+          { name: 'queueMicrotask', queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'microtask-2',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['4: Promise 마이크로태스크'], queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'microtask-3',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['5: 중첩 마이크로태스크'], queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'animation-frame',
+        queueType: 'animation',
+        calls: [
+          { name: 'console.log', params: ['6: 애니메이션 프레임'], queueType: 'animation' }
+        ]
+      },
+      {
+        name: 'macrotask-timer',
+        queueType: 'macrotask',
+        calls: [
+          { name: 'console.log', params: ['7: 매크로태스크'], queueType: 'macrotask' },
+          { name: 'queueMicrotask', queueType: 'microtask' }
+        ]
+      },
+      {
+        name: 'microtask-4',
+        queueType: 'microtask',
+        calls: [
+          { name: 'console.log', params: ['8: 매크로태스크 내 마이크로태스크'], queueType: 'microtask' }
+        ]
+      }
+    ],
+    expectedOrder: ['<global>', 'console.log', 'queueMicrotask', 'setTimeout', 'requestAnimationFrame', 'Promise.resolve().then', 'console.log', 'microtask-1', 'console.log', 'queueMicrotask', 'microtask-2', 'console.log', 'microtask-3', 'console.log', 'animation-frame', 'console.log', 'macrotask-timer', 'console.log', 'queueMicrotask', 'microtask-4', 'console.log'],
+    eventLoopSteps: [
+      {
+        stepNumber: 0,
+        description: "초기 상태 - 복합 스케줄링 시작",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: [],
+          animation: [],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: ['<global>'],
+          microtask: [],
+          macrotask: [],
+          animation: [],
+          io: [],
+          worker: []
+        }
+      },
+      {
+        stepNumber: 1,
+        description: "모든 비동기 작업 등록",
+        beforeState: {
+          callstack: ['<global>'],
+          microtask: [],
+          macrotask: [],
+          animation: [],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['microtask-1', 'Promise-then'],
+          macrotask: ['timer-callback'],
+          animation: ['animation-frame'],
+          io: [],
+          worker: []
+        }
+      },
+      {
+        stepNumber: 2,
+        description: "마이크로태스크 처리 (중첩 포함)",
+        beforeState: {
+          callstack: [],
+          microtask: ['microtask-1', 'Promise-then'],
+          macrotask: ['timer-callback'],
+          animation: ['animation-frame'],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: ['animation-frame'],
+          io: [],
+          worker: []
+        }
+      },
+      {
+        stepNumber: 3,
+        description: "애니메이션 프레임 처리",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: ['animation-frame'],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: [],
+          io: [],
+          worker: []
+        }
+      },
+      {
+        stepNumber: 4,
+        description: "매크로태스크 처리 및 새 마이크로태스크",
+        beforeState: {
+          callstack: [],
+          microtask: [],
+          macrotask: ['timer-callback'],
+          animation: [],
+          io: [],
+          worker: []
+        },
+        afterState: {
+          callstack: [],
+          microtask: ['macrotask-microtask'],
+          macrotask: [],
+          animation: [],
+          io: [],
+          worker: []
+        }
+      }
+    ]
   }
 ]

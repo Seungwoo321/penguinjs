@@ -14,6 +14,7 @@
     "@penguinjs/game-engine": "workspace:*",
     "@penguinjs/ui": "workspace:*",
     "@penguinjs/utils": "workspace:*",
+    "immer": "^10.1.1",
     "lucide-react": "^0.468.0",
     "next": "15.3.2",
     "next-intl": "^4.1.0",

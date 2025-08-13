@@ -2,7 +2,7 @@
 export interface StackItem {
   id: string
   functionName: string
-  returnValue?: any
+  returnValue?: string | number | boolean | null | any[]
   color: string
   height: number
   queueType?: QueueType
@@ -18,22 +18,22 @@ export type QueueType =
   | 'macrotask'      // 매크로태스크 큐  
   | 'priority'       // 우선순위 큐
   | 'circular'       // 원형 큐
-  | 'deque'          // 덱 (양방향 큐)
   | 'animation'      // 애니메이션 프레임 큐
-  | 'immediate'      // setImmediate 큐
-  | 'idle'           // requestIdleCallback 큐
+  | 'generator'      // 제너레이터 큐
+  | 'io'             // I/O 처리 큐
+  | 'worker'         // 웹 워커 큐
 
 // 큐 아이템 (다양한 큐 타입을 위한 확장된 인터페이스)
 export interface QueueItem {
   id: string
   functionName: string
-  returnValue?: any
+  returnValue?: string | number | boolean | null | any[]
   color: string
   height: number
   queueType: QueueType
   priority?: number
   timestamp?: number
-  data?: any
+  data?: Record<string, unknown>
   position?: number
 }
 
@@ -59,8 +59,8 @@ export interface AsyncTask {
 // 함수 호출 정보
 export interface FunctionCall {
   name: string
-  params?: any[]
-  returns?: any
+  params?: Array<string | number | boolean | null | any[]>
+  returns?: string | number | boolean | null | any[]
   calls?: FunctionCall[]
   queueType?: QueueType
   priority?: number
@@ -106,6 +106,9 @@ export interface CallStackLevel {
   breakpoints?: number[]
   snapshotCheckpoints?: number[]
   expectedSnapshots?: Record<number, StackItem[]>
+  
+  // 타입 B, C, D 전용 필드들
+  eventLoopSteps?: any[] // EventLoopStep 타입이 별도로 정의되어 있을 수 있음
 }
 
 // 확장된 게임 상태

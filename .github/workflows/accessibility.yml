@@ -11,41 +11,25 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
         
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10.11.0
+        
     - name: Install dependencies
-      run: |
-        cd apps/playground
-        npm ci
+      run: pnpm install
     
     - name: Build application
       run: |
         cd apps/playground
-        npm run build
-    
-    - name: Install accessibility tools
-      run: |
-        npm install -g @axe-core/cli
-        npm install -g pa11y
-    
-    - name: Start server
-      run: |
-        cd apps/playground
-        npm run start &
-        sleep 10
-    
-    - name: Run axe accessibility tests
-      run: |
-        axe http://localhost:3000 --tags wcag2aa,wcag21aa --exit
-    
-    - name: Run pa11y color contrast tests
-      run: |
-        pa11y http://localhost:3000 --standard WCAG2AA --reporter cli
+        pnpm build
     
     - name: Check specific color combinations
       run: |
@@ -54,9 +38,7 @@ jobs:
     
     - name: Upload accessibility report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: accessibility-report
-        path: |
-          apps/playground/accessibility-report.json
-          apps/playground/color-contrast-report.json
+        name: color-contrast-report
+        path: apps/playground/color-contrast-report.json

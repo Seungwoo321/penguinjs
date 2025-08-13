@@ -1,4 +1,4 @@
-import { CallStackLevel } from '../types'
+import { CallStackLevel } from '@/games/callstack-library/types'
 
 export const intermediateLevels: CallStackLevel[] = [
   {
