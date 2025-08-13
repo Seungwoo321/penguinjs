@@ -18,15 +18,18 @@ jobs:
       with:
         node-version: '20'
         
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
     - name: Install dependencies
-      run: |
-        cd apps/playground
-        npm ci
+      run: pnpm install
     
     - name: Build application
       run: |
         cd apps/playground
-        npm run build
+        pnpm build
     
     - name: Install accessibility tools
       run: |
@@ -36,7 +39,7 @@ jobs:
     - name: Start server
       run: |
         cd apps/playground
-        npm run start &
+        pnpm start &
         sleep 10
     
     - name: Run axe accessibility tests
