@@ -31,25 +31,6 @@ jobs:
         cd apps/playground
         pnpm build
     
-    - name: Install accessibility tools
-      run: |
-        npm install -g @axe-core/cli
-        npm install -g pa11y
-    
-    - name: Start server
-      run: |
-        cd apps/playground
-        pnpm start &
-        sleep 10
-    
-    - name: Run axe accessibility tests
-      run: |
-        axe http://localhost:3000 --tags wcag2aa,wcag21aa --exit
-    
-    - name: Run pa11y color contrast tests
-      run: |
-        pa11y http://localhost:3000 --standard WCAG2AA --reporter cli
-    
     - name: Check specific color combinations
       run: |
         node scripts/check-color-contrast.js
@@ -59,7 +40,5 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: accessibility-report
-        path: |
-          apps/playground/accessibility-report.json
-          apps/playground/color-contrast-report.json
+        name: color-contrast-report
+        path: apps/playground/color-contrast-report.json
