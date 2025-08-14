@@ -1,15 +1,24 @@
 # JavaScript 개념별 학습 게임 상세 기획
 
+## 📊 구현 현황
+| 게임명 | 상태 | 스테이지 | 테스트 |
+|---------|------|---------|--------|
+| Closure Cave | ✅ 완료 | 15/15 | ❌ 없음 |
+| CallStack Library | ✅ 완료 | 15/15 | ✅ 95% |
+| Promise Battle | 🔒 미구현 | 0/15 | ❌ 없음 |
+| 기타 15개 게임 | 🔒 미구현 | 0/225 | ❌ 없음 |
+
 ## 게임 컬렉션 개요
 각 JavaScript 개념의 특성에 맞는 다양한 형태의 인터랙티브 학습 게임
 
 ---
 
-## 1. 🐸 Closure Cave (클로저 동굴)
+## 1. 🐸 Closure Cave (클로저 동굴) ✅ 구현 완료
 
 ### 게임 타입: **Flexbox Froggy 스타일 - 코드 작성**
 - **테마**: 보물 사냥꾼이 동굴 탐험
 - **목표**: 클로저를 활용하여 보물상자에 접근
+- **구현 기술**: React + CodeMirror + Custom Visualizer
 
 ### 게임플레이
 - 함수 스코프를 동굴로, 클로저를 비밀 통로로 표현
@@ -40,11 +49,12 @@
 
 ---
 
-## 2. 📚 CallStack Library (콜스택 도서관)
+## 2. 📚 CallStack Library (콜스택 도서관) ✅ 구현 완료
 
 ### 게임 타입: **드래그 앤 드롭 시뮬레이션**
 - **테마**: 도서관에서 책을 쌓고 정리하기
 - **목표**: 함수 호출 순서를 책 더미로 시각화
+- **구현 기술**: CQRS 패턴 + DND Kit + Vitest (95% 커버리지)
 
 ### 게임플레이
 - 주어진 코드를 실행하면 책들이 자동으로 쌓임
@@ -76,7 +86,7 @@
 
 ---
 
-## 3. 🎮 Promise Battle (프로미스 배틀)
+## 3. 🎮 Promise Battle (프로미스 배틀) 🔒 미구현
 
 ### 게임 타입: **턴제 카드 게임**
 - **테마**: Promise 상태를 카드로 표현
@@ -118,7 +128,7 @@
 
 ---
 
-## 4. 🛫 Async Airways (비동기 항공사)
+## 4. 🛫 Async Airways (비동기 항공사) 🔒 미구현
 
 ### 게임 타입: **실시간 스케줄 관리**
 - **테마**: 공항 관제탑에서 비행기 스케줄 관리
@@ -136,7 +146,7 @@
 
 ---
 
-## 5. 🪞 Proxy Laboratory (프록시 실험실)
+## 5. 🪞 Proxy Laboratory (프록시 실험실) 🔒 미구현
 
 ### 게임 타입: **퍼즐/실험 시뮬레이션**
 - **테마**: 과학자가 객체의 행동을 관찰하고 조작
@@ -153,7 +163,7 @@
 
 ---
 
-## 6. 🎯 Event Target (이벤트 타겟)
+## 6. 🎯 Event Target (이벤트 타겟) 🔒 미구현
 
 ### 게임 타입: **Flexbox Froggy 스타일 - 위치 맞추기**
 - **테마**: 이벤트를 올바른 타겟에 배치하기
@@ -173,7 +183,7 @@
 
 ---
 
-## 7. 🔗 Prototype Chain (프로토타입 체인)
+## 7. 🔗 Prototype Chain (프로토타입 체인) 🔒 미구현
 
 ### 게임 타입: **연결 퍼즐**
 - **테마**: 상속 관계를 선으로 연결하기
@@ -190,7 +200,7 @@
 
 ---
 
-## 8. 🎬 EventLoop Cinema (이벤트 루프 영화관)
+## 8. 🎬 EventLoop Cinema (이벤트 루프 영화관) 🔒 미구현
 
 ### 게임 타입: **타이밍 기반 액션**
 - **테마**: 영화관에서 올바른 순서로 영화 상영하기
@@ -217,7 +227,7 @@ console.log('4');
 
 ---
 
-## 9. 🧠 Memory Management Museum (메모리 관리 박물관)
+## 9. 🧠 Memory Management Museum (메모리 관리 박물관) 🔒 미구현
 
 ### 게임 타입: **관리 시뮬레이션**
 - **테마**: 박물관 큐레이터가 전시품 관리
@@ -252,7 +262,7 @@ console.log('4');
 
 ---
 
-## 10. 🌳 Scope Forest (스코프 숲)
+## 10. 🌳 Scope Forest (스코프 숲) 🔒 미구현
 
 ### 게임 타입: **탐험/퍼즐**
 - **테마**: 숲 속에서 보물 찾기
@@ -287,7 +297,7 @@ console.log('4');
 
 ---
 
-## 11. ⚡ Hoisting Helicopter (호이스팅 헬리콥터)
+## 11. ⚡ Hoisting Helicopter (호이스팅 헬리콥터) 🔒 미구현
 
 ### 게임 타입: **물리 시뮬레이션**
 - **테마**: 헬리콥터로 화물 운반
@@ -322,7 +332,7 @@ console.log('4');
 
 ---
 
-## 12. 🎯 This Binding Target (this 바인딩 타겟)
+## 12. 🎯 This Binding Target (this 바인딩 타겟) 🔒 미구현
 
 ### 게임 타입: **타겟 슈팅**
 - **테마**: 화살로 정확한 타겟 맞추기
@@ -357,7 +367,7 @@ console.log('4');
 
 ---
 
-## 13. 🎪 Destructuring Circus (구조분해 서커스)
+## 13. 🎪 Destructuring Circus (구조분해 서커스) 🔒 미구현
 
 ### 게임 타입: **퍼즐/패턴 매칭**
 - **테마**: 서커스 공연자를 올바른 위치에 배치
@@ -392,7 +402,7 @@ console.log('4');
 
 ---
 
-## 14. 🔄 Array Methods Racing (배열 메서드 레이싱)
+## 14. 🔄 Array Methods Racing (배열 메서드 레이싱) 🔒 미구현
 
 ### 게임 타입: **레이싱/경쟁**
 - **테마**: 자동차 경주에서 코스 선택
@@ -427,7 +437,7 @@ console.log('4');
 
 ---
 
-## 15. 🎲 Modules Marketplace (모듈 마켓플레이스)
+## 15. 🎲 Modules Marketplace (모듈 마켓플레이스) 🔒 미구현
 
 ### 게임 타입: **경영 시뮬레이션**
 - **테마**: 상점에서 필요한 상품 주문하고 판매
@@ -462,7 +472,7 @@ console.log('4');
 
 ---
 
-## 16. 🎨 Template Literal Art (템플릿 리터럴 아트)
+## 16. 🎨 Template Literal Art (템플릿 리터럴 아트) 🔒 미구현
 
 ### 게임 타입: **창작/아트**
 - **테마**: 디지털 아티스트가 그림 그리기
@@ -497,7 +507,7 @@ console.log('4');
 
 ---
 
-## 17. 🔧 Error Handling Hospital (에러 처리 병원)
+## 17. 🔧 Error Handling Hospital (에러 처리 병원) 🔒 미구현
 
 ### 게임 타입: **의료 시뮬레이션**
 - **테마**: 응급실에서 다양한 환자 치료
@@ -532,7 +542,7 @@ console.log('4');
 
 ---
 
-## 18. 🎯 WeakMap/WeakSet Vault (약한 참조 금고)
+## 18. 🎯 WeakMap/WeakSet Vault (약한 참조 금고) 🔒 미구현
 
 ### 게임 타입: **보안/스파이**
 - **테마**: 첨단 보안 시설에서 임시 보안 키 관리
@@ -589,13 +599,13 @@ console.log('4');
 - 단계별 실행 과정 표시
 - 인터랙티브 요소
 
-## 기술 스택
+## 기술 스택 (실제 구현)
 
 ### 프론트엔드
-- **바닐라 JavaScript**: 게임 로직
-- **CSS3 + Animations**: 시각화
-- **HTML5**: 마크업
-- **CodeMirror**: 코드 에디터
+- **TypeScript 5.8.3**: 게임 로직
+- **React 19.1.0**: UI 컴포넌트
+- **Tailwind CSS 4.1.8**: 스타일링
+- **CodeMirror 6**: 코드 에디터
 
 ### 구조
 ```
@@ -612,9 +622,8 @@ console.log('4');
 └── 📄 index.html
 ```
 
-### 개발 단계
-1. **Week 1-2**: 게임 엔진과 공통 컴포넌트 개발
-2. **Week 3-4**: Closure Cave 프로토타입 구현
-3. **Week 5-6**: CallStack Tower, Promise Rocket 추가
-4. **Week 7-8**: 나머지 게임들 구현
-5. **Week 9-10**: 통합, 테스트, 최적화
+### 개발 진행 현황
+1. **완료 ✅**: BaseGameEngine, Closure Cave, CallStack Library
+2. **계획 대기 📅**: Promise Battle 포함 16개 게임
+3. **테스트 커버리지**: CallStack Library만 95%
+4. **CI/CD**: 접근성 검사만 구현

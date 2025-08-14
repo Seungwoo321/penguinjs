@@ -1,4 +1,4 @@
-# JSPlayground 데이터 스키마 설계서
+# PenguinJS 데이터 스키마 설계서
 
 ## 1. 개요
 
@@ -23,74 +23,95 @@ JavaScript 학습 게임 플랫폼의 모든 데이터 구조와 관계를 정�
 ### 데이터 엔티티 계층구조
 ```
 Application State
-├── User Profile          # 사용자 프로필
-├── Game Collection      # 게임 컬렉션
-│   ├── Game Metadata   # 게임 메타데이터
-│   └── Stage Data      # 스테이지 데이터
-├── Progress System     # 진행도 시스템
-│   ├── User Progress   # 사용자 진행도
-│   ├── Achievements    # 성취 시스템
-│   └── Statistics      # 통계 데이터
-├── Settings           # 사용자 설정
-└── Session Data       # 세션 임시 데이터
+├── Game Manager         # 게임 관리 시스템
+│   ├── Game Config     # 게임 설정
+│   └── Game Progress   # 게임 진행도
+├── Game Session        # 현재 게임 세션
+│   ├── Stage Data      # 스테이지 데이터
+│   └── Score Data      # 점수 데이터
+├── User Settings       # 사용자 설정
+│   ├── Theme          # 테마 설정
+│   └── Language       # 언어 설정
+└── Local Storage      # 로컬 저장소 관리
 ```
 
 ---
 
-## 3. 사용자 프로필 (User Profile)
+## 3. 게임 관리 시스템 (Game Manager)
 
-### 기본 사용자 정보
-**UserProfile Entity**
-- 사용자 고유 식별자
-- 사용자명 (변경 가능)
-- 프로필 아바타 설정
-- 계정 생성 일시
-- 마지막 접속 일시
-- 선호 언어 설정
-- 테마 설정 (라이트/다크)
+### GameConfig Interface
+```typescript
+interface GameConfig {
+  id: string                    // 게임 고유 ID
+  name: string                  // 게임 이름
+  description: string           // 게임 설명
+  concept: string              // 학습 개념
+  difficulties: GameDifficulty[] // 지원 난이도
+  totalStages: number          // 총 스테이지 수
+  prerequisites?: string[]     // 선수 게임
+}
+```
 
-### 학습 선호도
-**LearningPreferences Entity**
-- 선호 난이도 설정
-- 힌트 사용 선호도
-- 애니메이션 속도 설정
-- 사운드 효과 설정
-- 접근성 옵션 설정
+### GameProgress Interface
+```typescript
+interface GameProgress {
+  gameId: string               // 게임 ID
+  difficulty: GameDifficulty   // 난이도
+  completedStages: Set<number> // 완료한 스테이지
+  currentStage: number         // 현재 스테이지
+  scores: Record<number, number> // 스테이지별 점수
+  totalScore: number           // 총점
+  isUnlocked: boolean          // 잠금 해제 여부
+}
+```
 
-### 사용자 통계
-**UserStatistics Entity**
-- 총 게임 플레이 시간
-- 총 완료한 스테이지 수
-- 평균 스테이지 완료 시간
-- 선호하는 게임 유형
-- 가장 어려워하는 개념
-- 학습 연속 일수
+### GameSession Interface
+```typescript
+interface GameSession {
+  gameId: string               // 게임 ID
+  difficulty: GameDifficulty   // 난이도
+  startTime: Date              // 시작 시간
+  endTime?: Date               // 종료 시간
+  currentStage: number         // 현재 스테이지
+  attempts: number             // 시도 횟수
+  hints: number                // 사용한 힌트
+  score: number                // 현재 점수
+}
+```
 
 ---
 
-## 4. 게임 컬렉션 (Game Collection)
+## 4. 스테이지 시스템 (Stage System)
 
-### 게임 메타데이터
-**GameMetadata Entity**
-- 게임 고유 식별자
-- 게임 이름 (다국어 지원)
-- 게임 설명 (다국어 지원)
-- 게임 아이콘 리소스
-- 게임 유형 분류
-- 학습 목표 JavaScript 개념
-- 권장 선수 지식
-- 예상 완료 시간
-- 게임 버전 정보
-- 마지막 업데이트 일시
+### GameLevel Interface  
+```typescript
+interface GameLevel {
+  id: string                   // 스테이지 ID
+  gameId: string               // 게임 ID
+  difficulty: GameDifficulty   // 난이도
+  stageNumber: number          // 스테이지 번호
+  title: string                // 스테이지 제목
+  instruction: string          // 지시사항
+  initialCode?: string         // 초기 코드
+  solution?: string            // 정답 코드
+  validation: (code: string) => boolean // 검증 함수
+  hints: string[]              // 힌트 목록
+}
+```
 
-### 게임 분류 체계
-**GameCategory Entity**
-- 카테고리 식별자
-- 카테고리 이름
-- 카테고리 설명
-- 카테고리 색상 테마
-- 포함된 게임 목록
-- 카테고리별 진행도
+### 난이도별 스테이지 범위
+```typescript
+type StageRange = {
+  start: number
+  end: number
+}
+
+type DifficultyStageRanges = {
+  beginner: StageRange      // 1-8 또는 1-5
+  intermediate: StageRange  // 9-16 또는 6-10
+  advanced: StageRange      // 17-24 또는 11-15
+}
+```
 
 ### 스테이지 메타데이터
 **StageMetadata Entity**
