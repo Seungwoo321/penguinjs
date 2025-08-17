@@ -284,7 +284,7 @@ const LifoPrincipleDisplay: React.FC<{
           </h5>
           <div className="space-y-1">
             {userAnswer
-              .filter(item => !item.includes('종료'))
+              .filter(item => !item.includes('종료') && !item.endsWith('-return'))
               .map((item, index) => (
                 <div 
                   key={index} 
@@ -295,7 +295,7 @@ const LifoPrincipleDisplay: React.FC<{
                     color: 'rgb(var(--foreground))'
                   }}
                 >
-                  {index + 1}. {item}
+                  {index + 1}. {item.replace(' → 시작', '')}
                 </div>
               ))
             }
@@ -312,7 +312,7 @@ const LifoPrincipleDisplay: React.FC<{
           </h5>
           <div className="space-y-1">
             {userAnswer
-              .filter(item => item.includes('종료'))
+              .filter(item => item.includes('종료') || item.endsWith('-return'))
               .map((item, index) => (
                 <div 
                   key={index} 

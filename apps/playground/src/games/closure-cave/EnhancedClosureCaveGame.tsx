@@ -339,9 +339,8 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
                   ? { backgroundColor: 'rgb(var(--primary))', color: 'white' }
                   : { backgroundColor: 'rgb(var(--muted))', color: 'rgb(var(--muted-foreground))' }
                 ),
-                cursor: 'pointer',
-                '--tw-ring-color': 'rgb(var(--primary))'
-              }}
+                cursor: 'pointer'
+              } as React.CSSProperties}
               onClick={() => {
                 const targetStage = CLOSURE_STAGE_RANGES[selectedDifficulty].min + stage - 1
                 setCurrentStage(targetStage)

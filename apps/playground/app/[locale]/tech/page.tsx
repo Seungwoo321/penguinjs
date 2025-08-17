@@ -444,8 +444,8 @@ export default function TechPage() {
             <div className="space-y-6">
               {/* 메모리 모니터링 시스템 */}
               <div className="bg-[rgb(var(--surface-secondary))] rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-[rgb(var(--text-primary))] mb-4 flex items-center gap-2">
-                  <span className="text-2xl">🧠</span> {t('performance.memoryMonitoring.title')}
+                <h3 className="text-lg font-semibold text-[rgb(var(--text-primary))] mb-4">
+                  {t('performance.memoryMonitoring.title')}
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
