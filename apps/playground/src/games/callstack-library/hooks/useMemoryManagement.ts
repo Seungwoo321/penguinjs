@@ -143,10 +143,8 @@ export const useMemoryManagement = (
       (window as any).gc();
     }
     
-    // 🔑 핵심 변경: 정리 후 상태 업데이트 없이 바로 메모리 체크
-    if (checkMemoryAndNotify.current) {
-      checkMemoryAndNotify.current();
-    }
+    // 🔑 핵심 수정: 순환 호출 방지 - cleanup 후 즉시 메모리 체크하지 않음
+    // 메모리 체크는 다음 interval에서 자연스럽게 실행됨
   };
 
   // 🔑 핵심 변경: 정리 함수 등록 (의존성 없음)
@@ -200,10 +198,8 @@ export const useMemoryManagement = (
       });
     }
 
-    // 메모리 체크 (상태 업데이트 없음)
-    if (checkMemoryAndNotify.current) {
-      checkMemoryAndNotify.current();
-    }
+    // 🔑 핵심 수정: 순환 호출 방지 - 수동 최적화 후 즉시 메모리 체크하지 않음
+    // 메모리 체크는 다음 interval에서 자연스럽게 실행됨
   }, [maxComponentAge]); // 의존성 최소화
 
   // 🔑 핵심 변경: 단순한 interval 관리 (의존성 체인 없음)

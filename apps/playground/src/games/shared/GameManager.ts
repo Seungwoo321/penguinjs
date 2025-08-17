@@ -29,11 +29,22 @@ export class GameManager {
     // 각 난이도별로 진행 상황 초기화
     config.difficulties.forEach(difficulty => {
       const progressKey = `${config.id}-${difficulty}`
-      if (!this.gameProgress.has(progressKey)) {
+      const existingProgress = this.gameProgress.get(progressKey)
+      
+      // 게임별로 다른 시작 스테이지 설정
+      let startStage: number
+      if (config.id === 'closure-cave') {
+        startStage = difficulty === 'beginner' ? 1 : 
+                    difficulty === 'intermediate' ? 6 : 11
+      } else {
+        // 콜스택 도서관 등 다른 게임
+        startStage = difficulty === 'beginner' ? 1 : 
+                    difficulty === 'intermediate' ? 9 : 17
+      }
+
+      if (!existingProgress) {
+        // 새로운 진행 상황 생성
         const isUnlocked = this.checkIfUnlocked(config.id, difficulty)
-        // 난이도별 시작 스테이지 설정
-        const startStage = difficulty === 'beginner' ? 1 : 
-                         difficulty === 'intermediate' ? 9 : 17
         this.gameProgress.set(progressKey, {
           gameId: config.id,
           difficulty,
@@ -43,6 +54,11 @@ export class GameManager {
           totalScore: 0,
           isUnlocked
         })
+      } else {
+        // 기존 진행 상황이 있으면 currentStage만 업데이트 (완료된 스테이지가 없는 경우에만)
+        if (existingProgress.completedStages.size === 0) {
+          existingProgress.currentStage = startStage
+        }
       }
     })
   }
@@ -124,9 +140,15 @@ export class GameManager {
       // 다음 스테이지로 진행
       const config = this.gameConfigs.get(gameId)
       if (config) {
-        // 절대 스테이지를 상대 스테이지로 변환
-        const startStage = difficulty === 'beginner' ? 1 : 
-                          difficulty === 'intermediate' ? 9 : 17
+        // 게임별로 다른 스테이지 범위 처리
+        let startStage: number
+        if (gameId === 'closure-cave') {
+          startStage = difficulty === 'beginner' ? 1 : 
+                      difficulty === 'intermediate' ? 6 : 11
+        } else {
+          startStage = difficulty === 'beginner' ? 1 : 
+                      difficulty === 'intermediate' ? 9 : 17
+        }
         const relativeStage = stage - startStage + 1
         
         if (relativeStage < config.totalStagesPerDifficulty) {

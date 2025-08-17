@@ -54,31 +54,29 @@ export function LanguageToggle() {
   return (
     <div className="relative" data-language-toggle>
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="hover:bg-slate-100 dark:hover:bg-slate-800 px-2 border border-slate-200 dark:border-slate-700"
         title="Change Language"
+        className="text-foreground flex items-center gap-1.5"
       >
-        <div className="flex items-center gap-1">
-          <span className="text-sm">{currentLanguage.flag}</span>
-          <span className="text-xs font-semibold text-slate-800 dark:text-slate-300">
-            {currentLanguage.code.toUpperCase()}
-          </span>
-          <ChevronDown className="h-3 w-3 text-slate-800 dark:text-slate-300" />
-        </div>
+        <span className="text-sm">{currentLanguage.flag}</span>
+        <span className="text-xs font-semibold text-foreground">
+          {currentLanguage.code.toUpperCase()}
+        </span>
+        <ChevronDown className="h-3 w-3 text-foreground" />
       </Button>
       
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xl py-1 z-50 min-w-36">
+        <div className="absolute top-full right-0 mt-1 bg-background border border-input rounded-lg shadow-xl py-1 z-50 min-w-36">
           {languages.map((language) => (
             <button
               key={language.code}
               onClick={() => changeLanguage(language.code)}
-              className={`w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors ${
+              className={`w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors ${
                 currentLocale === language.code 
-                  ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-semibold' 
-                  : 'text-slate-800 dark:text-slate-300'
+                  ? 'bg-accent text-accent-foreground font-semibold' 
+                  : ''
               }`}
             >
               <span className="text-base">{language.flag}</span>

@@ -283,18 +283,36 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   // 새로운 레이아웃 시스템을 위한 핸들러 함수들
   const handleFunctionSelect = (functionName: string) => {
     if (isExecuting) return
-    // 중복 체크: 이미 추가된 함수는 무시
-    setUserOrder(prev => {
-      if (prev.includes(functionName)) {
-        return prev // 이미 있으면 추가하지 않음
-      }
-      return [...prev, functionName]
-    })
+    
+    // 타입 A+의 표시 형식을 정리 (→ 시작, ← 종료 제거)
+    let cleanFunctionName = functionName
+    if (functionName.includes(' → 시작')) {
+      cleanFunctionName = functionName.replace(' → 시작', '')
+    } else if (functionName.includes(' ← 종료')) {
+      cleanFunctionName = functionName.replace(' ← 종료', '') + '-return'
+    }
+    
+    // 모든 레이아웃에서 같은 함수를 여러 번 선택할 수 있음 
+    // (예: fibonacci(1) 2번, console.log 여러 번, isEven 여러 번 등)
+    setUserOrder(prev => [...prev, cleanFunctionName])
   }
 
   const handleFunctionRemove = (index: number) => {
     if (isExecuting) return
     setUserOrder(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // 함수명을 사용자에게 표시하기 위한 형식으로 변환 (타입 A+에서만)
+  const formatFunctionNameForDisplay = (funcName: string): string => {
+    if (currentLayoutType !== 'A+') {
+      return funcName // 타입 A+가 아니면 그대로 반환
+    }
+    
+    if (funcName.endsWith('-return')) {
+      const baseName = funcName.replace('-return', '')
+      return `${baseName} ← 종료`
+    }
+    return `${funcName} → 시작`
   }
 
   // Layout E 전용 제출 함수
@@ -986,20 +1004,40 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       level.simulationSteps.forEach(step => {
         if (step !== 'main' && step !== 'main-return') {
           if (step.endsWith('-return')) {
-            // 종료 함수는 '함수명 종료' 형식으로 표시
+            // 종료 함수는 '함수명 ← 종료' 형식으로 표시
             const funcName = step.replace('-return', '')
-            functionEnds.add(`${funcName} 종료`)
+            functionEnds.add(`${funcName} ← 종료`)
           } else {
-            // 시작 함수는 그대로 표시
-            functionStarts.add(step)
+            // 시작 함수는 '함수명 → 시작' 형식으로 표시
+            functionStarts.add(`${step} → 시작`)
           }
         }
       })
       
-      // 시작 함수들 먼저, 그 다음 종료 함수들
-      const allFunctions = Array.from(functionStarts).concat(Array.from(functionEnds))
+      // Layout A+의 경우 기본 함수명만 추출하여 중복 제거
+      const uniqueFunctionNames = new Set<string>()
       
-      setAvailableFunctions(allFunctions.map(name => ({ name })))
+      // 시작 함수에서 기본 함수명 추출
+      Array.from(functionStarts).forEach(funcName => {
+        if (funcName.includes('→ 시작')) {
+          uniqueFunctionNames.add(funcName.replace(' → 시작', ''))
+        } else {
+          uniqueFunctionNames.add(funcName)
+        }
+      })
+      
+      // 종료 함수에서 기본 함수명 추출  
+      Array.from(functionEnds).forEach(funcName => {
+        if (funcName.includes('← 종료')) {
+          uniqueFunctionNames.add(funcName.replace(' ← 종료', ''))
+        } else if (funcName.endsWith('-return')) {
+          uniqueFunctionNames.add(funcName.replace('-return', ''))
+        } else {
+          uniqueFunctionNames.add(funcName)
+        }
+      })
+      
+      setAvailableFunctions(Array.from(uniqueFunctionNames).map(name => ({ name })))
     } else if (layoutType === 'B' || layoutType === 'C' || layoutType === 'D') {
       // Layout B, C, D: 큐 타입 정보 포함
       if (level.functionCalls) {
@@ -1918,24 +1956,37 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 ? Array.from({ length: 8 }, (_, i) => i + 9)
                 : Array.from({ length: 8 }, (_, i) => i + 17)
               
-              return stageRange.map((stageNumber, index) => (
-                <div
+              return stageRange.map((stageNumber, index) => {
+                const isCompleted = progress?.completedStages.has(stageNumber)
+                const isCurrent = stageNumber === currentStage
+                
+                return (
+                <button
                   key={stageNumber}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                   style={{
-                    background: progress?.completedStages.has(stageNumber)
+                    background: isCompleted
                       ? `rgb(var(--game-callstack-library-success))`
-                      : stageNumber === currentStage
+                      : isCurrent
                       ? `rgb(var(--primary))`
                       : `rgb(var(--muted))`,
-                    color: progress?.completedStages.has(stageNumber) || stageNumber === currentStage
+                    color: isCompleted || isCurrent
                       ? `rgb(var(--primary-foreground))`
-                      : `rgb(var(--muted-foreground))`
+                      : `rgb(var(--muted-foreground))`,
+                    cursor: 'pointer'
                   }}
+                  onClick={() => {
+                    setGameConfig(prev => ({
+                      ...prev,
+                      stage: stageNumber
+                    }))
+                  }}
+                  title={`스테이지 ${getRelativeStageNumber(stageNumber)}로 이동`}
                 >
-                  {progress?.completedStages.has(stageNumber) ? <Star className="h-4 w-4" /> : getRelativeStageNumber(stageNumber)}
-                </div>
-              ))
+                  {isCompleted ? <Star className="h-4 w-4" /> : getRelativeStageNumber(stageNumber)}
+                </button>
+                )
+              })
             })()}
           </div>
           
@@ -2194,7 +2245,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                                   {index + 1}.
                                 </span>
                                 <span className="font-medium text-sm">
-                                  {funcName}
+                                  {formatFunctionNameForDisplay(funcName)}
                                 </span>
                                 {queueType && (
                                   <span className="text-xs px-1.5 py-0.5 rounded bg-[rgb(var(--surface-secondary))]/10">
@@ -2577,7 +2628,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                                   {index + 1}.
                                 </span>
                                 <span className="font-medium">
-                                  {funcName}
+                                  {formatFunctionNameForDisplay(funcName)}
                                 </span>
                                 {queueType && (
                                   <span className="text-xs px-2 py-1 rounded bg-[rgb(var(--surface-secondary))]/10">
@@ -2921,13 +2972,22 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           microtaskQueue.length +
           macrotaskQueue.length
         }
-        currentStep={currentStep}
-        totalSteps={
-          eventLoopSteps?.length || 
-          currentLevel?.executionSteps?.length || 
-          currentLevel?.simulationSteps?.length || 
-          0
-        }
+        currentStep={(() => {
+          // 레이아웃별로 적절한 currentStep 반환
+          if (currentLayoutType === 'B' || currentLayoutType === 'C' || currentLayoutType === 'D') {
+            return currentStep + 1  // 1-based로 표시
+          }
+          return currentStep + 1  // 모든 경우에 1-based로 표시
+        })()}
+        totalSteps={(() => {
+          // 레이아웃별로 적절한 totalSteps 반환
+          if (currentLayoutType === 'B' || currentLayoutType === 'C' || currentLayoutType === 'D') {
+            return eventLoopSteps?.length || 0
+          }
+          return currentLevel?.executionSteps?.length || 
+                 currentLevel?.simulationSteps?.length || 
+                 0
+        })()}
         memoryPressure={false}
       />
     </React.Fragment>
