@@ -1,4 +1,4 @@
-# JSPlayground 데이터 스키마 설계서
+# PenguinJS 데이터 스키마 설계서
 
 ## 1. 개요
 

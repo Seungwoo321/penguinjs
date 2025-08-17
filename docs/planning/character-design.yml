@@ -1,3 +1,11 @@
+# 구현 상태 (2025년 1월 기준)
+implementation_status:
+  current: emoji_only
+  emoji_used: "🐧"
+  custom_graphics: not_implemented
+  planned_for: Phase 2
+  notes: "현재는 펭귄 이모지로 대체 사용 중, 커스텀 SVG/이미지 제작 예정"
+
 character_name: Penguin Developer
 
 type: Baby Emperor Penguin

@@ -49,7 +49,7 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
           className="font-semibold flex items-center gap-2"
           style={{
             fontSize: responsiveLayout.config.fontSize.subtitle,
-            color: 'rgb(var(--text-primary))'
+            color: 'rgb(var(--foreground))'
           }}
         >
           📋 도서관 기록 평가
@@ -110,7 +110,7 @@ export const EvaluationPanel: React.FC<EvaluationPanelProps> = ({
                 textDecoration: 'underline'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'rgb(var(--text-primary))'
+                e.currentTarget.style.color = 'rgb(var(--foreground))'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = 'rgb(var(--muted-foreground))'
@@ -257,7 +257,7 @@ const LifoPrincipleDisplay: React.FC<{
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium" style={{ color: 'rgb(var(--text-primary))' }}>LIFO 원칙 검증</h4>
+        <h4 className="text-sm font-medium" style={{ color: 'rgb(var(--foreground))' }}>LIFO 원칙 검증</h4>
         <div 
           className="px-2 py-1 text-xs rounded"
           style={{
@@ -284,18 +284,18 @@ const LifoPrincipleDisplay: React.FC<{
           </h5>
           <div className="space-y-1">
             {userAnswer
-              .filter(item => !item.includes('종료'))
+              .filter(item => !item.includes('종료') && !item.endsWith('-return'))
               .map((item, index) => (
                 <div 
                   key={index} 
                   className="text-xs p-2 rounded"
                   style={{
-                    background: 'rgb(var(--game-callstack-queue-microtask-light))',
-                    border: '1px solid rgb(var(--game-callstack-queue-microtask-light))',
-                    color: 'rgb(var(--text-primary))'
+                    background: 'rgba(var(--primary), 0.1)',
+                    border: '1px solid rgba(var(--primary), 0.2)',
+                    color: 'rgb(var(--foreground))'
                   }}
                 >
-                  {index + 1}. {item}
+                  {index + 1}. {item.replace(' → 시작', '')}
                 </div>
               ))
             }
@@ -312,15 +312,15 @@ const LifoPrincipleDisplay: React.FC<{
           </h5>
           <div className="space-y-1">
             {userAnswer
-              .filter(item => item.includes('종료'))
+              .filter(item => item.includes('종료') || item.endsWith('-return'))
               .map((item, index) => (
                 <div 
                   key={index} 
                   className="text-xs p-2 rounded"
                   style={{
-                    background: 'rgb(var(--game-callstack-pop-bg))',
-                    border: `1px solid rgb(var(--game-callstack-pop-border))`,
-                    color: 'rgb(var(--text-primary))'
+                    background: 'rgba(var(--destructive), 0.1)',
+                    border: `1px solid rgba(var(--destructive), 0.2)`,
+                    color: 'rgb(var(--foreground))'
                   }}
                 >
                   {index + 1}. {item}
@@ -423,7 +423,7 @@ const QueueStatesDisplay: React.FC<{
     return (
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-medium" style={{ color: 'rgb(var(--text-primary))' }}>큐 상태 검증 결과</h4>
+          <h4 className="text-sm font-medium" style={{ color: 'rgb(var(--foreground))' }}>큐 상태 검증 결과</h4>
           <span 
             className="text-xs px-2 py-1 rounded"
             style={{
@@ -443,36 +443,39 @@ const QueueStatesDisplay: React.FC<{
           <div 
             className="p-2 rounded"
             style={{
-              background: 'rgb(var(--game-callstack-queue-callstack-light))',
-              border: '2px solid rgb(var(--game-callstack-queue-callstack-light))'
+              background: isDarkMode ? 'rgba(var(--primary), 0.2)' : 'rgba(var(--primary), 0.1)',
+              border: `2px solid ${isDarkMode ? 'rgba(var(--primary), 0.3)' : 'rgba(var(--primary), 0.2)'}`,
+              color: 'rgb(var(--foreground))'
             }}
           >
-            <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-callstack))' }}>📥 Call Stack</div>
-            <div style={{ color: 'rgb(var(--text-primary))' }}>
+            <div className="font-semibold" style={{ color: 'rgb(var(--primary))' }}>📥 Call Stack</div>
+            <div style={{ color: 'rgb(var(--foreground))' }}>
               {totalSteps > 0 ? `${callstackAccuracy}/${totalSteps} 정답` : '미완료'}
             </div>
           </div>
           <div 
             className="p-2 rounded"
             style={{
-              background: 'rgb(var(--game-callstack-queue-microtask-light))',
-              border: '1px solid rgb(var(--game-callstack-queue-microtask-light))'
+              background: isDarkMode ? 'rgba(var(--secondary), 0.2)' : 'rgba(var(--secondary), 0.1)',
+              border: `1px solid ${isDarkMode ? 'rgba(var(--secondary), 0.3)' : 'rgba(var(--secondary), 0.2)'}`,
+              color: 'rgb(var(--foreground))'
             }}
           >
-            <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-microtask))' }}>⚡ Microtask</div>
-            <div style={{ color: 'rgb(var(--text-primary))' }}>
+            <div className="font-semibold" style={{ color: 'rgb(var(--primary))' }}>⚡ Microtask</div>
+            <div style={{ color: 'rgb(var(--foreground))' }}>
               {totalSteps > 0 ? `${microtaskAccuracy}/${totalSteps} 정답` : '미완료'}
             </div>
           </div>
           <div 
             className="p-2 rounded"
             style={{
-              background: 'rgb(var(--game-callstack-queue-macrotask-light))',
-              border: '1px solid rgb(var(--game-callstack-queue-macrotask-light))'
+              background: isDarkMode ? 'rgba(var(--accent), 0.2)' : 'rgba(var(--accent), 0.1)',
+              border: `1px solid ${isDarkMode ? 'rgba(var(--accent), 0.3)' : 'rgba(var(--accent), 0.2)'}`,
+              color: 'rgb(var(--foreground))'
             }}
           >
-            <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-macrotask))' }}>⏰ Macrotask</div>
-            <div style={{ color: 'rgb(var(--text-primary))' }}>
+            <div className="font-semibold" style={{ color: 'rgb(var(--primary))' }}>⏰ Macrotask</div>
+            <div style={{ color: 'rgb(var(--foreground))' }}>
               {totalSteps > 0 ? `${macrotaskAccuracy}/${totalSteps} 정답` : '미완료'}
             </div>
           </div>
@@ -490,37 +493,40 @@ const QueueStatesDisplay: React.FC<{
   // 다른 레이아웃의 경우 기본 표시
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-medium" style={{ color: 'rgb(var(--text-primary))' }}>큐 상태 예측</h4>
+      <h4 className="text-sm font-medium" style={{ color: 'rgb(var(--foreground))' }}>큐 상태 예측</h4>
       
       <div className="grid grid-cols-3 gap-2 text-xs">
         <div 
           className="p-2 rounded"
           style={{
-            background: 'rgb(var(--game-callstack-queue-callstack-light))',
-            border: '2px solid rgb(var(--game-callstack-queue-callstack-light))'
+            background: isDarkMode ? 'rgba(var(--primary), 0.2)' : 'rgba(var(--primary), 0.1)',
+            border: `2px solid ${isDarkMode ? 'rgba(var(--primary), 0.3)' : 'rgba(var(--primary), 0.2)'}`,
+            color: 'rgb(var(--foreground))'
           }}
         >
-          <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-callstack))' }}>콜스택</div>
+          <div className="font-semibold" style={{ color: 'rgb(var(--primary))' }}>콜스택</div>
           <div style={{ color: 'rgb(var(--muted-foreground))' }}>예측 대기</div>
         </div>
         <div 
           className="p-2 rounded"
           style={{
-            background: 'rgb(var(--game-callstack-queue-microtask-light))',
-            border: '1px solid rgb(var(--game-callstack-queue-microtask-light))'
+            background: isDarkMode ? 'rgba(var(--secondary), 0.2)' : 'rgba(var(--secondary), 0.1)',
+            border: `1px solid ${isDarkMode ? 'rgba(var(--secondary), 0.3)' : 'rgba(var(--secondary), 0.2)'}`,
+            color: 'rgb(var(--foreground))'
           }}
         >
-          <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-microtask))' }}>마이크로태스크</div>
+          <div className="font-semibold" style={{ color: isDarkMode ? 'rgb(var(--primary))' : 'rgb(var(--primary))' }}>마이크로태스크</div>
           <div style={{ color: 'rgb(var(--muted-foreground))' }}>예측 대기</div>
         </div>
         <div 
           className="p-2 rounded"
           style={{
-            background: 'rgb(var(--game-callstack-queue-macrotask-light))',
-            border: '1px solid rgb(var(--game-callstack-queue-macrotask-light))'
+            background: isDarkMode ? 'rgba(var(--accent), 0.2)' : 'rgba(var(--accent), 0.1)',
+            border: `1px solid ${isDarkMode ? 'rgba(var(--accent), 0.3)' : 'rgba(var(--accent), 0.2)'}`,
+            color: 'rgb(var(--foreground))'
           }}
         >
-          <div className="font-semibold" style={{ color: 'rgb(var(--game-callstack-queue-macrotask))' }}>매크로태스크</div>
+          <div className="font-semibold" style={{ color: isDarkMode ? 'rgb(var(--primary))' : 'rgb(var(--primary))' }}>매크로태스크</div>
           <div style={{ color: 'rgb(var(--muted-foreground))' }}>예측 대기</div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-# JSPlayground 게임 엔진 상세 설계서
+# PenguinJS 게임 엔진 상세 설계서
 
 ## 1. 개요
 
@@ -232,7 +232,7 @@ Game Engine Architecture
 ### 코드 작성 게임 엔진 (Code Writing Engine)
 
 #### 에디터 통합
-- **Monaco Editor 연동**: 전문적인 코드 편집 환경
+- **CodeMirror 6 연동**: 전문적인 코드 편집 환경
 - **문법 강조**: JavaScript 구문 하이라이팅
 - **자동 완성**: 컨텍스트 기반 제안
 - **에러 표시**: 실시간 구문 오류 표시

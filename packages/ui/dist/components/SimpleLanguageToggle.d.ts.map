@@ -1,0 +1,1 @@
+{"version":3,"file":"SimpleLanguageToggle.d.ts","sourceRoot":"","sources":["../../src/components/SimpleLanguageToggle.tsx"],"names":[],"mappings":"AAYA,UAAU,yBAAyB;IACjC,OAAO,CAAC,EAAE,WAAW,GAAG,WAAW,GAAG,OAAO,GAAG,UAAU,CAAA;IAC1D,QAAQ,CAAC,EAAE,OAAO,CAAA;IAClB,SAAS,CAAC,EAAE,MAAM,CAAA;CACnB;AAED,wBAAgB,oBAAoB,CAAC,EACnC,OAAiB,EACjB,QAAe,EACf,SAAc,EACf,EAAE,yBAAyB,kDAmJ3B"}

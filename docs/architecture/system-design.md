@@ -8,29 +8,29 @@
 ### 캐릭터
 **Penguin Developer** - 차분하고 끈기있는 아기 황제펭귄 개발자
 
-### 기술 스택 (daily-tools 기반)
-- **Framework**: Next.js 15.3.2
-- **Language**: TypeScript 5.8.3+
-- **Runtime**: React 19.1.0
-- **Build Tool**: Turbo (Monorepo)
-- **Package Manager**: pnpm 10.11.0+
-- **Styling**: Tailwind CSS 4.1.8
-- **UI Components**: Radix UI + shadcn/ui
-- **State Management**: Zustand (추가)
-- **Code Editor**: Monaco Editor (추가)
-- **Icons**: Lucide React
-- **Form Handling**: React Hook Form + Zod
-- **Theming**: next-themes
-- **Internationalization**: next-intl
+### 기술 스택 (실제 구현 기준 - 2025년 1월)
+- **Framework**: Next.js 15.3.2 ✅
+- **Language**: TypeScript 5.8.3+ ✅
+- **Runtime**: React 19.1.0 ✅
+- **Build Tool**: Turbo (Monorepo) ✅
+- **Package Manager**: pnpm 10.11.0+ ✅
+- **Styling**: Tailwind CSS 4.1.8 ✅
+- **UI Components**: 자체 구현 컴포넌트 (Radix UI 대신)
+- **State Management**: Zustand ✅
+- **Code Editor**: CodeMirror ✅ (Monaco Editor 대신)
+- **Icons**: Lucide React ✅
+- **Form Handling**: React Hook Form + Zod ✅
+- **Theming**: next-themes ✅
+- **Internationalization**: next-intl ✅
 
 ---
 
 ## 2. 아키텍처 개요
 
 ### 전체 아키텍처 패턴
-- **Micro Frontend Architecture**: 각 게임을 독립적인 모듈로 구성
-- **Component-Driven Development**: 재사용 가능한 컴포넌트 중심 설계
-- **Progressive Web App**: 오프라인 지원 및 설치 가능
+- **Micro Frontend Architecture**: 각 게임을 독립적인 모듈로 구성 ✅
+- **Component-Driven Development**: 재사용 가능한 컴포넌트 중심 설계 ✅
+- **Progressive Web App**: 오프라인 지원 및 설치 가능 ❌ (미구현)
 
 ### 폴더 구조 (Turborepo 기반)
 ```

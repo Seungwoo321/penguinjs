@@ -38,6 +38,7 @@ export const FunctionSelectorPanel: React.FC<FunctionSelectorPanelProps> = ({
             functions={functions}
             selectedFunctions={selectedFunctions}
             onFunctionSelect={onFunctionSelect}
+            onRemove={onRemove}
           />
         ) : (
           <OrderPredictionSelector
@@ -96,26 +97,31 @@ const OrderPredictionSelector: React.FC<{
                 )}
                 style={{
                   backgroundColor: isSelected 
-                    ? 'rgb(var(--game-callstack-queue-callstack-light))'
+                    ? 'rgb(var(--muted))'
                     : 'rgb(var(--card))',
                   borderColor: isSelected 
-                    ? 'rgb(var(--game-callstack-queue-callstack-light))'
+                    ? 'rgb(var(--muted-foreground))'
                     : 'rgb(var(--border))',
                   color: isSelected 
                     ? 'rgb(var(--muted-foreground))'
                     : 'rgb(var(--foreground))',
-                  cursor: isSelected ? 'not-allowed' : 'pointer'
+                  cursor: isSelected ? 'not-allowed' : 'pointer',
+                  opacity: isSelected ? 0.6 : 1
                 }}
                 onMouseEnter={(e) => {
                   if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = 'rgb(var(--game-callstack-queue-callstack-hover))'
+                    e.currentTarget.style.backgroundColor = 'rgb(var(--accent))'
                     e.currentTarget.style.borderColor = 'rgb(var(--primary))'
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)'
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isSelected) {
                     e.currentTarget.style.backgroundColor = 'rgb(var(--card))'
                     e.currentTarget.style.borderColor = 'rgb(var(--border))'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
                   }
                 }}
               >
@@ -149,15 +155,21 @@ const OrderPredictionSelector: React.FC<{
                 value={functionName}
                 className="rounded-lg p-3 cursor-grab active:cursor-grabbing transition-colors"
                 style={{
-                  backgroundColor: 'rgb(var(--game-callstack-queue-callstack-light))',
-                  borderColor: 'rgb(var(--game-callstack-queue-callstack-light))',
+                  backgroundColor: 'rgb(var(--muted))',
+                  borderColor: 'rgb(var(--border))',
                   border: '1px solid'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgb(var(--game-callstack-queue-callstack-hover))'
+                  e.currentTarget.style.backgroundColor = 'rgb(var(--primary))'
+                  e.currentTarget.style.borderColor = 'rgb(var(--primary))'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgb(var(--game-callstack-queue-callstack-light))'
+                  e.currentTarget.style.backgroundColor = 'rgb(var(--muted))'
+                  e.currentTarget.style.borderColor = 'rgb(var(--border))'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = 'none'
                 }}
               >
                 <div className="flex items-center justify-between">
@@ -191,7 +203,13 @@ const StartEndTrackingSelector: React.FC<{
   functions: string[]
   selectedFunctions: string[]
   onFunctionSelect: (functionName: string) => void
-}> = ({ functions, selectedFunctions, onFunctionSelect }) => {
+  onRemove?: (index: number) => void
+}> = ({ functions, selectedFunctions, onFunctionSelect, onRemove }) => {
+  
+  // Layout A+에서 functions 배열을 start와 end로 필터링
+  // 모든 함수는 start와 end 모두 가능하다고 가정
+  const availableStartFunctions = functions
+  const availableEndFunctions = functions
   
   return (
     <div className="space-y-4">
@@ -201,23 +219,78 @@ const StartEndTrackingSelector: React.FC<{
           📥 함수 시작 (Push)
         </div>
         <div className="space-y-2">
-          {functions.map((functionName) => (
-            <button
-              key={`${functionName}_start`}
-              onClick={() => onFunctionSelect(`${functionName}_start`)}
-              className="w-full p-3 text-left rounded-lg border transition-all bg-card border-border hover:bg-accent hover:text-accent-foreground"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-accent-foreground">📥</span>
-                  <span className="font-mono text-sm">{functionName}()</span>
+          {availableStartFunctions.map((functionName) => {
+            const startKey = `${functionName}_start`
+            // Layout A+에서는 같은 함수를 여러 번 선택할 수 있으므로 비활성화하지 않음
+            const isSelected = false
+            
+            return (
+              <button
+                key={startKey}
+                onClick={() => onFunctionSelect(`${functionName} → 시작`)}
+                className="w-full p-3 text-left rounded-lg border transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  backgroundColor: isSelected 
+                    ? 'rgb(var(--primary))' 
+                    : 'rgb(var(--card))',
+                  borderColor: isSelected 
+                    ? 'rgb(var(--primary))' 
+                    : 'rgb(var(--border))',
+                  color: isSelected 
+                    ? 'rgb(var(--primary-foreground))' 
+                    : 'rgb(var(--foreground))',
+                  boxShadow: isSelected 
+                    ? '0 4px 12px rgba(var(--primary-rgb), 0.3)' 
+                    : 'none'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = 'rgb(var(--accent))'
+                    e.currentTarget.style.borderColor = 'rgb(var(--primary))'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = 'rgb(var(--card))'
+                    e.currentTarget.style.borderColor = 'rgb(var(--border))'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={isSelected ? "opacity-100" : "opacity-70"}>📥</span>
+                    <span className="font-mono text-sm font-medium">{functionName}()</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span 
+                      className="text-xs px-2 py-1 rounded font-medium"
+                      style={{
+                        backgroundColor: isSelected 
+                          ? 'rgba(var(--primary-foreground-rgb), 0.2)' 
+                          : 'rgb(var(--muted))',
+                        color: isSelected 
+                          ? 'rgb(var(--primary-foreground))' 
+                          : 'rgb(var(--muted-foreground))',
+                        border: '1px solid',
+                        borderColor: isSelected 
+                          ? 'rgba(var(--primary-foreground-rgb), 0.3)' 
+                          : 'rgb(var(--border))'
+                      }}
+                    >
+                      시작
+                    </span>
+                    {isSelected && (
+                      <span className="text-xs font-bold" style={{ color: 'rgb(var(--primary-foreground))' }}>
+                        ✓ 선택됨
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground border border-border px-2 py-1 rounded">
-                  시작
-                </span>
-              </div>
-            </button>
-          ))}
+              </button>
+            )
+          })}
         </div>
       </div>
       
@@ -227,25 +300,143 @@ const StartEndTrackingSelector: React.FC<{
           📤 함수 종료 (Pop)
         </div>
         <div className="space-y-2">
-          {functions.map((functionName) => (
-            <button
-              key={`${functionName}_end`}
-              onClick={() => onFunctionSelect(`${functionName}_end`)}
-              className="w-full p-3 text-left rounded-lg border transition-all bg-card border-border hover:bg-accent hover:text-accent-foreground"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-accent-foreground">📤</span>
-                  <span className="font-mono text-sm">{functionName}()</span>
+          {availableEndFunctions.map((functionName) => {
+            const endKey = `${functionName}_end`
+            // Layout A+에서는 같은 함수를 여러 번 선택할 수 있으므로 비활성화하지 않음
+            const isSelected = false
+            
+            return (
+              <button
+                key={endKey}
+                onClick={() => onFunctionSelect(`${functionName} ← 종료`)}
+                className="w-full p-3 text-left rounded-lg border transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  backgroundColor: isSelected 
+                    ? 'rgb(var(--secondary))' 
+                    : 'rgb(var(--card))',
+                  borderColor: isSelected 
+                    ? 'rgb(var(--secondary))' 
+                    : 'rgb(var(--border))',
+                  color: isSelected 
+                    ? 'rgb(var(--secondary-foreground))' 
+                    : 'rgb(var(--foreground))',
+                  boxShadow: isSelected 
+                    ? '0 4px 12px rgba(var(--secondary-rgb), 0.3)' 
+                    : 'none'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = 'rgb(var(--accent))'
+                    e.currentTarget.style.borderColor = 'rgb(var(--secondary))'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = 'rgb(var(--card))'
+                    e.currentTarget.style.borderColor = 'rgb(var(--border))'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={isSelected ? "opacity-100" : "opacity-70"}>📤</span>
+                    <span className="font-mono text-sm font-medium">{functionName}()</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span 
+                      className="text-xs px-2 py-1 rounded font-medium"
+                      style={{
+                        backgroundColor: isSelected 
+                          ? 'rgba(var(--secondary-foreground-rgb), 0.2)' 
+                          : 'rgb(var(--muted))',
+                        color: isSelected 
+                          ? 'rgb(var(--secondary-foreground))' 
+                          : 'rgb(var(--muted-foreground))',
+                        border: '1px solid',
+                        borderColor: isSelected 
+                          ? 'rgba(var(--secondary-foreground-rgb), 0.3)' 
+                          : 'rgb(var(--border))'
+                      }}
+                    >
+                      종료
+                    </span>
+                    {isSelected && (
+                      <span className="text-xs font-bold" style={{ color: 'rgb(var(--secondary-foreground))' }}>
+                        ✓ 선택됨
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground border border-border px-2 py-1 rounded">
-                  종료
-                </span>
-              </div>
-            </button>
-          ))}
+              </button>
+            )
+          })}
         </div>
       </div>
+      
+      {/* 선택된 함수들 표시 및 제거 */}
+      {selectedFunctions.length > 0 && onRemove && (
+        <div>
+          <div className="font-bold text-sm mb-2 p-2 bg-muted border border-border rounded">
+            📋 선택된 함수들 (클릭하여 제거)
+          </div>
+          <div className="space-y-2">
+            {selectedFunctions.map((selectedFunction, index) => {
+              // Determine if it's a start or end function based on the format
+              const isStart = !selectedFunction.includes('종료') && !selectedFunction.endsWith('-return')
+              const funcName = selectedFunction
+                .replace(' → 시작', '')
+                .replace(' ← 종료', '')
+                .replace('-return', '')
+              
+              return (
+                <button
+                  key={`${selectedFunction}-${index}`}
+                  onClick={() => onRemove(index)}
+                  className="w-full p-2 text-left rounded-lg border transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] group"
+                  style={{
+                    backgroundColor: isStart ? 'rgba(var(--primary-rgb), 0.1)' : 'rgba(var(--secondary-rgb), 0.1)',
+                    borderColor: isStart ? 'rgb(var(--primary))' : 'rgb(var(--secondary))',
+                    color: 'rgb(var(--foreground))'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(var(--destructive-rgb), 0.1)'
+                    e.currentTarget.style.borderColor = 'rgb(var(--destructive))'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = isStart ? 'rgba(var(--primary-rgb), 0.1)' : 'rgba(var(--secondary-rgb), 0.1)'
+                    e.currentTarget.style.borderColor = isStart ? 'rgb(var(--primary))' : 'rgb(var(--secondary))'
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{isStart ? '📥' : '📤'}</span>
+                      <span className="font-mono text-sm">{funcName}()</span>
+                      <span 
+                        className="text-xs px-2 py-1 rounded"
+                        style={{
+                          backgroundColor: isStart ? 'rgba(var(--primary-rgb), 0.2)' : 'rgba(var(--secondary-rgb), 0.2)',
+                          color: isStart ? 'rgb(var(--primary))' : 'rgb(var(--secondary))'
+                        }}
+                      >
+                        {isStart ? '시작' : '종료'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">순서: {index + 1}</span>
+                      <X 
+                        className="w-4 h-4 group-hover:text-destructive transition-colors" 
+                        style={{ color: 'rgb(var(--muted-foreground))' }}
+                      />
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

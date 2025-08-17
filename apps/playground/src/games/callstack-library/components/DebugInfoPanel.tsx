@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Info, Cpu, Layers, Activity, Zap, X, ChevronUp } from 'lucide-react'
 import { cn } from '@penguinjs/ui'
@@ -26,10 +26,16 @@ export const DebugInfoPanel: React.FC<DebugInfoPanelProps> = ({
   className
 }) => {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const isDarkMode = useDarkModeDetection()
   
-  // 개발 모드에서만 표시
-  if (process.env.NODE_ENV !== 'development') {
+  // 클라이언트 마운트 확인
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+  
+  // 개발 모드에서만 표시하고, 마운트되지 않았으면 표시하지 않음
+  if (process.env.NODE_ENV !== 'development' || !isMounted) {
     return null
   }
 
@@ -50,11 +56,12 @@ export const DebugInfoPanel: React.FC<DebugInfoPanelProps> = ({
               className
             )}
             style={{
-              backgroundColor: 'rgb(var(--game-callstack-library-bg-elevated))',
-              borderColor: 'rgb(var(--game-callstack-library-border-default))'
+              backgroundColor: 'rgba(var(--background), 0.95)',
+              borderColor: 'rgb(var(--border))',
+              backdropFilter: 'blur(8px)'
             }}
           >
-            <Info className="h-5 w-5" style={{ color: 'rgb(var(--game-callstack-library-primary))' }} />
+            <Info className="h-5 w-5" style={{ color: 'rgb(var(--primary))' }} />
           </motion.button>
         )}
       </AnimatePresence>
@@ -73,21 +80,23 @@ export const DebugInfoPanel: React.FC<DebugInfoPanelProps> = ({
               className
             )}
             style={{
-              backgroundColor: 'rgb(var(--game-callstack-library-bg-elevated))',
-              borderColor: 'rgb(var(--game-callstack-library-border-default))'
+              backgroundColor: 'rgba(var(--background), 0.95)',
+              borderColor: 'rgb(var(--border))',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
             }}
           >
             {/* 헤더 */}
-            <div className="flex items-center justify-between mb-3 pb-3 border-b" style={{ borderBottomColor: 'rgb(var(--game-callstack-library-border-default))' }}>
+            <div className="flex items-center justify-between mb-3 pb-3 border-b" style={{ borderBottomColor: 'rgb(var(--border))' }}>
               <div className="flex items-center gap-2">
-                <Info className="h-4 w-4" style={{ color: 'rgb(var(--game-callstack-library-primary))' }} />
-                <h4 className="text-sm font-semibold" style={{ color: 'rgb(var(--game-callstack-library-text-primary))' }}>디버그 정보</h4>
+                <Info className="h-4 w-4" style={{ color: 'rgb(var(--primary))' }} />
+                <h4 className="text-sm font-semibold" style={{ color: 'rgb(var(--foreground))' }}>디버그 정보</h4>
               </div>
               <button
                 onClick={() => setIsExpanded(false)}
                 className="p-1 rounded transition-colors hover:opacity-80"
               >
-                <X className="h-4 w-4" style={{ color: 'rgb(var(--game-callstack-library-text-muted))' }} />
+                <X className="h-4 w-4" style={{ color: 'rgb(var(--muted-foreground))' }} />
               </button>
             </div>
 
@@ -96,10 +105,10 @@ export const DebugInfoPanel: React.FC<DebugInfoPanelProps> = ({
         {/* 레이아웃 정보 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="h-3 w-3" style={{ color: 'rgb(var(--game-callstack-library-stage-advanced))' }} />
-            <span className="text-xs" style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>레이아웃</span>
+            <Layers className="h-3 w-3" style={{ color: 'rgb(var(--primary))' }} />
+            <span className="text-xs" style={{ color: 'rgb(var(--muted-foreground))' }}>레이아웃</span>
           </div>
-          <span className="text-xs font-mono font-medium" style={{ color: 'rgb(var(--game-callstack-library-text-primary))' }}>
+          <span className="text-xs font-mono font-medium" style={{ color: 'rgb(var(--foreground))' }}>
             {layoutType} ({breakpoint})
           </span>
         </div>
@@ -107,10 +116,10 @@ export const DebugInfoPanel: React.FC<DebugInfoPanelProps> = ({
         {/* 큐 아이템 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Activity className="h-3 w-3" style={{ color: 'rgb(var(--game-callstack-library-success))' }} />
-            <span className="text-xs" style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>큐 아이템</span>
+            <Activity className="h-3 w-3" style={{ color: 'rgb(var(--primary))' }} />
+            <span className="text-xs" style={{ color: 'rgb(var(--muted-foreground))' }}>큐 아이템</span>
           </div>
-          <span className="text-xs font-mono font-medium" style={{ color: 'rgb(var(--game-callstack-library-text-primary))' }}>
+          <span className="text-xs font-mono font-medium" style={{ color: 'rgb(var(--foreground))' }}>
             {queueItems}
           </span>
         </div>
@@ -118,10 +127,10 @@ export const DebugInfoPanel: React.FC<DebugInfoPanelProps> = ({
         {/* 진행 단계 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Zap className="h-3 w-3" style={{ color: 'rgb(var(--game-callstack-library-warning))' }} />
-            <span className="text-xs" style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>진행도</span>
+            <Zap className="h-3 w-3" style={{ color: 'rgb(var(--primary))' }} />
+            <span className="text-xs" style={{ color: 'rgb(var(--muted-foreground))' }}>진행도</span>
           </div>
-          <span className="text-xs font-mono font-medium" style={{ color: 'rgb(var(--game-callstack-library-text-primary))' }}>
+          <span className="text-xs font-mono font-medium" style={{ color: 'rgb(var(--foreground))' }}>
             {currentStep}/{totalSteps}
           </span>
         </div>
@@ -129,11 +138,11 @@ export const DebugInfoPanel: React.FC<DebugInfoPanelProps> = ({
         {/* 메모리 상태 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Cpu className="h-3 w-3" style={{ color: 'rgb(var(--game-callstack-library-error))' }} />
-            <span className="text-xs" style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>메모리</span>
+            <Cpu className="h-3 w-3" style={{ color: 'rgb(var(--primary))' }} />
+            <span className="text-xs" style={{ color: 'rgb(var(--muted-foreground))' }}>메모리</span>
           </div>
           <span className="text-xs font-mono font-medium"
-            style={{ color: memoryPressure ? 'rgb(var(--game-callstack-library-error))' : 'rgb(var(--game-callstack-library-success))' }}
+            style={{ color: memoryPressure ? 'rgb(var(--destructive))' : 'rgb(var(--primary))' }}
           >
             {memoryPressure ? '⚠️ HIGH' : '✅ OK'}
           </span>
@@ -141,20 +150,20 @@ export const DebugInfoPanel: React.FC<DebugInfoPanelProps> = ({
             </div>
 
             {/* 프로그레스 바 */}
-            <div className="mt-3 pt-3 border-t" style={{ borderTopColor: 'rgb(var(--game-callstack-library-border-default))' }}>
+            <div className="mt-3 pt-3 border-t" style={{ borderTopColor: 'rgb(var(--border))' }}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs" style={{ color: 'rgb(var(--game-callstack-library-text-secondary))' }}>진행률</span>
-                <span className="text-xs font-medium" style={{ color: 'rgb(var(--game-callstack-library-text-primary))' }}>
-                  {totalSteps > 0 ? Math.round((currentStep / totalSteps) * 100) : 0}%
+                <span className="text-xs" style={{ color: 'rgb(var(--muted-foreground))' }}>진행률</span>
+                <span className="text-xs font-medium" style={{ color: 'rgb(var(--foreground))' }}>
+                  {totalSteps > 0 ? Math.min(100, Math.round((currentStep / totalSteps) * 100)) : 0}%
                 </span>
               </div>
-              <div className="w-full rounded-full h-1.5" style={{ backgroundColor: 'rgb(var(--game-callstack-library-border-default))' }}>
+              <div className="w-full rounded-full h-1.5" style={{ backgroundColor: 'rgb(var(--muted))' }}>
                 <motion.div
                   className="h-1.5 rounded-full"
-                  style={{ background: 'linear-gradient(to right, rgb(var(--game-callstack-library-primary)), rgb(var(--game-callstack-library-stage-advanced)))' }}
+                  style={{ background: 'linear-gradient(to right, rgb(var(--primary)), rgb(var(--primary)))' }}
                   initial={{ width: 0 }}
                   animate={{ 
-                    width: totalSteps > 0 ? `${(currentStep / totalSteps) * 100}%` : '0%' 
+                    width: totalSteps > 0 ? `${Math.min(100, (currentStep / totalSteps) * 100)}%` : '0%' 
                   }}
                   transition={{ duration: 0.3 }}
                 />

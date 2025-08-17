@@ -3,7 +3,7 @@
 ## 1. 프로젝트 개요
 
 ### 프로젝트명
-**JSPlayground** - JavaScript 핵심 개념 학습 게임 플랫폼
+**PenguinJS** - JavaScript 핵심 개념 학습 게임 플랫폼
 
 ### 기술 스택 (daily-tools 기반)
 - **Framework**: Next.js 15.3.2
@@ -13,8 +13,7 @@
 - **Package Manager**: pnpm 10.11.0+
 - **Styling**: Tailwind CSS 4.1.8
 - **UI Components**: Radix UI + shadcn/ui
-- **State Management**: Zustand (추가)
-- **Code Editor**: Monaco Editor (추가)
+- **Code Editor**: CodeMirror 6
 - **Icons**: Lucide React
 - **Form Handling**: React Hook Form + Zod
 - **Theming**: next-themes
@@ -159,7 +158,7 @@
 - **Footer**: 추가 정보 및 링크
 
 #### UI Components
-- **CodeEditor**: Monaco Editor 래퍼
+- **CodeEditor**: CodeMirror 6 래퍼
 - **Button**: 다양한 스타일의 버튼
 - **Modal**: 공통 모달 컴포넌트
 - **ProgressBar**: 진행도 표시
