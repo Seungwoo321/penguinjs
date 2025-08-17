@@ -292,13 +292,9 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       cleanFunctionName = functionName.replace(' ← 종료', '') + '-return'
     }
     
-    // 중복 체크: 이미 추가된 함수는 무시
-    setUserOrder(prev => {
-      if (prev.includes(cleanFunctionName)) {
-        return prev // 이미 있으면 추가하지 않음
-      }
-      return [...prev, cleanFunctionName]
-    })
+    // 모든 레이아웃에서 같은 함수를 여러 번 선택할 수 있음 
+    // (예: fibonacci(1) 2번, console.log 여러 번, isEven 여러 번 등)
+    setUserOrder(prev => [...prev, cleanFunctionName])
   }
 
   const handleFunctionRemove = (index: number) => {
@@ -1018,10 +1014,30 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
         }
       })
       
-      // 시작 함수들 먼저, 그 다음 종료 함수들
-      const allFunctions = Array.from(functionStarts).concat(Array.from(functionEnds))
+      // Layout A+의 경우 기본 함수명만 추출하여 중복 제거
+      const uniqueFunctionNames = new Set<string>()
       
-      setAvailableFunctions(allFunctions.map(name => ({ name })))
+      // 시작 함수에서 기본 함수명 추출
+      Array.from(functionStarts).forEach(funcName => {
+        if (funcName.includes('→ 시작')) {
+          uniqueFunctionNames.add(funcName.replace(' → 시작', ''))
+        } else {
+          uniqueFunctionNames.add(funcName)
+        }
+      })
+      
+      // 종료 함수에서 기본 함수명 추출  
+      Array.from(functionEnds).forEach(funcName => {
+        if (funcName.includes('← 종료')) {
+          uniqueFunctionNames.add(funcName.replace(' ← 종료', ''))
+        } else if (funcName.endsWith('-return')) {
+          uniqueFunctionNames.add(funcName.replace('-return', ''))
+        } else {
+          uniqueFunctionNames.add(funcName)
+        }
+      })
+      
+      setAvailableFunctions(Array.from(uniqueFunctionNames).map(name => ({ name })))
     } else if (layoutType === 'B' || layoutType === 'C' || layoutType === 'D') {
       // Layout B, C, D: 큐 타입 정보 포함
       if (level.functionCalls) {
