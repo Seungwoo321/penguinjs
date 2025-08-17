@@ -283,18 +283,40 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
   // 새로운 레이아웃 시스템을 위한 핸들러 함수들
   const handleFunctionSelect = (functionName: string) => {
     if (isExecuting) return
+    
+    // 타입 A+의 표시 형식을 정리 (→ 시작, ← 종료 제거)
+    let cleanFunctionName = functionName
+    if (functionName.includes(' → 시작')) {
+      cleanFunctionName = functionName.replace(' → 시작', '')
+    } else if (functionName.includes(' ← 종료')) {
+      cleanFunctionName = functionName.replace(' ← 종료', '') + '-return'
+    }
+    
     // 중복 체크: 이미 추가된 함수는 무시
     setUserOrder(prev => {
-      if (prev.includes(functionName)) {
+      if (prev.includes(cleanFunctionName)) {
         return prev // 이미 있으면 추가하지 않음
       }
-      return [...prev, functionName]
+      return [...prev, cleanFunctionName]
     })
   }
 
   const handleFunctionRemove = (index: number) => {
     if (isExecuting) return
     setUserOrder(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // 함수명을 사용자에게 표시하기 위한 형식으로 변환 (타입 A+에서만)
+  const formatFunctionNameForDisplay = (funcName: string): string => {
+    if (currentLayoutType !== 'A+') {
+      return funcName // 타입 A+가 아니면 그대로 반환
+    }
+    
+    if (funcName.endsWith('-return')) {
+      const baseName = funcName.replace('-return', '')
+      return `${baseName} ← 종료`
+    }
+    return `${funcName} → 시작`
   }
 
   // Layout E 전용 제출 함수
@@ -986,12 +1008,12 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
       level.simulationSteps.forEach(step => {
         if (step !== 'main' && step !== 'main-return') {
           if (step.endsWith('-return')) {
-            // 종료 함수는 '함수명 종료' 형식으로 표시
+            // 종료 함수는 '함수명 ← 종료' 형식으로 표시
             const funcName = step.replace('-return', '')
-            functionEnds.add(`${funcName} 종료`)
+            functionEnds.add(`${funcName} ← 종료`)
           } else {
-            // 시작 함수는 그대로 표시
-            functionStarts.add(step)
+            // 시작 함수는 '함수명 → 시작' 형식으로 표시
+            functionStarts.add(`${step} → 시작`)
           }
         }
       })
@@ -2207,7 +2229,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                                   {index + 1}.
                                 </span>
                                 <span className="font-medium text-sm">
-                                  {funcName}
+                                  {formatFunctionNameForDisplay(funcName)}
                                 </span>
                                 {queueType && (
                                   <span className="text-xs px-1.5 py-0.5 rounded bg-[rgb(var(--surface-secondary))]/10">
@@ -2590,7 +2612,7 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                                   {index + 1}.
                                 </span>
                                 <span className="font-medium">
-                                  {funcName}
+                                  {formatFunctionNameForDisplay(funcName)}
                                 </span>
                                 {queueType && (
                                   <span className="text-xs px-2 py-1 rounded bg-[rgb(var(--surface-secondary))]/10">
