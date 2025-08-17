@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { GamePanel, CodeEditor, Button, ThemeToggle } from '@penguinjs/ui'
-import { Play, RotateCcw, Lightbulb, ChevronRight, ChevronLeft, Home, Globe, Lock, Star, Trophy } from 'lucide-react'
+import { GamePanel, CodeEditor, Button, ThemeToggle, SimpleLanguageToggle } from '@penguinjs/ui'
+import { Play, RotateCcw, Lightbulb, ChevronRight, ChevronLeft, Home, Lock, Star, Trophy } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { ClosureCaveBoard } from '@/games/closure-cave/ClosureCaveBoard'
@@ -14,6 +14,13 @@ import { levels } from '@/games/closure-cave/levels'
 import { GameGuideModal } from '@/games/closure-cave/GameGuideModal'
 import { useClosureCaveTheme } from '@/games/closure-cave/hooks/useClosureCaveTheme'
 
+// 난이도별 스테이지 범위 정의
+const CLOSURE_STAGE_RANGES = {
+  beginner: { min: 1, max: 5 },
+  intermediate: { min: 6, max: 10 },
+  advanced: { min: 11, max: 15 }
+}
+
 interface EnhancedClosureCaveGameProps {
   onScoreUpdate?: (score: number) => void
 }
@@ -23,7 +30,7 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
   const theme = useClosureCaveTheme()
   
   const [selectedDifficulty, setSelectedDifficulty] = useState<GameDifficulty>('beginner')
-  const [currentStage, setCurrentStage] = useState(1)
+  const [currentStage, setCurrentStage] = useState(1) // 초급은 절대 스테이지도 1부터 시작
   const [userCode, setUserCode] = useState('')
   const [isAnimating, setIsAnimating] = useState(false)
   const [showHints, setShowHints] = useState(false)
@@ -46,7 +53,9 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
   
   // loadLevel 함수를 먼저 정의
   const loadLevel = (difficulty: GameDifficulty, stage: number) => {
-    const level = gameEngine.getLevelByStage(difficulty, stage)
+    // 난이도별 상대적 스테이지 번호 계산 (1-5)
+    const relativeStage = stage - CLOSURE_STAGE_RANGES[difficulty].min + 1
+    const level = gameEngine.getLevelByStage(difficulty, relativeStage)
     if (level) {
       setCurrentLevel(level)
       setUserCode(level.codeTemplate)
@@ -86,8 +95,10 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
     }
     
     setSelectedDifficulty(difficulty)
-    setCurrentStage(progress.currentStage)
-    loadLevel(difficulty, progress.currentStage)
+    // progress.currentStage는 절대 스테이지 번호이므로 그대로 사용
+    const targetStage = progress.currentStage
+    setCurrentStage(targetStage)
+    loadLevel(difficulty, targetStage)
   }
   
   // 코드 실행
@@ -144,12 +155,14 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
     
     // 성공했고 마지막 스테이지가 아니라면 다음 스테이지로
     const progress = gameManager.getGameProgress('closure-cave', selectedDifficulty)
-    if (progress && message?.type === 'success' && currentStage < 5) {
+    const relativeCurrentStage = currentStage - CLOSURE_STAGE_RANGES[selectedDifficulty].min + 1
+    if (progress && message?.type === 'success' && relativeCurrentStage < 5) {
       setTimeout(() => {
         const nextStage = currentStage + 1
         setCurrentStage(nextStage)
         loadLevel(selectedDifficulty, nextStage)
-        setMessage({ type: 'info', text: `스테이지 ${nextStage}로 이동합니다! 🎯` })
+        const relativeNextStage = nextStage - CLOSURE_STAGE_RANGES[selectedDifficulty].min + 1
+        setMessage({ type: 'info', text: `스테이지 ${relativeNextStage}로 이동합니다! 🎯` })
       }, 2000)
     }
   }
@@ -171,9 +184,10 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
   // 스테이지 이동
   const handleStageChange = (direction: 'prev' | 'next') => {
     const newStage = direction === 'prev' ? currentStage - 1 : currentStage + 1
-    const maxStages = gameEngine.getTotalStages(selectedDifficulty)
+    const minStage = CLOSURE_STAGE_RANGES[selectedDifficulty].min
+    const maxStage = CLOSURE_STAGE_RANGES[selectedDifficulty].max
     
-    if (newStage >= 1 && newStage <= maxStages) {
+    if (newStage >= minStage && newStage <= maxStage) {
       setCurrentStage(newStage)
       loadLevel(selectedDifficulty, newStage)
     }
@@ -203,7 +217,7 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
       
       <div className="w-full p-4">
         {/* 헤더 */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 relative z-50">
           <div className="flex items-center gap-4">
             <Link href={`/${currentLocale}`}>
               <Button variant="outline" size="sm">
@@ -213,7 +227,7 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
             </Link>
             <h1 
               className="text-3xl font-bold"
-              style={{ color: theme.getTextColor('primary') }}
+              style={{ color: 'rgb(var(--foreground))' }}
             >
               클로저 동굴 🕳️
             </h1>
@@ -227,18 +241,7 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
               게임 가이드
             </Button>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const newLocale = currentLocale === 'ko' ? 'en' : 'ko'
-                  const newPath = pathname.replace(`/${currentLocale}`, `/${newLocale}`)
-                  router.push(newPath)
-                }}
-              >
-                <Globe className="h-4 w-4 mr-1" />
-                {currentLocale === 'ko' ? 'EN' : 'KO'}
-              </Button>
+              <SimpleLanguageToggle variant="dropdown" />
               <ThemeToggle />
             </div>
           </div>
@@ -260,41 +263,33 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
               advanced: '고급'
             }
             
-            const getDifficultyStyle = (difficulty: GameDifficulty, isSelected: boolean) => {
-              if (isSelected) return {}
+            const getDifficultyClasses = (difficulty: GameDifficulty, isSelected: boolean) => {
+              const baseClasses = 'transition-all duration-200'
               
-              const suffix = theme.isDarkMode ? '-dark' : '-light'
+              if (isSelected) {
+                return `${baseClasses} bg-primary border-primary text-primary-foreground hover:opacity-90`
+              }
               
               switch (difficulty) {
                 case 'beginner':
-                  return {
-                    backgroundColor: `rgba(${theme.getSpecialColor(`difficulty-beginner-bg${suffix}`)}, ${theme.isDarkMode ? 0.2 : 1})`,
-                    borderColor: `rgba(${theme.getSpecialColor(`difficulty-beginner-border${suffix}`)}, ${theme.isDarkMode ? 0.5 : 1})`,
-                    color: `rgb(${theme.getSpecialColor(`difficulty-beginner-text${suffix}`)})`
-                  }
+                  return `${baseClasses} bg-background border-muted-foreground/20 text-muted-foreground hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30 dark:hover:border-blue-500 dark:hover:text-blue-400 dark:hover:bg-blue-950/30`
+                  
                 case 'intermediate':
-                  return {
-                    backgroundColor: `rgba(${theme.getSpecialColor(`difficulty-intermediate-bg${suffix}`)}, ${theme.isDarkMode ? 0.2 : 1})`,
-                    borderColor: `rgba(${theme.getSpecialColor(`difficulty-intermediate-border${suffix}`)}, ${theme.isDarkMode ? 0.5 : 1})`,
-                    color: `rgb(${theme.getSpecialColor(`difficulty-intermediate-text${suffix}`)})`
-                  }
+                  return `${baseClasses} bg-background border-muted-foreground/20 text-muted-foreground hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50/30 dark:hover:border-purple-500 dark:hover:text-purple-400 dark:hover:bg-purple-950/30`
+                  
                 case 'advanced':
-                  return {
-                    backgroundColor: `rgba(${theme.getSpecialColor(`difficulty-advanced-bg${suffix}`)}, ${theme.isDarkMode ? 0.2 : 1})`,
-                    borderColor: `rgba(${theme.getSpecialColor(`difficulty-advanced-border${suffix}`)}, ${theme.isDarkMode ? 0.5 : 1})`,
-                    color: `rgb(${theme.getSpecialColor(`difficulty-advanced-text${suffix}`)})`
-                  }
+                  return `${baseClasses} bg-background border-muted-foreground/20 text-muted-foreground hover:border-rose-400 hover:text-rose-600 hover:bg-rose-50/30 dark:hover:border-rose-500 dark:hover:text-rose-400 dark:hover:bg-rose-950/30`
+                  
                 default:
-                  return {}
+                  return baseClasses
               }
             }
             
             return (
               <Button
                 key={difficulty}
-                variant={isSelected ? "default" : "outline"}
-                className={`relative ${!isUnlocked ? 'opacity-50' : ''}`}
-                style={getDifficultyStyle(difficulty, isSelected)}
+                variant="outline"
+                className={`relative border-2 ${!isUnlocked ? 'opacity-50' : ''} ${getDifficultyClasses(difficulty, isSelected)}`}
                 onClick={() => handleDifficultyChange(difficulty)}
                 disabled={!isUnlocked}
               >
@@ -304,7 +299,7 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
                   {completedStages === 5 && (
                     <Trophy 
                       className="h-4 w-4" 
-                      style={{ color: theme.getTreasureColor('gold') }}
+                      style={{ color: 'rgb(var(--yellow-500))' }}
                     />
                   )}
                   <span className="text-xs">({completedStages}/5)</span>
@@ -320,29 +315,44 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-semibold text-foreground">
             {selectedDifficulty === 'beginner' ? '초급' : selectedDifficulty === 'intermediate' ? '중급' : '고급'} - 
-            스테이지 {currentStage} / 5
+            스테이지 {currentStage - CLOSURE_STAGE_RANGES[selectedDifficulty].min + 1} / 5
           </h3>
           <div className="text-sm text-muted-foreground">
             총 점수: {progress?.totalScore || 0}점
           </div>
         </div>
         <div className="flex gap-2">
-          {[1, 2, 3, 4, 5].map((stage) => (
-            <div
+          {[1, 2, 3, 4, 5].map((stage) => {
+            const absoluteStage = CLOSURE_STAGE_RANGES[selectedDifficulty].min + stage - 1
+            const relativeCurrentStage = currentStage - CLOSURE_STAGE_RANGES[selectedDifficulty].min + 1
+            const isCompleted = progress?.completedStages.has(absoluteStage)
+            const isCurrent = stage === relativeCurrentStage
+            
+            return (
+            <button
               key={stage}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{
-                ...(progress?.completedStages.has(stage)
-                  ? { backgroundColor: theme.getSuccessColor(), color: 'white' }
-                  : stage === currentStage
-                  ? { backgroundColor: theme.getPrimaryColor(), color: 'white' }
-                  : { backgroundColor: theme.getBackgroundColor('secondary'), color: theme.getTextColor('secondary') }
-                )
+                ...(isCompleted
+                  ? { backgroundColor: 'rgb(var(--green-500))', color: 'white' }
+                  : isCurrent
+                  ? { backgroundColor: 'rgb(var(--primary))', color: 'white' }
+                  : { backgroundColor: 'rgb(var(--muted))', color: 'rgb(var(--muted-foreground))' }
+                ),
+                cursor: 'pointer',
+                '--tw-ring-color': 'rgb(var(--primary))'
               }}
+              onClick={() => {
+                const targetStage = CLOSURE_STAGE_RANGES[selectedDifficulty].min + stage - 1
+                setCurrentStage(targetStage)
+                loadLevel(selectedDifficulty, targetStage)
+              }}
+              title={`스테이지 ${stage}로 이동`}
             >
-              {progress?.completedStages.has(stage) ? <Star className="h-4 w-4" /> : stage}
-            </div>
-          ))}
+              {isCompleted ? <Star className="h-4 w-4" /> : stage}
+            </button>
+            )
+          })}
           </div>
         </div>
         
@@ -402,13 +412,13 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
                           key={index}
                           className="rounded p-2 border"
                           style={{
-                            backgroundColor: theme.getSpecialColor('hint-bg'),
-                            borderColor: theme.getSpecialColor('hint-border')
+                            backgroundColor: 'rgb(var(--accent))',
+                            borderColor: 'rgb(var(--border))'
                           }}
                         >
                           <p 
                             className="text-xs"
-                            style={{ color: theme.getSpecialColor('hint-text') }}
+                            style={{ color: 'rgb(var(--accent-foreground))' }}
                           >
                             힌트 {index + 1}: {hint}
                           </p>
@@ -443,20 +453,20 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
                     className="p-3 rounded-lg border"
                     style={{
                       backgroundColor: message.type === 'success'
-                        ? theme.getSpecialColor('message-success-bg')
+                        ? 'rgb(var(--green-50))'
                         : message.type === 'error'
-                        ? theme.getSpecialColor('message-error-bg')
-                        : theme.getSpecialColor('message-info-bg'),
+                        ? 'rgb(var(--red-50))'
+                        : 'rgb(var(--blue-50))',
                       borderColor: message.type === 'success'
-                        ? theme.getSuccessColor()
+                        ? 'rgb(var(--green-200))'
                         : message.type === 'error'
-                        ? theme.getErrorColor()
-                        : theme.getPrimaryColor(),
+                        ? 'rgb(var(--red-200))'
+                        : 'rgb(var(--blue-200))',
                       color: message.type === 'success'
-                        ? theme.getSpecialColor('message-success-text')
+                        ? 'rgb(var(--green-700))'
                         : message.type === 'error'
-                        ? theme.getSpecialColor('message-error-text')
-                        : theme.getSpecialColor('message-info-text')
+                        ? 'rgb(var(--red-700))'
+                        : 'rgb(var(--blue-700))'
                     }}
                   >
                     {message.text}
@@ -489,7 +499,7 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
                 <Button
                   variant="outline"
                   onClick={() => handleStageChange('prev')}
-                  disabled={currentStage === 1}
+                  disabled={currentStage === CLOSURE_STAGE_RANGES[selectedDifficulty].min}
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
                   이전 스테이지
@@ -497,7 +507,7 @@ export function EnhancedClosureCaveGame({ onScoreUpdate }: EnhancedClosureCaveGa
                 <Button
                   variant="outline"
                   onClick={() => handleStageChange('next')}
-                  disabled={currentStage === 5}
+                  disabled={currentStage === CLOSURE_STAGE_RANGES[selectedDifficulty].max}
                 >
                   다음 스테이지
                   <ChevronRight className="h-4 w-4 ml-1" />

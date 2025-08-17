@@ -260,7 +260,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
               <p 
                 className="font-medium"
                 style={{ 
-                  color: 'rgb(var(--text-primary))',
+                  color: 'rgb(var(--foreground))',
                   fontSize: typography.body.medium,
                   ...createTextOverflowStyles({ maxLines: 2, breakWord: true })
                 }}
@@ -270,7 +270,7 @@ export const QueueSnapshotBuilderPanel: React.FC<QueueSnapshotBuilderPanelProps>
               <p 
                 className="mt-1"
                 style={{ 
-                  color: 'rgb(var(--text-secondary))',
+                  color: 'rgb(var(--muted-foreground))',
                   fontSize: typography.caption.large
                 }}
               >
@@ -390,14 +390,14 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
     <div 
       className="px-4 py-3 border-b border-editor-border"
       style={{
-        background: 'rgb(var(--game-callstack-queue-callstack-light))'
+        background: isDarkMode ? 'rgb(var(--muted))' : 'rgb(var(--game-callstack-queue-callstack-light))'
       }}
     >
       <div className="flex items-center justify-between">
         <h3 
           className="font-semibold flex items-center gap-2"
           style={{ 
-            color: 'rgb(var(--text-primary))',
+            color: 'rgb(var(--foreground))',
             fontSize: typography.body.medium
           }}
         >
@@ -406,7 +406,7 @@ const ExecutionStepSelector: React.FC<ExecutionStepSelectorProps> = ({
         </h3>
         <div 
           className="text-xs"
-          style={{ color: 'rgb(var(--text-secondary))' }}
+          style={{ color: 'rgb(var(--muted-foreground))' }}
         >
           {currentStep + 1}/{executionSteps.length}
         </div>
@@ -597,13 +597,14 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
       }}
     >
       {/* 상단: 사용 가능한 함수들 */}
-      <div className="h-1/2 border-b border-editor-border p-4" style={{
-        backgroundColor: 'rgb(var(--card))'
+      <div className="h-1/2 border-b p-4" style={{
+        backgroundColor: isDarkMode ? 'rgb(var(--card))' : 'rgb(var(--background))',
+        borderBottomColor: 'rgb(var(--border))'
       }}>
         <h4 
           className="font-medium mb-3 flex items-center gap-2"
           style={{ 
-            color: 'rgb(var(--text-primary))',
+            color: 'rgb(var(--foreground))',
             fontSize: typography.body.medium
           }}
         >
@@ -625,7 +626,7 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
           {remainingFunctions.length === 0 && (
             <p 
               className="text-sm text-center py-4"
-              style={{ color: 'rgb(var(--text-secondary))' }}
+              style={{ color: 'rgb(var(--muted-foreground))' }}
             >
               모든 도서가 처리 중입니다
             </p>
@@ -635,12 +636,12 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
 
       {/* 하단: 현재 큐 상태 */}
       <div className="h-1/2 p-4" style={{
-        backgroundColor: 'rgb(var(--muted))'
+        backgroundColor: isDarkMode ? 'rgba(var(--muted), 0.3)' : 'rgb(var(--muted))'
       }}>
         <h4 
           className="font-medium mb-3 flex items-center gap-2"
           style={{ 
-            color: 'rgb(var(--text-primary))',
+            color: 'rgb(var(--foreground))',
             fontSize: typography.body.medium
           }}
         >
@@ -666,10 +667,10 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                 <motion.div
                   className="flex items-center justify-between p-3 border rounded-lg transition-all cursor-move relative overflow-hidden group"
                   style={{
-                    backgroundColor: 'rgb(var(--card))',
+                    backgroundColor: isDarkMode ? 'rgba(var(--card), 0.8)' : 'rgb(var(--card))',
                     borderColor: 'rgb(var(--border))',
                     borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                    boxShadow: isDarkMode ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.1)'
                   }}
                   {...(optimizedAnimations.shouldAnimate('queueTransition') ? optimizedAnimations.variants.queueTransition : {
                     initial: { opacity: 0 },
@@ -689,7 +690,7 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <span 
                         className="text-xs font-medium opacity-60 flex-shrink-0"
-                        style={{ color: 'rgb(var(--text-secondary))' }}
+                        style={{ color: 'rgb(var(--muted-foreground))' }}
                       >
                         {queueType === 'callstack' ? items.length - index : index + 1}
                       </span>
@@ -716,7 +717,7 @@ const QueueStateBuilder: React.FC<QueueStateBuilderProps> = ({
         ) : (
           <div 
             className="text-center py-8"
-            style={{ color: 'rgb(var(--text-secondary))' }}
+            style={{ color: 'rgb(var(--muted-foreground))' }}
           >
             <div className="text-2xl mb-2">
               {queueType === 'callstack' ? '📚' : 
@@ -785,7 +786,7 @@ const FunctionButton: React.FC<FunctionButtonProps> = ({
         onClick={onClick}
         className="w-full p-3 text-left border rounded-lg transition-all relative overflow-hidden group"
         style={{
-          backgroundColor: 'rgb(var(--card))',
+          backgroundColor: isDarkMode ? 'rgba(var(--card), 0.8)' : 'rgb(var(--card))',
           borderColor: 'rgb(var(--border))',
           borderRadius: '8px',
           minHeight: '44px', // 접근성 터치 타겟
@@ -805,7 +806,7 @@ const FunctionButton: React.FC<FunctionButtonProps> = ({
           <span 
             className="font-mono font-medium flex-1 min-w-0"
             style={{ 
-              color: 'rgb(var(--text-primary))',
+              color: 'rgb(var(--foreground))',
               ...textOverflow.styles
             }}
           >
@@ -813,7 +814,7 @@ const FunctionButton: React.FC<FunctionButtonProps> = ({
           </span>
           <Plus 
             className="w-4 h-4 ml-2 flex-shrink-0"
-            style={{ color: 'rgb(var(--text-secondary))' }}
+            style={{ color: 'rgb(var(--muted-foreground))' }}
           />
         </div>
       </motion.button>
@@ -846,7 +847,7 @@ const QueueItemLabel: React.FC<QueueItemLabelProps> = ({
         ref={textOverflow.ref as any}
         className="font-mono font-medium min-w-0 flex-1"
         style={{ 
-          color: 'rgb(var(--text-primary))',
+          color: 'rgb(var(--foreground))',
           fontSize: typography.body.medium,
           ...textOverflow.styles
         }}

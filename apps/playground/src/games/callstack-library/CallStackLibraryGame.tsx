@@ -1918,24 +1918,37 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
                 ? Array.from({ length: 8 }, (_, i) => i + 9)
                 : Array.from({ length: 8 }, (_, i) => i + 17)
               
-              return stageRange.map((stageNumber, index) => (
-                <div
+              return stageRange.map((stageNumber, index) => {
+                const isCompleted = progress?.completedStages.has(stageNumber)
+                const isCurrent = stageNumber === currentStage
+                
+                return (
+                <button
                   key={stageNumber}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                   style={{
-                    background: progress?.completedStages.has(stageNumber)
+                    background: isCompleted
                       ? `rgb(var(--game-callstack-library-success))`
-                      : stageNumber === currentStage
+                      : isCurrent
                       ? `rgb(var(--primary))`
                       : `rgb(var(--muted))`,
-                    color: progress?.completedStages.has(stageNumber) || stageNumber === currentStage
+                    color: isCompleted || isCurrent
                       ? `rgb(var(--primary-foreground))`
-                      : `rgb(var(--muted-foreground))`
+                      : `rgb(var(--muted-foreground))`,
+                    cursor: 'pointer'
                   }}
+                  onClick={() => {
+                    setGameConfig(prev => ({
+                      ...prev,
+                      stage: stageNumber
+                    }))
+                  }}
+                  title={`스테이지 ${getRelativeStageNumber(stageNumber)}로 이동`}
                 >
-                  {progress?.completedStages.has(stageNumber) ? <Star className="h-4 w-4" /> : getRelativeStageNumber(stageNumber)}
-                </div>
-              ))
+                  {isCompleted ? <Star className="h-4 w-4" /> : getRelativeStageNumber(stageNumber)}
+                </button>
+                )
+              })
             })()}
           </div>
           
@@ -2921,13 +2934,22 @@ export function CallStackLibraryGame({ onScoreUpdate, searchParams }: CallStackL
           microtaskQueue.length +
           macrotaskQueue.length
         }
-        currentStep={currentStep}
-        totalSteps={
-          eventLoopSteps?.length || 
-          currentLevel?.executionSteps?.length || 
-          currentLevel?.simulationSteps?.length || 
-          0
-        }
+        currentStep={(() => {
+          // 레이아웃별로 적절한 currentStep 반환
+          if (currentLayoutType === 'B' || currentLayoutType === 'C' || currentLayoutType === 'D') {
+            return currentStep + 1  // 1-based로 표시
+          }
+          return currentStep + 1  // 모든 경우에 1-based로 표시
+        })()}
+        totalSteps={(() => {
+          // 레이아웃별로 적절한 totalSteps 반환
+          if (currentLayoutType === 'B' || currentLayoutType === 'C' || currentLayoutType === 'D') {
+            return eventLoopSteps?.length || 0
+          }
+          return currentLevel?.executionSteps?.length || 
+                 currentLevel?.simulationSteps?.length || 
+                 0
+        })()}
         memoryPressure={false}
       />
     </React.Fragment>
